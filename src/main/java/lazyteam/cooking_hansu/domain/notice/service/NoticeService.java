@@ -5,14 +5,11 @@ import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeListDto;
 import lazyteam.cooking_hansu.domain.notice.entity.Notice;
 import lazyteam.cooking_hansu.domain.notice.repository.NoticeRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.util.NoSuchElementException;
 
 @Service

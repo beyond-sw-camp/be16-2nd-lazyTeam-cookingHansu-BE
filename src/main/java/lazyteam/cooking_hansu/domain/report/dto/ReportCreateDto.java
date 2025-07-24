@@ -1,6 +1,5 @@
 package lazyteam.cooking_hansu.domain.report.dto;
 
-
 import lazyteam.cooking_hansu.domain.report.entity.Report;
 import lazyteam.cooking_hansu.domain.report.entity.ReportReasonType;
 import lazyteam.cooking_hansu.domain.report.entity.ReportType;

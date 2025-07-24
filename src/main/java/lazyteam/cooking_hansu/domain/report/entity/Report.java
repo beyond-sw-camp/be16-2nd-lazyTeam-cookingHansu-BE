@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
-import lazyteam.cooking_hansu.domain.report.dto.RejectRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

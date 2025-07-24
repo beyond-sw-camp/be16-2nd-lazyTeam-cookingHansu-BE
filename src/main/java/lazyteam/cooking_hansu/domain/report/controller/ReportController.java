@@ -1,4 +1,5 @@
 package lazyteam.cooking_hansu.domain.report.controller;
+
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.report.dto.ReportCreateDto;
 import lazyteam.cooking_hansu.domain.report.service.ReportService;

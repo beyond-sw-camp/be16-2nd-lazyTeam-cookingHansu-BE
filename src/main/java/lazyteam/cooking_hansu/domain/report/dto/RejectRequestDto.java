@@ -1,6 +1,5 @@
 package lazyteam.cooking_hansu.domain.report.dto;
 
-import lazyteam.cooking_hansu.domain.common.dto.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
