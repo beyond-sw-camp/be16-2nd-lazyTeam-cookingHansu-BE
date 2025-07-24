@@ -1,4 +1,4 @@
-package global.dto;
+package lazyteam.cooking_hansu.global.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +19,7 @@ public class ResponseDto<T> {
                 .success(true)
                 .code(status.value())
                 .data(data)
+                .message("요청이 성공적으로 처리되었습니다.")
                 .build();
     }
 

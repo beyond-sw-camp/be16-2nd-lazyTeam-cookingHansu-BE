@@ -1,4 +1,4 @@
-package domain.common;
+package lazyteam.cooking_hansu.domain.common;
 
 
 import jakarta.persistence.MappedSuperclass;
