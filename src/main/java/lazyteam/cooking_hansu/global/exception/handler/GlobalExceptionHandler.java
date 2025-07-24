@@ -1,6 +1,6 @@
-package global.exception.handler;
+package lazyteam.cooking_hansu.global.exception.handler;
 
-import global.dto.ResponseDto;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<?> handleMissingRequestParam(MissingServletRequestParameterException e) {
-        log.warn("필수 요청 파라미터 누락: {}", e.getParameterName());
+        log.error("필수 요청 파라미터 누락: {}", e.getParameterName());
         return new ResponseEntity<>(ResponseDto.fail(HttpStatus.BAD_REQUEST,
                 String.format("필수 요청 파라미터 '%s'가 누락되었습니다.", e.getParameterName())), HttpStatus.BAD_REQUEST);
     }
@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        log.warn("요청 타입 불일치: {}={}", e.getName(), e.getValue());
+        log.error("요청 타입 불일치: {}={}", e.getName(), e.getValue());
         String errorMessage = String.format("요청 파라미터 '%s'의 타입이 '%s'이어야 합니다.", e.getName(), e.getRequiredType().getSimpleName());
         return new ResponseEntity<>(ResponseDto.fail(HttpStatus.BAD_REQUEST, errorMessage), HttpStatus.BAD_REQUEST);
     }
