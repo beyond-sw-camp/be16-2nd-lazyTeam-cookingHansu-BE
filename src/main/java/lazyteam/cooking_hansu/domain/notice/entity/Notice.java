@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.notice.entity;
 
-import lazyteam.cooking_hansu.domain.common.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
