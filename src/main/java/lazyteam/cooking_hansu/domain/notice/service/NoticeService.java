@@ -21,7 +21,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
 
     // 공지사항 등록
-    public void createNotice(@Valid @RequestBody NoticeCreateDto noticeCreateDto) {
+    public void createNotice(NoticeCreateDto noticeCreateDto) {
         if(noticeCreateDto.getContent() ==null || noticeCreateDto.getContent().isEmpty()) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
