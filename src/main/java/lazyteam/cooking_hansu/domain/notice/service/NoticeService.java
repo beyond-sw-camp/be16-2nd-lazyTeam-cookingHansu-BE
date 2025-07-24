@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.NoSuchElementException;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -40,13 +42,13 @@ public class NoticeService {
     // 공지사항 상세조회
     @Transactional(readOnly = true)
     public NoticeDetailDto findById(Long id) {
-        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 ID의 공지사항이 없습니다. id=" + id));
+        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 ID의 공지사항이 없습니다. id=" + id));
         return NoticeDetailDto.fromEntity(notice);
     }
 
     // 공지사항 수정
     public void updateNotice(Long id, NoticeDetailDto noticeDetailDto) {
-        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("수정할 공지사항이 없습니다. id=" + id));
+        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("수정할 공지사항이 없습니다. id=" + id));
         if (noticeDetailDto.getTitle() == null || noticeDetailDto.getContent() == null) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
@@ -55,7 +57,7 @@ public class NoticeService {
 
     // 공지사항 삭제
     public void deleteNotice(Long id) {
-        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("삭제할 공지사항이 없습니다. id=" + id));
+        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("삭제할 공지사항이 없습니다. id=" + id));
         noticeRepository.delete(notice);
     }
 }
