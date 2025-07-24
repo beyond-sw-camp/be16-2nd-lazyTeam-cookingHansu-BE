@@ -27,7 +27,7 @@ public class NoticeService {
         if(noticeCreateDto.getContent() ==null || noticeCreateDto.getContent().isEmpty()) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
-//        공지사항 작성자 정보는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야함.
+//       TODO: 공지사항 작성자 정보는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야함.
         Notice notice = noticeCreateDto.NoticeToEntity("관리자");
         noticeRepository.save(notice);
     }
@@ -42,13 +42,13 @@ public class NoticeService {
     // 공지사항 상세조회
     @Transactional(readOnly = true)
     public NoticeDetailDto findById(Long id) {
-        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 ID의 공지사항이 없습니다. id=" + id));
+        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 ID의 공지사항이 없습니다"));
         return NoticeDetailDto.fromEntity(notice);
     }
 
     // 공지사항 수정
     public void updateNotice(Long id, NoticeDetailDto noticeDetailDto) {
-        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("수정할 공지사항이 없습니다. id=" + id));
+        Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("수정할 공지사항이 없습니다."));
         if (noticeDetailDto.getTitle() == null || noticeDetailDto.getContent() == null) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }

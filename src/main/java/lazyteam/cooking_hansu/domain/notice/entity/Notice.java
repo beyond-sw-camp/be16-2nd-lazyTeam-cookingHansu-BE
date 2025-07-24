@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -28,12 +30,14 @@ public class Notice extends BaseTimeEntity {
 
     private String imageUrl; // 공지사항 이미지 URL
 
+    private LocalDateTime deletedAt; // 삭제 시간
+
     private String writer; // 작성자 (관리자)
 
     public void updateNotice(NoticeDetailDto noticeDetailDto) {
         this.title = noticeDetailDto.getTitle();
         this.content = noticeDetailDto.getContent();
         this.imageUrl = noticeDetailDto.getImageUrl();
-        this.writer = "관리자"; // 작성자는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야 함.
+        this.writer = "관리자"; // TODO: 작성자는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야 함.
     }
 }

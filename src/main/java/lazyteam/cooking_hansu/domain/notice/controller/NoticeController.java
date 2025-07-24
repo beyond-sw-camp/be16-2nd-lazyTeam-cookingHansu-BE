@@ -7,6 +7,7 @@ import lazyteam.cooking_hansu.domain.notice.service.NoticeService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class NoticeController {
 
     //     공지사항 전체 목록 조회
     @GetMapping("/list")
-    public ResponseEntity<?> noticeLists(@PageableDefault(size = 10, sort = "id", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> noticeLists(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(ResponseDto.ok(noticeService.findAll(pageable), HttpStatus.OK), HttpStatus.OK);
     }
 
