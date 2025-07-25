@@ -1,11 +1,7 @@
-package lazyteam.lecture.domain;
+package lazyteam.cooking_hansu.domain.lecture.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ValueGenerationType;
 
 @Entity
 @AllArgsConstructor
@@ -21,5 +17,12 @@ public class Lecture {
 
     //fk설정 필요(조회용)
     private Long submittedId;
+    private Long approveAdminId;
     private Long rejectAdminId;
+
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+    private
 }
