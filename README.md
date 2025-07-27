@@ -8,17 +8,37 @@
 ## 👨‍💻 Team Members
 
 <table>
-  <tr>
+<!--   <tr>
+    <td align="center">
+      <img src="" width="150"/>
+    </td>
+    <td align="center">
+      <img src="" width="150"/>
+    </td>
+    <td align="center">
+      <img src="" width="150"/>
+    </td>
+    <td align="center">
+      <img src="" width="150"/>
+    </td>
+    <td align="center">
+      <img src="" width="150"/>
+    </td>
+  </tr> -->
+    <tr>
     <td align="center"> 김건동</td>
     <td align="center"> 이승지</td>
-    <td align="center"> 최재혁</td>
-    <td align="center"> 조민형</td>
-    <td align="center"> 김상환</td>
+    <td align="center">최재혁</td>
+    <td align="center">조민형</td>
+    <td align="center">김상환</td>
   </tr>
   <tr>
-    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a></td>
-    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a></td>
-    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a></td>
+    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a>
+    </td>
+    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a>
+    </td>
+    <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a> 
+    </td>
     <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a></td>
     <td align="center"><a href="#" target="_blank"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white"/></a></td>
   </tr>
@@ -26,52 +46,36 @@
 
 ---
 
-## 🎨 디자인 & 설계 자료
-
-| 구분 | 링크 |
-|------|------|
-| 🧩 **Figma 디자인** | [👉 피그마 보기](https://www.figma.com/design/0r1vmACeBTegtlH9OHZaMn/%EC%9A%94%EB%A6%AC%ED%95%9C%EC%88%98?node-id=0-1&p=f&t=NJOrncqdhdRnxdh6-0) |
-| 🗂️ **ERD (DB 설계도)** | [👉 ERDCloud 보기](https://www.erdcloud.com/d/25tEnmWT48D4MufsZ) |
-| 📝 **WBS & 요구사항 정의서** | [👉 Google Sheet 보기](https://docs.google.com/spreadsheets/d/1UsaqCAM9-1V2rr0dIufYZtAmWtn-mnH4Uthqad71YM8/edit?gid=2045131748#gid=2045131748) |
-
----
-
 ## 🛠️ 기술 스택
 
-### 📦 Frontend
+### 🖥️ Backend
 
-- **Vue 3**
-- **Vite**
-- **Vuetify 3**
-- **Pinia** – 상태 관리
-- **Vue Router 4** – SPA 라우팅
-- **Axios** – API 통신
-- **SCSS** – 스타일링
-- **JavaScript (ES6+)**
-
-### 🧰 Backend
-
-- **Spring Boot**
+- **Java 17**
+- **Spring Boot 3**
+- **Spring Security** – 인증 및 인가
+- **JWT (Access/Refresh Token)**
 - **Spring Data JPA**
-- **MySQL**
-- **Spring Security + JWT**
-- **Lombok**
-- **Gradle**
+- **QueryDSL**
+- **MySQL / MariaDB**
+- **Redis** – 토큰 캐시, 채팅 세션 관리
+- **AWS S3** – 이미지 업로드
+- **WebSocket + STOMP** – 실시간 채팅
+- **SSE** – 알림 기능
+- **Gradle** – 빌드 툴
+- **Swagger / Springdoc** – API 문서 자동화
+- **Docker** – 개발 환경 컨테이너화
 
+🎯 Commit Convention
 ---
-
-## 📄 Commit Convention
 
 | 태그         | 설명                   |
-|--------------|------------------------|
-| `feat`       | 기능 추가              |
-| `fix`        | 버그 수정              |
-| `refactor`   | 리팩토링 (기능 변경 없음) |
-| `style`      | 코드 스타일 수정 (공백, 포맷 등) |
-| `docs`       | 문서 작성/수정         |
-| `test`       | 테스트 코드 작성       |
-| `chore`      | 빌드, 패키지, 설정 등 기타 변경 |
-| `ci`         | CI/CD 설정 관련       |
-
----
+| ---------- | -------------------- |
+| `feat`     | 기능 추가                |
+| `fix`      | 버그 수정                |
+| `refactor` | 리팩토링 (기능 변경 없음)      |
+| `style`    | 코드 스타일 수정 (공백, 포맷 등) |
+| `docs`     | 문서 작성/수정             |
+| `test`     | 테스트 코드 작성            |
+| `chore`    | 빌드, 패키지, 설정 등 기타 변경  |
+| `ci`       | CI/CD 설정 관련          |
 
