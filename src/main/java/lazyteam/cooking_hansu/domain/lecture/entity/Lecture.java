@@ -5,7 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.StatusEnum;
+import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
+import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -20,18 +24,23 @@ public class Lecture {
     private Long lectureId;
 
     //fk설정 필요(조회용)
-//    요청자 컬럼ERD 바꾸고 관계성 설정 다시
     @JoinColumn(name = "administrator_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Long submittedId;
 
-//    @JoinColumn(name = "administrator_id")
-//    @ManyToOne(fetch = FetchType.LAZY)
-    private Long approveAdminId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") // FK 컬럼 이름
+    private User user;
 
-//    @JoinColumn(name = "administrator_id")
-//    @ManyToOne(fetch = FetchType.LAZY)
-    private Long rejectAdminId;
+    // 승인 관리자
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approve_admin_id")
+    private Administrator approveAdminId;
+
+    // 거절 관리자
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reject_admin_id")
+    private Administrator rejectAdminId;
 
     @NotNull
     private String title;
@@ -64,5 +73,26 @@ public class Lecture {
     private String createdAt;
 
     private String updatedAt;
+
+
+//    역방향 관계설정(조회용)
+
+    @OneToMany(mappedBy = "lecture")
+    private List<LectureReview> reviews;
+
+    @OneToMany(mappedBy = "lecture")
+    private List<LectureQna> qnas;
+
+    @OneToMany(mappedBy = "lecture")
+    private List<LectureVideo> videos;
+
+    @OneToMany(mappedBy = "lecture")
+    private List<LectureIngredientsList> ingredientsList;
+
+    @OneToMany(mappedBy = "lecture")
+    private List<PurchasedLecture> purchases;
+
+    @OneToMany(mappedBy = "lecture")
+    private List<CartItem> cartItems;
 
 }

@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -10,19 +9,22 @@ import lombok.*;
 @Getter
 @ToString
 @Builder
-public class LectureIngredientsList {
+//ERD상에서 조리순서(내레시피)가 두개라서 일단 클래스명 이렇게 명시했음.
+public class CopyOfLectureStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lectureIngredientsId;
+    private Long stepId;
 
+    // FK: 강의
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture;
 
-    @NotNull
-    private String IngredientsName;
+    // 조리 순서 번호
+    @Column(nullable = false)
+    private Integer stepSequence;
 
-    @NotNull
-    private String amount;
-
+    // 조리 내용
+    @Column(length = 255, nullable = false)
+    private String content;
 }
