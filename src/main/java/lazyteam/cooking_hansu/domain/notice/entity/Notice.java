@@ -32,12 +32,14 @@ public class Notice extends BaseTimeEntity {
 
     private LocalDateTime deletedAt; // 삭제 시간
 
-    private String writer; // 작성자 (관리자)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "administrator_id", nullable = false)
+    private Administrator administrator; // 관리자 ID (FK)
 
     public void updateNotice(NoticeDetailDto noticeDetailDto) {
         this.title = noticeDetailDto.getTitle();
         this.content = noticeDetailDto.getContent();
         this.imageUrl = noticeDetailDto.getImageUrl();
-        this.writer = "관리자"; // TODO: 작성자는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야 함.
+        this.administrator = "관리자"; // TODO: 작성자는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야 함.
     }
 }
