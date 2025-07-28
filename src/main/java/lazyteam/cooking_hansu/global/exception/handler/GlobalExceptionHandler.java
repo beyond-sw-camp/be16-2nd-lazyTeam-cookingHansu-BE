@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getFieldError() != null
                 ? e.getBindingResult().getFieldError().getDefaultMessage()
                 : "요청 데이터의 형식이 올바르지 않습니다.";
-        log.warn("Validation 실패: {}", errorMessage);
+        log.error("Validation 실패: {}", errorMessage);
         return new ResponseEntity<>(ResponseDto.fail(HttpStatus.BAD_REQUEST, errorMessage), HttpStatus.BAD_REQUEST);
     }
 
@@ -95,8 +95,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        log.error("HttpMessageNotReadableException: {}", e.getMessage(), e);
-       return new ResponseEntity<>(ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
+        log.error("JSON 파싱 오류: {}", e.getMessage(), e);
+        return new ResponseEntity<>(ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -124,7 +124,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<?> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException e) {
-        log.warn("지원하지 않는 미디어 타입: {}", e.getContentType());
+        log.error("지원하지 않는 미디어 타입: {}", e.getContentType());
         String errorMessage = String.format("지원하지 않는 미디어 타입: %s. 지원되는 타입은 %s입니다.",
                 e.getContentType(), e.getSupportedMediaTypes());
         return new ResponseEntity<>(ResponseDto.fail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, errorMessage), HttpStatus.UNSUPPORTED_MEDIA_TYPE);

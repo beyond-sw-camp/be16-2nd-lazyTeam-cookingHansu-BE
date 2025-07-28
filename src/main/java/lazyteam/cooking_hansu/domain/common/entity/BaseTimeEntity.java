@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.common;
+package lazyteam.cooking_hansu.domain.common.entity;
 
 
 import jakarta.persistence.MappedSuperclass;
@@ -17,5 +17,4 @@ public class BaseTimeEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt; // 수정 시간
 
-    private LocalDateTime deletedAt; // 삭제 시간
 }
