@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,7 +32,14 @@ public class Report extends BaseTimeEntity {
     private Status status = Status.PENDING; // Report Status (신고 상태: PENDING, APPROVED, REJECTED)
     private String rejectReason; // 거절 사유
 
-    private Long reporterId; // Reporter ID (신고자 ID)
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User member; // 신고한 회원 (Member 엔티티와 연관 관계)
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    private Administrator admin; // 신고를 처리한 관리자 (Member 엔티티와 연관 관계)
+
 
     public void updateStatus(Status status, String statusReason) {
         this.status = status;

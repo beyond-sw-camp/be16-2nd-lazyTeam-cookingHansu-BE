@@ -1,9 +1,9 @@
 package lazyteam.cooking_hansu.domain.purchase.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.BaseTimeEntity;
 import lazyteam.cooking_hansu.domain.common.PayMethod;
 import lazyteam.cooking_hansu.domain.common.PaymentStatus;
+import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.User;
 import lombok.*;
 import java.time.LocalDateTime;
