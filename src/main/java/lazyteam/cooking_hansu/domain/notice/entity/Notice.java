@@ -17,24 +17,31 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 public class Notice extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 공지사항 ID
 
+    // 공지사항 ID
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 공지사항 제목
     @NotNull(message = "제목은 필수 입력입니다.")
     @Column(nullable = false, length = 100)
-    private String title; // 공지사항 제목
+    private String title;
+
+    // 공지사항 내용
     @NotNull(message = "내용은 필수 입력입니다.")
     @Column(nullable = false, length = 3000)
-    private String content; // 공지사항 내용
+    private String content;
 
-    private String imageUrl; // 공지사항 이미지 URL
+    // 공지사항 이미지 URL
+    private String imageUrl;
 
-    private LocalDateTime deletedAt; // 삭제 시간
+    // 삭제 시간
+    private LocalDateTime deletedAt;
 
+    // 관리자 ID (FK)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "administrator_id", nullable = false)
-    private Administrator administrator; // 관리자 ID (FK)
+    private Administrator administrator;
 
     public void updateNotice(NoticeDetailDto noticeDetailDto) {
         this.title = noticeDetailDto.getTitle();
