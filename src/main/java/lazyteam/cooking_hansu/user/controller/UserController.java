@@ -1,7 +1,7 @@
-package lazyteam.cooking_hansu.controller.user;
+package lazyteam.cooking_hansu.user.controller;
 
-import lazyteam.cooking_hansu.repository.user.UserRepository;
-import lazyteam.cooking_hansu.service.user.UserService;
+import lazyteam.cooking_hansu.user.repository.UserRepository;
+import lazyteam.cooking_hansu.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,5 +13,4 @@ public class UserController {
     private final UserService userService;
 
     // TODO: 회원 관련 API 메서드 구현 예정
-
 }
