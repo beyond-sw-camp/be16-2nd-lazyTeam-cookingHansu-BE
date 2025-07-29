@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.notice.entity;
 
+import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
 import jakarta.persistence.*;
@@ -41,12 +42,12 @@ public class Notice extends BaseTimeEntity {
     // 관리자 ID (FK)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "administrator_id", nullable = false)
-    private Administrator administrator;
+    private Admin admin;
 
-    public void updateNotice(NoticeDetailDto noticeDetailDto) {
+    public void updateNotice(NoticeDetailDto noticeDetailDto, Admin admin) {
         this.title = noticeDetailDto.getTitle();
         this.content = noticeDetailDto.getContent();
         this.imageUrl = noticeDetailDto.getImageUrl();
-        this.administrator = "관리자"; // TODO: 작성자는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야 함.
+        this.admin = admin;
     }
 }
