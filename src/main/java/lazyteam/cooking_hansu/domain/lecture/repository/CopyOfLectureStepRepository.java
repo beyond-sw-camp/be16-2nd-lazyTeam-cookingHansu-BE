@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CopyOfLectureStepRepository extends JpaRepository<CopyOfLectureStepRepository, Long> {
-}
+}g

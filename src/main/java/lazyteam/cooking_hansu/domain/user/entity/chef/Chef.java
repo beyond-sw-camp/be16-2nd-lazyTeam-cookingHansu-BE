@@ -6,9 +6,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * 요식업 종사자 정보 엔티티
@@ -17,8 +17,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @MappedSuperclass
-@SuperBuilder
 public class Chef extends User {
 
     private String licenseNumber; // 자격 번호
