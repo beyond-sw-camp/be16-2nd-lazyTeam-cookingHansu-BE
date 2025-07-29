@@ -8,7 +8,7 @@ import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.StatusEnum;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
-import lazyteam.cooking_hansu.domain.user.entity.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.util.List;

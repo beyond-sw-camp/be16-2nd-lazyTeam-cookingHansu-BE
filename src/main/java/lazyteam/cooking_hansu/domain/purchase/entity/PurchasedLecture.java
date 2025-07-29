@@ -2,8 +2,8 @@ package lazyteam.cooking_hansu.domain.purchase.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
-import lazyteam.cooking_hansu.domain.user.entity.User;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 @Entity

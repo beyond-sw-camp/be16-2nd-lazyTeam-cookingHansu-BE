@@ -1,6 +1,6 @@
-package lazyteam.cooking_hansu.user.service;
+package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.user.repository.UserRepository;
+import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
-package lazyteam.cooking_hansu.user.controller;
+package lazyteam.cooking_hansu.domain.user.controller;
 
-import lazyteam.cooking_hansu.user.repository.UserRepository;
-import lazyteam.cooking_hansu.user.service.UserService;
+import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
