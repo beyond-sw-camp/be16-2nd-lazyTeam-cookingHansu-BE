@@ -1,10 +1,10 @@
-package lazyteam.cooking_hansu.user.domain.chef;
+package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
-import lazyteam.cooking_hansu.user.domain.common.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

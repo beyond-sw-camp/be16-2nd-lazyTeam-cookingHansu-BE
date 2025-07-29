@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.user.domain.common;
+package lazyteam.cooking_hansu.domain.user.entity.common;
 
 /**
  * 로그인 상태 Enum

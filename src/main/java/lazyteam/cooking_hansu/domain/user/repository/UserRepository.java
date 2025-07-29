@@ -1,6 +1,6 @@
-package lazyteam.cooking_hansu.user.repository;
+package lazyteam.cooking_hansu.domain.user.repository;
 
-import lazyteam.cooking_hansu.user.domain.common.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.user.domain.chef;
+package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 /**
  * 요식업 종사자 자격 업종 Enum

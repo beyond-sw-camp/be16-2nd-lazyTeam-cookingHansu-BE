@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.user.domain.chef;
+package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 /**
  * 종사자 & 자영업자 승인 상태 Enum

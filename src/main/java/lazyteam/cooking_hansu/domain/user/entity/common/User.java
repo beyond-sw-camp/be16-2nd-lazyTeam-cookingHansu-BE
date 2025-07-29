@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.user.domain.common;
+package lazyteam.cooking_hansu.domain.user.entity.common;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
