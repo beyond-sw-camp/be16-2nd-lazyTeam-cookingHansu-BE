@@ -2,7 +2,7 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
-import lazyteam.cooking_hansu.domain.user.entity.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.PayMethod;
 import lazyteam.cooking_hansu.domain.common.PaymentStatus;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
-import lazyteam.cooking_hansu.domain.user.entity.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
