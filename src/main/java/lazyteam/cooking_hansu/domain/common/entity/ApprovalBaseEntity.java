@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.common.entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
+import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

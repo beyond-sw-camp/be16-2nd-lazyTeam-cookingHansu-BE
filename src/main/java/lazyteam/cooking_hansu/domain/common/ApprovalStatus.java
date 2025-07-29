@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.common.entity;
+package lazyteam.cooking_hansu.domain.common;
 
 /**
  * 종사자 & 자영업자 승인 상태 Enum
