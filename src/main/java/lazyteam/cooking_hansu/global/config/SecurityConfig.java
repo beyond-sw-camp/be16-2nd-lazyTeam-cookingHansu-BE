@@ -41,6 +41,7 @@ public class SecurityConfig {
                         e.authenticationEntryPoint(jwtAuthenticationHandler)
                                 .accessDeniedHandler(jwtAuthorizationHandler)
                 )
+                // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
                 .authorizeHttpRequests(a -> a.requestMatchers("/user/create", "/user/login").permitAll().anyRequest().authenticated())
                 .build();
     }
