@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.report.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
 import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.User;
@@ -54,7 +55,7 @@ public class Report extends BaseTimeEntity {
     // 신고를 처리한 관리자ID (FK)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
-    private Administrator admin;
+    private Admin admin;
 
 
     public void updateStatus(Status status, String statusReason) {

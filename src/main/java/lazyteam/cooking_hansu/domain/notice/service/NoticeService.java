@@ -49,7 +49,7 @@ public class NoticeService {
         if (noticeDetailDto.getTitle() == null || noticeDetailDto.getContent() == null) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
-        notice.updateNotice(noticeDetailDto);
+        notice.updateNotice(noticeDetailDto, notice.getAdmin());
     }
 
     // 공지사항 삭제

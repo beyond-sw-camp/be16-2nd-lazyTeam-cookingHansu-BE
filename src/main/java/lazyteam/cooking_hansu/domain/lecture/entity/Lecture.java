@@ -2,11 +2,13 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.StatusEnum;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
+import lazyteam.cooking_hansu.domain.user.entity.User;
 import lombok.*;
 
 import java.util.List;
@@ -35,12 +37,12 @@ public class Lecture {
     // 승인 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approve_admin_id")
-    private Administrator approveAdminId;
+    private Admin approveAdminId;
 
     // 거절 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reject_admin_id")
-    private Administrator rejectAdminId;
+    private Admin rejectAdminId;
 
     @NotNull
     private String title;
