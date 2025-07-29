@@ -1,8 +1,8 @@
 package lazyteam.cooking_hansu.domain.user.entity.business;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.entity.ApprovalBaseEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.entity.chef.ApprovalStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Business {
+public class Business extends ApprovalBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,4 @@ public class Business {
     @Column(nullable = false)
     private String shopCategory; // 사업 업종
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ApprovalStatus approvalStatus; // 승인 상태 (PENDING, APPROVED, REJECTED)
 }

@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.entity.ApprovalBaseEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Chef {
+public class Chef extends ApprovalBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +36,4 @@ public class Chef {
 
     @Column(length = 512, nullable = false)
     private String licenseUrl; // 자격증 이미지 url
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ApprovalStatus approvalStatus; // 승인 상태
-
 }
