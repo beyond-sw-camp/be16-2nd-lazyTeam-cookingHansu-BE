@@ -30,13 +30,48 @@ public class Recipe {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LevelType level;
+    private Level level;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CategoryType category;
+    private Category category;
 
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private int cookTime; // 조리 시간 (분)
 
+    // Enum 정의
+    public enum Level {
+        VERY_HIGH("매우 어려움"),
+        HIGH("어려움"),
+        MEDIUM("보통"),
+        LOW("쉬움"),
+        VERY_LOW("매우 쉬움");
+
+        private final String label;
+
+        Level(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    public enum Category {
+        KOREAN("한식"),
+        CHINESE("중식"),
+        WESTERN("양식"),
+        JAPANESE("일식");
+
+        private final String label;
+
+        Category(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
 }
