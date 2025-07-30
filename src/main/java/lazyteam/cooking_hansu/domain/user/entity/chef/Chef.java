@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.ApprovalBaseEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,12 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Chef extends ApprovalBaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, unique = true)
-    private Long id;
+public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId

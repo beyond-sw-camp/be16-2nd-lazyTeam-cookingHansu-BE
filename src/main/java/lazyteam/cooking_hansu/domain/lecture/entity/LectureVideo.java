@@ -1,21 +1,16 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 @Entity
 @Table(name = "lecture_video")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LectureVideo extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long videoId;
+public class LectureVideo extends BaseIdAndTimeEntity {
 
     // 🔗 강의와 연결 (N:1)
     @ManyToOne(fetch = FetchType.LAZY)

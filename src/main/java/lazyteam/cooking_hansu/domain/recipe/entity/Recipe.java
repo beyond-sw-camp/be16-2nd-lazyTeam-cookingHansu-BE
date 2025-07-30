@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,16 +10,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "recipe")
-public class Recipe {
+public class Recipe extends BaseIdEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recipe_id", columnDefinition = "BIGINT UNSIGNED")
-    private Long id;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(columnDefinition = "TEXT")
     private String description;

@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.interaction.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 // 북마크 엔티티
@@ -13,12 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Bookmark extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bookmark_id")
-    private Long id; // 북마크 ID
+public class Bookmark extends BaseIdAndTimeEntity {
 
     @Column(name = "user_id", nullable = false)
     private Long userId; // 사용자 ID

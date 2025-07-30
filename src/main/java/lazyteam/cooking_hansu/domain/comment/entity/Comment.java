@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,12 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Comment extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Long id;
+public class Comment extends BaseIdAndTimeEntity {
 
     @Column(name = "comment_parent_id")
     private Long commentParentId;

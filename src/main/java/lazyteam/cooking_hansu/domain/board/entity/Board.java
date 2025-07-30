@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.board.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,12 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Board extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
-    private Long id; //게시물아이디
+public class Board extends BaseIdAndTimeEntity {
 
     @Column(name = "user_id", nullable = false)
     private Long userId; //유저 아이디

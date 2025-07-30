@@ -2,28 +2,10 @@ package lazyteam.cooking_hansu.domain.user.entity.common;
 
 import jakarta.persistence.*;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
-import lazyteam.cooking_hansu.domain.board.entity.Board;
-import lazyteam.cooking_hansu.domain.chat.entity.ChatMessage;
-import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
-import lazyteam.cooking_hansu.domain.comment.entity.Comment;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
-import lazyteam.cooking_hansu.domain.interaction.entity.Bookmark;
-import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
-import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
-import lazyteam.cooking_hansu.domain.notification.entity.Notification;
-import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
-import lazyteam.cooking_hansu.domain.purchase.entity.Payment;
-import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
-import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
-import lazyteam.cooking_hansu.domain.report.entity.Report;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 공통 회원 엔티티
@@ -34,12 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-public class User extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long id; // 회원 ID
+public class User extends BaseIdAndTimeEntity {
 
     @Column(nullable = false)
     private String name; // 이름

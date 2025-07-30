@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 /**
@@ -14,11 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class RecipeStep extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RecipeStep extends BaseIdAndTimeEntity {
 
     @Column(nullable = false)
     private Long recipeId; // 어떤 레시피의 조리 순서인지

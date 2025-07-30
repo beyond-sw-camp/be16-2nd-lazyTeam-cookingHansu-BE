@@ -3,7 +3,7 @@ package lazyteam.cooking_hansu.domain.purchase.entity;
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.PayMethod;
 import lazyteam.cooking_hansu.domain.common.PaymentStatus;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -15,11 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
+public class Payment extends BaseIdAndTimeEntity {
 
     // 사용자 (FK)
     @ManyToOne(fetch = FetchType.LAZY)

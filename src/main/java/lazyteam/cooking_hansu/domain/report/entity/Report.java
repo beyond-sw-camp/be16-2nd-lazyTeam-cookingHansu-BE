@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,11 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Builder
-public class Report extends BaseTimeEntity {
-
-    // Report ID (자동 생성)
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Report extends BaseIdAndTimeEntity {
 
     // Report Type (RECIPE, USER, COMMENT)
     @NotNull(message = "신고 유형은 필수 선택입니다.")

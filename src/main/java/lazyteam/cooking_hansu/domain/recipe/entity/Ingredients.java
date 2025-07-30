@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 @Entity
@@ -11,12 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Ingredients extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ingredient_id")
-    private Long id;
+public class Ingredients extends BaseIdAndTimeEntity {
 
     @Column(name = "recipe_id", nullable = false)
     private Long recipeId; // 어떤 레시피의 재료인지

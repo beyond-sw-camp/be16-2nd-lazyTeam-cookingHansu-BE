@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +15,7 @@ import java.util.List;
 @Getter
 @Entity
 @Builder
-public class ChatRoom extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 채팅방 ID
+public class ChatRoom extends BaseIdAndTimeEntity {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name; // 채팅방 이름

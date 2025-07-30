@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.*;
 
 /**
@@ -17,12 +17,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class PostComment extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Long id;
+public class PostComment extends BaseIdAndTimeEntity {
 
     @Column(name = "post_id", nullable = false)
     private Long postId; // 게시글 ID

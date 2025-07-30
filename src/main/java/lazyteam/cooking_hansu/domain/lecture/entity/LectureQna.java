@@ -1,11 +1,9 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lecture_qna")
@@ -13,11 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LectureQna extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postId;
+public class LectureQna extends BaseIdAndTimeEntity {
 
     // 강의 연관
     @ManyToOne(fetch = FetchType.LAZY)

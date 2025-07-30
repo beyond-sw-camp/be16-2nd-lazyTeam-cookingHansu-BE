@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
 import lombok.*;
 
 @Entity
@@ -10,10 +11,7 @@ import lombok.*;
 @Getter
 @ToString
 @Builder
-public class LectureIngredientsList {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lectureIngredientsId;
+public class LectureIngredientsList extends BaseIdEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)

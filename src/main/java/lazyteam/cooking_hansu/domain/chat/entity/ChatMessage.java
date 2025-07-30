@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,10 +16,7 @@ import java.util.List;
 @Getter
 @Entity
 @Builder
-public class ChatMessage extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 메시지 ID
+public class ChatMessage extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
@@ -42,9 +39,6 @@ public class ChatMessage extends BaseTimeEntity {
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private String isDeleted = "N"; // 메시지 삭제 여부, 기본값은 "N" (삭제되지 않음)
-
-
-
 
     @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
