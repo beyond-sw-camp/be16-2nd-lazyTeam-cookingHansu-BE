@@ -6,12 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 public class ReportDetailDto {
-    private Long id;
+    private UUID id;
     private String reportType; // 신고 유형
     private Long targetId; // 신고 대상 ID
     private String reportReasonType; // 신고 사유 유형

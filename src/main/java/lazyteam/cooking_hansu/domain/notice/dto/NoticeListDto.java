@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class NoticeListDto {
-    private Long id;
+    private UUID id;
     private String title;
     private String content;
     private String imageUrl; // 이미지 URL을 추가할 수 있습니다.
