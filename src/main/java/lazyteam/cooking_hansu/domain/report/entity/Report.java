@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -25,7 +27,7 @@ public class Report extends BaseIdAndTimeEntity {
 
     // Target ID (예: Recipe ID, User ID, Comment ID)
     @NotNull(message = "신고 대상 ID는 필수 입력입니다.")
-    private Long targetId;
+    private UUID targetId;
 
     // Report Reason Type (신고 사유 타입: SPAM_OR_ADS, INCORRECT_CONTENTS, BOTHER_OR_SPIT, FRAUD_INFORMATION, AUTHORIZATION, ETC)
     @NotNull(message = "신고 사유 타입은 필수 선택입니다.")
@@ -41,6 +43,7 @@ public class Report extends BaseIdAndTimeEntity {
     private Status status = Status.PENDING;
 
     // 거절 사유
+    @Column(name = "reject_reason", columnDefinition = "TEXT")
     private String rejectReason;
 
     // 신고한 회원ID (FK)

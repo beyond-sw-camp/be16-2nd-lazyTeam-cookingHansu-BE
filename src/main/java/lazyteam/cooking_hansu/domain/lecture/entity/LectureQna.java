@@ -41,5 +41,6 @@ public class LectureQna extends BaseIdAndTimeEntity {
     private String answerText;
 
     // 답변 시간 (nullable)
+    @Column
     private String answerCreatedAt;
 }

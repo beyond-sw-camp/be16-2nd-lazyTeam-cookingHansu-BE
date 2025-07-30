@@ -2,9 +2,13 @@ package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -15,14 +19,22 @@ import java.time.LocalDateTime;
 @ToString
 public class Comment extends BaseIdAndTimeEntity {
 
-    @Column(name = "comment_parent_id")
-    private Long commentParentId;
+    // 부모 댓글 (자기참조)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_parent_id")
+    private Comment parentComment;
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; //게시물 ID
+    // 대댓글 목록
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> childComments = new ArrayList<>();
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; //작성자 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post; //게시물 ID
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; //작성자 ID
 
     @Column(name = "comment_content", nullable = false , columnDefinition = "TEXT")
     private String content;
@@ -62,12 +74,12 @@ public class Comment extends BaseIdAndTimeEntity {
         }
     }
 
-//    본인 확인
-    public boolean isOwner(Long userId){return this.userId.equals(userId);}
-
-//    대댓글 여부
-    public boolean isReply() {return this.commentParentId != null;}
-
-//    삭제 여부
-    public boolean isDeleted(){return this.commentIsDeleted != null && this.commentIsDeleted;}
+////    본인 확인
+//    public boolean isOwner(Long userId){return this.userId.equals(userId);}
+//
+////    대댓글 여부
+//    public boolean isReply() {return this.commentParentId != null;}
+//
+////    삭제 여부
+//    public boolean isDeleted(){return this.commentIsDeleted != null && this.commentIsDeleted;}
 }

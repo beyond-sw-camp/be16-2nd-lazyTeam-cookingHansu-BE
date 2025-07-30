@@ -1,7 +1,9 @@
-package lazyteam.cooking_hansu.domain.board.entity;
+package lazyteam.cooking_hansu.domain.post.entity;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,16 +15,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Board extends BaseIdAndTimeEntity {
+public class Post extends BaseIdAndTimeEntity {
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; //유저 아이디
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; //유저 아이디
 
     @Column(nullable = false,length = 255)
     private String title; // 제목
 
     @Column(columnDefinition = "TEXT")
     private String description; // 설명
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CategoryEnum category; // 카테고리
 
     @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl; // 썸네일 url
@@ -83,8 +90,8 @@ public class Board extends BaseIdAndTimeEntity {
 //   삭제 여부 확인
     public boolean isDeleted() { return this.deletedAt != null;}
 
-//   소유자 확인
-    public boolean isOwner(Long userId) {return this.userId.equals(userId);}
+////   소유자 확인
+//    public boolean isOwner(Long userId) {return this.userId.equals(userId);}
 
 //   공개 게시글 여부
     public boolean isPublic() { return this.isOpen != null && this.isOpen; }

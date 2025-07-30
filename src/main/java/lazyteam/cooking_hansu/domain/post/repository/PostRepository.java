@@ -1,13 +1,9 @@
-package lazyteam.cooking_hansu.domain.board.repository;
+package lazyteam.cooking_hansu.domain.post.repository;
 
-import lazyteam.cooking_hansu.domain.board.entity.Board;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface BoardRepository extends JpaRepository<Board , Long> {
+public interface PostRepository extends JpaRepository<Post, Long> {
 
 ////    기본조회
 //

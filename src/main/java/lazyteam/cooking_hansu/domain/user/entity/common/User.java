@@ -15,7 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
+@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = {"oauthType", "email"}))
 public class User extends BaseIdAndTimeEntity {
 
     @Column(nullable = false)
@@ -28,7 +28,7 @@ public class User extends BaseIdAndTimeEntity {
     @Column(nullable = false)
     private String nickname; // 닉네임
 
-    @Column(unique = true)
+    @Column(nullable = false)
     private String email; // 이메일
 
     @Column(nullable = false)

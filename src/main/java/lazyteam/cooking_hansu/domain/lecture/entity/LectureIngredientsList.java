@@ -17,10 +17,10 @@ public class LectureIngredientsList extends BaseIdEntity {
     @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture;
 
-    @NotNull
+    @Column(nullable = false)
     private String IngredientsName;
 
-    @NotNull
+    @Column(nullable = false)
     private String amount;
 
 }

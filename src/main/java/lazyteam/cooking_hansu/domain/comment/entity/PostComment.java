@@ -1,7 +1,9 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
 import lombok.*;
 
 /**
@@ -19,11 +21,13 @@ import lombok.*;
 @ToString
 public class PostComment extends BaseIdAndTimeEntity {
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; // 게시글 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post postId; // 게시글 ID
 
-    @Column(name = "step_id", nullable = false)
-    private Long stepId; // 조리순서 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "step_id", nullable = false)
+    private RecipeStep stepId; // 조리순서 ID
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // 코멘트 내용

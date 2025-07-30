@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -35,7 +36,7 @@ public class ReportService {
     public Page<ReportDetailDto> findAll(Pageable pageable){
         Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
 //        TODO:나중에 실제 사용자의 ID로 변경 필요
-        return reportLists.map(r -> ReportDetailDto.fromEntity(r, 1L));
+        return reportLists.map(r -> ReportDetailDto.fromEntity(r, UUID.fromString("00000000-0000-0000-0000-000000000000")));
     }
 
     public void approveReport(Long id) {

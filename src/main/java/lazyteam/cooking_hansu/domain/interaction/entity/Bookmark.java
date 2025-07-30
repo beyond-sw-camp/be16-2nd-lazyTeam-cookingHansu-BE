@@ -2,6 +2,8 @@ package lazyteam.cooking_hansu.domain.interaction.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 // 북마크 엔티티
@@ -14,10 +16,15 @@ import lombok.*;
 @Getter
 @ToString
 public class Bookmark extends BaseIdAndTimeEntity {
+    // 회원 정보
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // 사용자 ID
+    // 게시글 정보
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; // 게시글 ID
+
 }

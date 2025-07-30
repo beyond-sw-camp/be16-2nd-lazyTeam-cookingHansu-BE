@@ -30,9 +30,11 @@ public class Notice extends BaseIdAndTimeEntity {
     private String content;
 
     // 공지사항 이미지 URL
+    @Column(length = 255)
     private String imageUrl;
 
     // 삭제 시간
+    @Column
     private LocalDateTime deletedAt;
 
     // 관리자 ID (FK)

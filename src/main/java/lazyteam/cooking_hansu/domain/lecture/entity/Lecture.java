@@ -26,35 +26,40 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submitted_id") // FK 컬럼 이름
-    private User user;
+    private User submittedBy; // 강의 제출자
 
     // 승인 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approve_admin_id")
-    private Admin approveAdminId;
+    private Admin approvedBy;
 
     // 거절 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reject_admin_id")
-    private Admin rejectAdminId;
+    private Admin rejectedBy;
 
-    @NotNull
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LevelEnum level;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private CategoryEnum category;
 
-    @NotNull
+    @Column(nullable = false)
     private Integer price;
 
     @Column(columnDefinition = "TEXT")
     private String thumbUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String videoUrl;
 
 ////    역방향 관계설정(조회용)
 //
