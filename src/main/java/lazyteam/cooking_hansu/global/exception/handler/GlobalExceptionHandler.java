@@ -134,6 +134,10 @@ public class GlobalExceptionHandler {
     // 잘못된 인자 전달
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
+        if (e.getMessage().contains("승인") || e.getMessage().contains("강의")) {
+            log.error("[LectureApprovalException] {}", e.getMessage());
+            return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
         log.error("[IllegalArgumentException] {}", e.getMessage(), e);
         return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
@@ -283,32 +287,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleIOException(IOException e) {
         log.error("[IOException] {}", e.getMessage(), e);
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
-    }
-
-    /**
-     * ======================== 비즈니스 로직 관련 예외 ========================
-     */
-
-    // 강의 승인 상태 관련 예외
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleLectureApprovalException(IllegalArgumentException e) {
-        if (e.getMessage().contains("승인") || e.getMessage().contains("강의")) {
-            log.warn("[LectureApprovalException] {}", e.getMessage());
-            return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-        // 다른 IllegalArgumentException은 기존 핸들러로
-        throw e;
-    }
-
-    // 결제 관련 예외
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<?> handlePaymentException(IllegalStateException e) {
-        if (e.getMessage().contains("결제") || e.getMessage().contains("가격")) {
-            log.warn("[PaymentException] {}", e.getMessage());
-            return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-        // 다른 IllegalStateException은 기존 핸들러로
-        throw e;
     }
 
     /**

@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
@@ -36,6 +37,8 @@ public class Comment extends BaseIdAndTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; //작성자 ID
 
+    @NotBlank(message = "댓글 내용은 필수입니다")
+    @Size(max = 1000, message = "댓글 내용은 1000자 이하여야 합니다")
     @Column(name = "comment_content", nullable = false , columnDefinition = "TEXT")
     private String content;
 

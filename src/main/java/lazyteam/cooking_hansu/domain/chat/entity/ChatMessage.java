@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,8 @@ public class ChatMessage extends BaseIdAndTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User sender; // 메시지 발신자 정보
 
+    @NotBlank(message = "메시지 내용은 필수입니다")
+    @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content; // 메시지 내용
 
@@ -33,6 +36,7 @@ public class ChatMessage extends BaseIdAndTimeEntity {
     @Column(name = "message_type")
     private MessageType messageType; // 메시지 타입 (예: TEXT, IMAGE, FILE 등)
 
+    @Size(max = 512, message = "파일 URL은 512자 이하여야 합니다")
     @Column(name = "file_url")
     private String fileUrl; // 파일 URL (이미지, 파일 등)
 

@@ -1,4 +1,4 @@
-//package global.exception.error;
+//package lazyteam.cooking_hansu.global.exception.error;
 //
 //import lombok.Getter;
 //import lombok.RequiredArgsConstructor;
@@ -7,82 +7,101 @@
 //@Getter
 //@RequiredArgsConstructor
 //public enum ErrorCode {
-//    // 🔸 공통 에러 코드
-//    ILLEGAL_ARGUMENT(10000, HttpStatus.BAD_REQUEST, "잘못된 인자입니다."),
-//    NO_SUCH_ELEMENT(10001, HttpStatus.NOT_FOUND, "해당 요소를 찾을 수 없습니다."),
-//    ILLEGAL_STATE(10002, HttpStatus.INTERNAL_SERVER_ERROR, "잘못된 상태입니다."),
-//    NULL_POINTER(10003, HttpStatus.INTERNAL_SERVER_ERROR, "널 포인터 예외가 발생했습니다."),
 //
-//    // 🔹 400 Bad Request (클라이언트의 잘못된 요청)
-//    INVALID_INPUT_VALUE(40000, HttpStatus.BAD_REQUEST, "잘못된 입력 값입니다."),
-//    MISSING_REQUEST_PARAMETER(40001, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
-//    INVALID_TYPE_VALUE(40002, HttpStatus.BAD_REQUEST, "입력 타입이 올바르지 않습니다."),
-//    VALIDATION_ERROR(40003, HttpStatus.BAD_REQUEST, "요청 데이터의 유효성 검사에 실패했습니다."),
-//    JSON_PARSE_ERROR(40004, HttpStatus.BAD_REQUEST, "요청 JSON 파싱에 실패했습니다."),
+//    // ======================== 공통 예외 ========================
+//    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C001", "잘못된 입력값입니다."),
+//    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C002", "지원하지 않는 HTTP 메서드입니다."),
+//    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C003", "서버 내부 오류가 발생했습니다."),
+//    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C004", "잘못된 타입의 값입니다."),
+//    HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "C005", "접근 권한이 없습니다."),
+//    ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "C006", "요청한 리소스를 찾을 수 없습니다."),
+//    DUPLICATE_ENTITY(HttpStatus.CONFLICT, "C007", "이미 존재하는 데이터입니다."),
 //
-//    // 🔹 401 Unauthorized (인증 실패 관련)
-//    UNAUTHORIZED(40100, HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
-//    INVALID_TOKEN(40101, HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
-//    EXPIRED_TOKEN(40102, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
-//    ACCESS_TOKEN_REQUIRED(40103, HttpStatus.UNAUTHORIZED, "AccessToken이 필요합니다."),
-//    REFRESH_TOKEN_REQUIRED(40104, HttpStatus.UNAUTHORIZED, "RefreshToken이 필요합니다."),
-//    LOGIN_REQUIRED(40105, HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
+//    // ======================== 인증/인가 예외 ========================
+//    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "A001", "인증이 필요합니다."),
+//    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 토큰입니다."),
+//    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A003", "만료된 토큰입니다."),
+//    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "A004", "사용자를 찾을 수 없습니다."),
+//    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "A005", "잘못된 비밀번호입니다."),
 //
-//    // 🔹 403 Forbidden (인가 실패 관련)
-//    FORBIDDEN(40300, HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
-//    ACCESS_DENIED(40301, HttpStatus.FORBIDDEN, "권한이 없습니다."),
+//    // ======================== 사용자 관련 예외 ========================
+//    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "U001", "이미 사용 중인 이메일입니다."),
+//    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "U002", "이미 사용 중인 닉네임입니다."),
+//    INVALID_OAUTH_TYPE(HttpStatus.BAD_REQUEST, "U003", "지원하지 않는 OAuth 타입입니다."),
+//    WITHDRAWN_USER(HttpStatus.BAD_REQUEST, "U004", "탈퇴한 사용자입니다."),
+//    BANNED_USER(HttpStatus.FORBIDDEN, "U005", "정지된 사용자입니다."),
 //
-//    // 🔹 404 Not Found (리소스를 찾을 수 없음)
-//    NOT_FOUND(40400, HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
-//    NOT_FOUND_USER(40401, HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),
-//    NOT_FOUND_RESOURCE(40402, HttpStatus.NOT_FOUND, "해당 리소스를 찾을 수 없습니다."),
-//    NOT_FOUND_END_POINT(40403, HttpStatus.NOT_FOUND, "존재하지 않는 API 엔드포인트입니다."),
+//    // ======================== 강의 관련 예외 ========================
+//    LECTURE_NOT_FOUND(HttpStatus.NOT_FOUND, "L001", "강의를 찾을 수 없습니다."),
+//    LECTURE_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "L002", "이미 승인된 강의입니다."),
+//    LECTURE_ALREADY_REJECTED(HttpStatus.BAD_REQUEST, "L003", "이미 거절된 강의입니다."),
+//    LECTURE_NOT_APPROVED(HttpStatus.BAD_REQUEST, "L004", "승인되지 않은 강의입니다."),
+//    LECTURE_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "L005", "강의 수정 권한이 없습니다."),
+//    INVALID_LECTURE_PRICE(HttpStatus.BAD_REQUEST, "L006", "강의 가격은 0원 이상이어야 합니다."),
+//    LECTURE_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "L007", "강의 제목은 100자 이하여야 합니다."),
 //
-//    // 🔹 405 Method Not Allowed
-//    METHOD_NOT_ALLOWED(40500, HttpStatus.METHOD_NOT_ALLOWED, "허용되지 않은 HTTP 메소드입니다."),
+//    // ======================== 게시글 관련 예외 ========================
+//    BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B001", "게시글을 찾을 수 없습니다."),
+//    BOARD_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "B002", "게시글 수정 권한이 없습니다."),
+//    BOARD_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "B003", "이미 삭제된 게시글입니다."),
+//    BOARD_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "B004", "게시글 제목은 255자 이하여야 합니다."),
 //
-//    // 🔹 409 Conflict (중복/충돌)
-//    CONFLICT(40900, HttpStatus.CONFLICT, "이미 존재하는 리소스입니다."),
-//    ALREADY_EXIST_USER(40901, HttpStatus.CONFLICT, "이미 가입된 유저입니다."),
-//    ALREADY_EXIST_ID(40902, HttpStatus.CONFLICT, "이미 존재하는 ID입니다."),
-//    DUPLICATE_RESOURCE(40903, HttpStatus.CONFLICT, "리소스가 중복되었습니다."),
+//    // ======================== 댓글 관련 예외 ========================
+//    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CM001", "댓글을 찾을 수 없습니다."),
+//    COMMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "CM002", "댓글 수정 권한이 없습니다."),
+//    COMMENT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "CM003", "이미 삭제된 댓글입니다."),
+//    COMMENT_CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "CM004", "댓글 내용이 너무 깁니다."),
 //
-//    // 🔹 415 Unsupported Media Type
-//    UNSUPPORTED_MEDIA_TYPE(41500, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 타입입니다."),
+//    // ======================== 레시피 관련 예외 ========================
+//    RECIPE_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "레시피를 찾을 수 없습니다."),
+//    RECIPE_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "R002", "레시피 수정 권한이 없습니다."),
+//    INVALID_COOK_TIME(HttpStatus.BAD_REQUEST, "R003", "조리 시간은 0분 이상이어야 합니다."),
 //
-//    // 🔹 422 Unprocessable Entity
-//    UNPROCESSABLE_ENTITY(42200, HttpStatus.UNPROCESSABLE_ENTITY, "처리할 수 없는 요청입니다."),
+//    // ======================== 결제 관련 예외 ========================
+//    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "결제 정보를 찾을 수 없습니다."),
+//    INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "P002", "잔액이 부족합니다."),
+//    PAYMENT_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "P003", "이미 완료된 결제입니다."),
+//    INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "P004", "결제 금액이 유효하지 않습니다."),
+//    PAYMENT_METHOD_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "P005", "지원하지 않는 결제 방법입니다."),
 //
-//    // 🔹 429 Too Many Requests
-//    TOO_MANY_REQUESTS(42900, HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+//    // ======================== 파일 업로드 관련 예외 ========================
+//    FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "F001", "파일 크기가 제한을 초과했습니다."),
+//    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "F002", "지원하지 않는 파일 형식입니다."),
+//    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "F003", "파일 업로드에 실패했습니다."),
+//    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "F004", "파일을 찾을 수 없습니다."),
 //
-//    // 🔹 500 Internal Server Error (서버 내부 에러)
-//    INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러입니다."),
-//    DATABASE_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "DB 처리 중 에러가 발생했습니다."),
-//    IO_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "입출력 처리 중 에러가 발생했습니다."),
+//    // ======================== 신고 관련 예외 ========================
+//    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "RP001", "신고 정보를 찾을 수 없습니다."),
+//    REPORT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "RP002", "이미 처리된 신고입니다."),
+//    INVALID_REPORT_TYPE(HttpStatus.BAD_REQUEST, "RP003", "유효하지 않은 신고 유형입니다."),
+//    SELF_REPORT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "RP004", "자신의 콘텐츠는 신고할 수 없습니다."),
 //
-//    // 🔸 사용자 도메인 관련 에러
-//    USER_NOT_FOUND(40410, HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."),
-//    EMAIL_ALREADY_USED(40910, HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
-//    PASSWORD_MISMATCH(40010, HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
-//    USER_NOT_ACTIVE(40310, HttpStatus.FORBIDDEN, "비활성화된 사용자입니다."),
+//    // ======================== 채팅 관련 예외 ========================
+//    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "CH001", "채팅방을 찾을 수 없습니다."),
+//    CHAT_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "CH002", "채팅 메시지를 찾을 수 없습니다."),
+//    NOT_CHAT_ROOM_MEMBER(HttpStatus.FORBIDDEN, "CH003", "채팅방 멤버가 아닙니다."),
 //
-//    // 🔸 인증/인가 관련
-//    AUTH_CODE_INVALID(40110, HttpStatus.UNAUTHORIZED, "인증 코드가 유효하지 않습니다."),
-//    OAUTH_PROVIDER_ERROR(50010, HttpStatus.INTERNAL_SERVER_ERROR, "소셜 로그인 처리 중 에러 발생"),
+//    // ======================== 알림 관련 예외 ========================
+//    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "N001", "알림을 찾을 수 없습니다."),
+//    NOTIFICATION_ALREADY_READ(HttpStatus.BAD_REQUEST, "N002", "이미 읽은 알림입니다."),
 //
-//    // 🔸 파일 업로드 관련
-//    FILE_UPLOAD_FAILED(50020, HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
-//    FILE_NOT_FOUND(40420, HttpStatus.NOT_FOUND, "요청한 파일이 존재하지 않습니다."),
-//    UNSUPPORTED_FILE_EXTENSION(40020, HttpStatus.BAD_REQUEST, "지원하지 않는 파일 확장자입니다."),
+//    // ======================== 검증 관련 예외 ========================
+//    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "V001", "입력값 검증에 실패했습니다."),
+//    REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "V002", "필수 필드가 누락되었습니다."),
+//    INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "V003", "유효하지 않은 이메일 형식입니다."),
+//    INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "V004", "비밀번호 형식이 올바르지 않습니다."),
+//    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "V005", "비밀번호가 일치하지 않습니다.");
 //
-//    // 🔸 게시글/댓글 등 컨텐츠 관련
-//    POST_NOT_FOUND(40430, HttpStatus.NOT_FOUND, "해당 게시글을 찾을 수 없습니다."),
-//    COMMENT_NOT_FOUND(40431, HttpStatus.NOT_FOUND, "해당 댓글을 찾을 수 없습니다."),
-//    UNAUTHORIZED_POST_ACCESS(40330, HttpStatus.FORBIDDEN, "게시글 접근 권한이 없습니다.");
+//    private final HttpStatus status;
+//    private final String code;
+//    private final String message;
 //
-//    // 🔸 공통 필드
-//    private final int code;               // 프론트와의 명확한 식별을 위한 고유 에러 코드
-//    private final HttpStatus httpStatus; // HTTP 상태 코드
-//    private final String message;        // 사용자/개발자용 메시지
+//    public static ErrorCode from(String code) {
+//        for (ErrorCode errorCode : ErrorCode.values()) {
+//            if (errorCode.getCode().equals(code)) {
+//                return errorCode;
+//            }
+//        }
+//        return INTERNAL_SERVER_ERROR;
+//    }
 //}

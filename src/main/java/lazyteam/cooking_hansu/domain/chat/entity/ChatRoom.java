@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,8 @@ import java.util.List;
 @Builder
 public class ChatRoom extends BaseIdAndTimeEntity {
 
+    @NotBlank(message = "채팅방 이름은 필수입니다")
+    @Size(max = 100, message = "채팅방 이름은 100자 이하여야 합니다")
     @Column(name = "name", nullable = false, length = 100)
     private String name; // 채팅방 이름
 

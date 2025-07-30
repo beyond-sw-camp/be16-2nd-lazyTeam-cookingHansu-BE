@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
@@ -38,20 +38,27 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @JoinColumn(name = "reject_admin_id")
     private Admin rejectedBy;
 
+    @NotBlank(message = "강의 제목은 필수입니다")
+    @Size(max = 100, message = "강의 제목은 100자 이하여야 합니다")
     @Column(nullable = false)
     private String title;
 
+    @Size(max = 1000, message = "강의 설명은 1000자 이하여야 합니다")
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @NotNull(message = "강의 난이도는 필수입니다")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LevelEnum level;
 
+    @NotNull(message = "강의 카테고리는 필수입니다")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CategoryEnum category;
 
+    @NotNull(message = "강의 가격은 필수입니다")
+    @Min(value = 0, message = "강의 가격은 0원 이상이어야 합니다")
     @Column(nullable = false)
     private Integer price;
 
