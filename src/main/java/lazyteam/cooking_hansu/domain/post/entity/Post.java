@@ -10,7 +10,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "board")
+@Table(name = "post")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
