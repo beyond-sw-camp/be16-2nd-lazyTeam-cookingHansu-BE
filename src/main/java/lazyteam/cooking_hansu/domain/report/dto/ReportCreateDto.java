@@ -20,13 +20,13 @@ public class ReportCreateDto {
     private Long reporterId; // 신고를 한 사용자의 ID
 
 //    파라미터에 신고자를 넣어줘야함.
-    public Report toEntity(Long reporterId) {
+    public Report toEntity() {
         return Report.builder()
                 .reportType(this.reportType)
                 .targetId(this.targetId)
                 .reportReasonType(this.reportReasonType)
                 .content(this.content)
-                .reporterId(reporterId)
+                .member(null) // 신고자를 설정하기 위해서는 User 엔티티를 가져와야함
                 .build();
     }
 

@@ -21,7 +21,7 @@ public class NoticeListDto {
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getImageUrl(),
-                notice.getWriter()
+                notice.getAdmin().getName()
         );
     }
 }

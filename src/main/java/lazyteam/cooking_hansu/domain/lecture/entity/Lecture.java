@@ -25,13 +25,8 @@ public class Lecture {
     @Id
     private Long lectureId;
 
-    //fk설정 필요(조회용)
-    @JoinColumn(name = "administrator_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private Long submittedId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id") // FK 컬럼 이름
+    @JoinColumn(name = "submitted_id") // FK 컬럼 이름
     private User user;
 
     // 승인 관리자
@@ -77,24 +72,24 @@ public class Lecture {
     private String updatedAt;
 
 
-//    역방향 관계설정(조회용)
-
-    @OneToMany(mappedBy = "lecture")
-    private List<LectureReview> reviews;
-
-    @OneToMany(mappedBy = "lecture")
-    private List<LectureQna> qnas;
-
-    @OneToMany(mappedBy = "lecture")
-    private List<LectureVideo> videos;
-
-    @OneToMany(mappedBy = "lecture")
-    private List<LectureIngredientsList> ingredientsList;
-
-    @OneToMany(mappedBy = "lecture")
-    private List<PurchasedLecture> purchases;
-
-    @OneToMany(mappedBy = "lecture")
-    private List<CartItem> cartItems;
+////    역방향 관계설정(조회용)
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<LectureReview> reviews;
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<LectureQna> qnas;
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<LectureVideo> videos;
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<LectureIngredientsList> ingredientsList;
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<PurchasedLecture> purchases;
+//
+//    @OneToMany(mappedBy = "lecture")
+//    private List<CartItem> cartItems;
 
 }
