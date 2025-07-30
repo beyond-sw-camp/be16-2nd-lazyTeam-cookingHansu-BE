@@ -9,23 +9,21 @@ import lombok.*;
  * ERD의 Lecture_Step 테이블과 매핑
  */
 @Entity
-@Table(name = "Lecture_Step")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @ToString
-public class LectureStep extends BaseTimeEntity {
+public class RecipeStep extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "step_id")
     private Long id;
 
-    @Column(name = "recipe_id", nullable = false)
+    @Column(nullable = false)
     private Long recipeId; // 어떤 레시피의 조리 순서인지
 
-    @Column(name = "step_sequence", nullable = false, columnDefinition = "INT UNSIGNED")
+    @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Integer stepSequence; // 순서 번호 (1, 2, 3, ...)
 
     @Column(nullable = false, length = 255)
