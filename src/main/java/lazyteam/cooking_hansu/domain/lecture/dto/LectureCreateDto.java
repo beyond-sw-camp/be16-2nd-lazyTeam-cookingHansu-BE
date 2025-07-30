@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.StatusEnum;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 
 public class LectureCreateDto {
-
-    private Long submittedId;
 
     private User user;
 
@@ -39,11 +38,17 @@ public class LectureCreateDto {
 
     private MultipartFile imageFile;
 
-    private StatusEnum status;
+    public Lecture toEntity(User user) {
+        return Lecture.builder()
+                .user(user)
+                .title(title)
+                .description(description)
+                .level(level)
+                .category(category)
+                .price(price)
+                .build();
+    }
 
 
-    private String createdAt;
-
-    private String updatedAt;
 
 }

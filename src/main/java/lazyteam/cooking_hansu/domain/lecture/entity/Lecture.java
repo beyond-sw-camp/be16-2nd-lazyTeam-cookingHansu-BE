@@ -63,7 +63,9 @@ public class Lecture {
     private String thumbUrl;
 
     @NotNull
-    private StatusEnum status;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status = StatusEnum.PENDING;
 
     private String approvedAt;
 
@@ -72,9 +74,6 @@ public class Lecture {
     @Column(columnDefinition = "TEXT")
     private String reject_reason;
 
-    private String createdAt;
-
-    private String updatedAt;
 
 
 //    역방향 관계설정(조회용)
@@ -97,4 +96,8 @@ public class Lecture {
     @OneToMany(mappedBy = "lecture")
     private List<CartItem> cartItems;
 
+
+    public void updateImageUrl(String url) {
+        this.thumbUrl = url;
+    }
 }
