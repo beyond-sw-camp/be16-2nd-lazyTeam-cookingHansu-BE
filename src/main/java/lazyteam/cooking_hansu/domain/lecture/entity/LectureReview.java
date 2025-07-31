@@ -26,11 +26,11 @@ public class LectureReview extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)
-    private Lecture lectureId;
+    private Lecture lecture;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
-    private User writerId;
+    private User user;
 
     @Column(nullable = false)
     private Integer rating;

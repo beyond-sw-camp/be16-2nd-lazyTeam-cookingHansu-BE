@@ -3,13 +3,16 @@ package lazyteam.cooking_hansu.domain.lecture.controller;
 
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.lecture.dto.LectureCreateDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureIngredientsListDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureStepDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("lecture")
@@ -26,16 +29,19 @@ public class LectureController {
 //    메모 : 아마존 config 추가, 강의ID > id로 통일시키기 , yaml 질문 ,findbyemail 구현필ㄹ요한데..
 
     @PostMapping("/post")
-    public ResponseEntity<?> create(@Valid @RequestBody LectureCreateDto lectureCreateDto) {
-        Long lectureId = lectureService.create(lectureCreateDto);
+    public ResponseEntity<?> create(@Valid @RequestPart LectureCreateDto lectureCreateDto,
+                                    @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
+                                    @RequestPart List<LectureStepDto> lectureStepDto,
+                                    @RequestPart MultipartFile multipartFile) {
+        Long lectureId = lectureService.create(lectureCreateDto, lectureIngredientsListDto,lectureStepDto ,multipartFile);
         return null;
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<?> lectureUpdate(@Valid @RequestBody LectureUpdateDto lectureUpdateDto) {
-        lectureService.lectureUpdate();
-        return null;
-    }
+//    @PostMapping("/update")
+//    public ResponseEntity<?> lectureUpdate(@Valid @RequestBody LectureUpdateDto lectureUpdateDto) {
+//        lectureService.lectureUpdate();
+//        return null;
+//    }
 
 
 

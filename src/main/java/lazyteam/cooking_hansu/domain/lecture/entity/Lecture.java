@@ -25,10 +25,6 @@ public class Lecture {
     @Id
     private Long lectureId;
 
-    //fk설정 필요(조회용)
-    @JoinColumn(name = "administrator_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Long submittedId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // FK 컬럼 이름

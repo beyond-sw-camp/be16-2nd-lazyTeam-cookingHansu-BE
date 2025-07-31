@@ -17,11 +17,11 @@ public class NoticeListDto {
 
     public static NoticeListDto fromEntity(Notice notice) {
         return new NoticeListDto(
-                notice.getId(),
-                notice.getTitle(),
-                notice.getContent(),
-                notice.getImageUrl(),
-                notice.getWriter()
+//                notice.getId(),
+//                notice.getTitle(),
+//                notice.getContent(),
+//                notice.getImageUrl(),
+//                notice.getWriter()
         );
     }
 }

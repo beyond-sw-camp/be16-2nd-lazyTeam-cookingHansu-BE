@@ -22,7 +22,7 @@ public class NoticeCreateDto {
                 .title(this.title)
                 .content(this.content)
                 .imageUrl(this.imageUrl)
-                .writer(authorName)
+//                .writer(authorName)
                 .build();
     }
 }

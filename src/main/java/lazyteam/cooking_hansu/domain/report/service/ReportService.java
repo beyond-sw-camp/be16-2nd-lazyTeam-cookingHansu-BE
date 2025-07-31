@@ -31,11 +31,11 @@ public class ReportService {
         reportRepository.save(reportCreateDto.toEntity(reportCreateDto.getReporterId()));
     }
 
-    public Page<ReportDetailDto> findAll(Pageable pageable){
-        Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
-//        TODO:나중에 실제 사용자의 ID로 변경 필요
-        return reportLists.map(report -> ReportDetailDto.fromEntity(report, report.getReporterId()));
-    }
+//    public Page<ReportDetailDto> findAll(Pageable pageable){
+//        Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
+////        TODO:나중에 실제 사용자의 ID로 변경 필요
+//        return reportLists.map(report -> ReportDetailDto.fromEntity(report, report.getReporterId()));
+//    }
 
     public void approveReport(Long id) {
         Report report = reportRepository.findById(id).orElseThrow(() -> new NoSuchElementException("신고 승인할 신고가 없습니다."));

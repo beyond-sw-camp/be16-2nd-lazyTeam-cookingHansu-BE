@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+//@Builder
 @MappedSuperclass
 public class Business extends User {
 

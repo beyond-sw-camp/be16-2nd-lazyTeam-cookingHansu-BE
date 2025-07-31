@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+//@Builder
 @MappedSuperclass
 public class Chef extends User {
 

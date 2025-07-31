@@ -26,7 +26,7 @@ public class ReportCreateDto {
                 .targetId(this.targetId)
                 .reportReasonType(this.reportReasonType)
                 .content(this.content)
-                .reporterId(reporterId)
+//                .reporterId(reporterId)
                 .build();
     }
 
