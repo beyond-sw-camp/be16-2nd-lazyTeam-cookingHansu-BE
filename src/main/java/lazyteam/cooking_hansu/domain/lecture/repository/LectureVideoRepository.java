@@ -1,9 +1,10 @@
 package lazyteam.cooking_hansu.domain.lecture.repository;
 
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LectureVideoRepository extends JpaRepository<LectureVideoRepository,Long> {
+public interface LectureVideoRepository extends JpaRepository<LectureVideo,Long> {
 
 }

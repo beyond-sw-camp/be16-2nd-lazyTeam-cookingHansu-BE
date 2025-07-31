@@ -1,7 +1,8 @@
 package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
 import lombok.*;
 
 @Entity
@@ -11,15 +12,11 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Ingredients extends BaseTimeEntity {
+public class Ingredients extends BaseIdEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ingredient_id")
-    private Long id;
-
-    @Column(name = "recipe_id", nullable = false)
-    private Long recipeId; // 어떤 레시피의 재료인지
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id", nullable = false)
+    private Recipe recipeId; // 어떤 레시피의 재료인지
 
     @Column(nullable = false, length = 255)
     private String name; // 재료명 (예: 돼지고기, 김치, 양파)

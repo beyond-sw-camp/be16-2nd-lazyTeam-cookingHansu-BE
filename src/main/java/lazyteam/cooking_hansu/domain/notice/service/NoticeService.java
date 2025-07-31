@@ -25,7 +25,7 @@ public class NoticeService {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
 //       TODO: 공지사항 작성자 정보는 현재 하드코딩되어 있지만, 실제로는 인증된 사용자 정보를 가져와야함.
-        Notice notice = noticeCreateDto.NoticeToEntity("관리자");
+        Notice notice = noticeCreateDto.NoticeToEntity();
         noticeRepository.save(notice);
     }
 

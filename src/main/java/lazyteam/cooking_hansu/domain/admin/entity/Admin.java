@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.admin.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,11 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Builder
-public class Admin extends BaseTimeEntity {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "admin_id", nullable = false, unique = true)
-    private Long id; // 관리자 ID
+public class Admin extends BaseIdAndTimeEntity {
 
     @Column(name = "admin_name", nullable = false, length = 50)
     private String name; // 관리자 이름

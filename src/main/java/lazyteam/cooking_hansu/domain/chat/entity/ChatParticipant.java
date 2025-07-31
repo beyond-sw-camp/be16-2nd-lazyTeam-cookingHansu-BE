@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,10 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Builder
-public class ChatParticipant extends BaseTimeEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 채팅 참여자 ID
+public class ChatParticipant extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
@@ -24,6 +21,6 @@ public class ChatParticipant extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User member; // 참여자 정보
+    private User user; // 참여자 정보
 
 }

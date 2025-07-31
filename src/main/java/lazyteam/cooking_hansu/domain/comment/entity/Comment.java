@@ -1,10 +1,15 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import jakarta.validation.constraints.*;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -13,22 +18,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Comment extends BaseTimeEntity {
+public class Comment extends BaseIdAndTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Long id;
+    // 부모 댓글 (자기참조)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_parent_id")
+    private Comment parentComment;
 
-    @Column(name = "comment_parent_id")
-    private Long commentParentId;
+//    // 대댓글 목록
+//    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<Comment> childComments = new ArrayList<>();
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; //게시물 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post; //게시물 ID
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; //작성자 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; //작성자 ID
 
+    @NotBlank(message = "댓글 내용은 필수입니다")
+    @Size(max = 1000, message = "댓글 내용은 1000자 이하여야 합니다")
     @Column(name = "comment_content", nullable = false , columnDefinition = "TEXT")
     private String content;
 
@@ -67,12 +77,12 @@ public class Comment extends BaseTimeEntity {
         }
     }
 
-//    본인 확인
-    public boolean isOwner(Long userId){return this.userId.equals(userId);}
-
-//    대댓글 여부
-    public boolean isReply() {return this.commentParentId != null;}
-
-//    삭제 여부
-    public boolean isDeleted(){return this.commentIsDeleted != null && this.commentIsDeleted;}
+////    본인 확인
+//    public boolean isOwner(Long userId){return this.userId.equals(userId);}
+//
+////    대댓글 여부
+//    public boolean isReply() {return this.commentParentId != null;}
+//
+////    삭제 여부
+//    public boolean isDeleted(){return this.commentIsDeleted != null && this.commentIsDeleted;}
 }

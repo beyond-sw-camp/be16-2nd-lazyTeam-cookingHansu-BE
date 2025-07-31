@@ -1,9 +1,12 @@
 package lazyteam.cooking_hansu.domain.notification.entity;
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notification")
@@ -11,12 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Notification {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
-    private Long id;
+public class Notification extends BaseIdAndTimeEntity {
 
     // 알림 수신자
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,19 +38,12 @@ public class Notification {
     private TargetType targetType;  // COMMENT, CHAT, APPROVAL
 
     @Column(name = "target_id", nullable = false)
-    private Long targetId;
+    private UUID targetId;
 
     @Column(name = "is_read", nullable = false)
-    private Boolean isRead = false;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Boolean isRead;
 
     @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
+    private Boolean isDeleted;
 
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }

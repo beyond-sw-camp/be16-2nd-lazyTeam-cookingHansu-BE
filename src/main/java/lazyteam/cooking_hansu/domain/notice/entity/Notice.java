@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.notice.entity;
 
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -17,11 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Builder
-public class Notice extends BaseTimeEntity {
-
-    // 공지사항 ID
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Notice extends BaseIdAndTimeEntity {
 
     // 공지사항 제목
     @NotNull(message = "제목은 필수 입력입니다.")
@@ -34,9 +30,11 @@ public class Notice extends BaseTimeEntity {
     private String content;
 
     // 공지사항 이미지 URL
+    @Column(length = 255)
     private String imageUrl;
 
     // 삭제 시간
+    @Column
     private LocalDateTime deletedAt;
 
     // 관리자 ID (FK)

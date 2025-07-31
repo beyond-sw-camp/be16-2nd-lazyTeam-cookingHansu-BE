@@ -18,7 +18,4 @@ public class LectureQnaService {
         this.lectureQnaRepository = lectureQnaRepository;
     }
 
-
-
-
 }

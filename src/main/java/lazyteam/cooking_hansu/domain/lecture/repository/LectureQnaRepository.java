@@ -1,9 +1,10 @@
 package lazyteam.cooking_hansu.domain.lecture.repository;
 
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LectureQnaRepository extends JpaRepository<LectureQnaRepository,Long> {
+public interface LectureQnaRepository extends JpaRepository<LectureQna,Long> {
 
 }

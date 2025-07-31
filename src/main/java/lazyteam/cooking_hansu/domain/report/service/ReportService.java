@@ -9,10 +9,12 @@ import lazyteam.cooking_hansu.domain.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -28,13 +30,13 @@ public class ReportService {
             throw new IllegalArgumentException("이미 신고가 접수된 상태입니다. 동일한 신고는 중복 접수가 불가능합니다.");
         }
 
-        reportRepository.save(reportCreateDto.toEntity(reportCreateDto.getReporterId()));
+        reportRepository.save(reportCreateDto.toEntity());
     }
 
     public Page<ReportDetailDto> findAll(Pageable pageable){
         Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
 //        TODO:나중에 실제 사용자의 ID로 변경 필요
-        return reportLists.map(report -> ReportDetailDto.fromEntity(report, report.getReporterId()));
+        return reportLists.map(r -> ReportDetailDto.fromEntity(r, UUID.fromString("00000000-0000-0000-0000-000000000000")));
     }
 
     public void approveReport(Long id) {

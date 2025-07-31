@@ -1,7 +1,9 @@
 package lazyteam.cooking_hansu.domain.interaction.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 // 북마크 엔티티
@@ -13,16 +15,16 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class Bookmark extends BaseTimeEntity {
+public class Bookmark extends BaseIdAndTimeEntity {
+    // 회원 정보
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bookmark_id")
-    private Long id; // 북마크 ID
+    // 게시글 정보
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId; // 사용자 ID
 
-    @Column(name = "post_id", nullable = false)
-    private Long postId; // 게시글 ID
 }
