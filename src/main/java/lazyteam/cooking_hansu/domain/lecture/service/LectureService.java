@@ -29,9 +29,11 @@ public class LectureService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+
+    // ====== 강의 등록 ======
     public Long create(LectureCreateDto lectureCreateDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//        findByEmail 구현 부탁?
+//        User repo에서 findByEmail 미 구현
         User user = userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("유저없음"));
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
@@ -57,6 +59,12 @@ public class LectureService {
 
         }
         return lecture.getLectureId();
+
+        // ====== 강의 수정 ======
+
+
+
+
 
 
     }
