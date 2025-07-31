@@ -29,8 +29,8 @@ public class ChatMessage extends BaseIdAndTimeEntity {
 
     @NotBlank(message = "메시지 내용은 필수입니다")
     @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
-    private String content; // 메시지 내용
+    @Column(name = "message_text", nullable = false, columnDefinition = "TEXT")
+    private String messageText; // 메시지 내용
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type")

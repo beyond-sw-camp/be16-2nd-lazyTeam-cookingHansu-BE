@@ -21,6 +21,6 @@ public class ChatParticipant extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User member; // 참여자 정보
+    private User user; // 참여자 정보
 
 }

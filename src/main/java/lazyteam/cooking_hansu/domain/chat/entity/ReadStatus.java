@@ -20,8 +20,8 @@ public class ReadStatus extends BaseIdAndTimeEntity {
     private ChatRoom chatRoom; // 채팅방 정보
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private User member; // 읽음 상태를 가진 사용자 정보
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // 읽음 상태를 가진 사용자 정보
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_message_id", nullable = false)

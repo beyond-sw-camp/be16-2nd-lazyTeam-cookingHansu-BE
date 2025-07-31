@@ -25,9 +25,9 @@ public class Comment extends BaseIdAndTimeEntity {
     @JoinColumn(name = "comment_parent_id")
     private Comment parentComment;
 
-    // 대댓글 목록
-    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Comment> childComments = new ArrayList<>();
+//    // 대댓글 목록
+//    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<Comment> childComments = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
