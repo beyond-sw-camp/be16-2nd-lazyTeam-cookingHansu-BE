@@ -58,7 +58,7 @@ public class ReportService {
     }
 
     public void rejectReport(UUID id, RejectRequestDto rejectRequestDto) {
-        Report report = reportRepository.findById(id).orElseThrow(() -> new NoSuchElementException("반려할 신고가 없습니다."));
+        Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("반려할 신고가 없습니다."));
         report.updateStatus(Status.REJECTED, rejectRequestDto.getReason());
 
         //        TODO:나중에 승인 알림 기능 추가 필요
