@@ -36,7 +36,7 @@ public class ReportService {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("신고를 생성할 사용자를 찾을 수 없습니다."));
         List<Report> reportList = reportRepository.findAllByStatus(Status.PENDING);
 //        이미 신고가 되어있고 같은사람이면 중복신고못하게 막기
-        if(reportList.stream().anyMatch(r -> r.getMember().getId().equals(user.getId()) && r.getTargetId().equals(reportCreateDto.getTargetId()))) {
+        if(reportList.stream().anyMatch(r -> r.getUser().getId().equals(user.getId()) && r.getTargetId().equals(reportCreateDto.getTargetId()))) {
             throw new IllegalArgumentException("같은 사용자에 대한 중복 신고는 허용되지 않습니다. 신고가 처리된 이후에 다시 시도해주세요.");
         }
 

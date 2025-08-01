@@ -32,7 +32,7 @@ public class ReportCreateDto {
                 .targetId(this.targetId)
                 .reportReasonType(this.reportReasonType)
                 .content(this.content)
-                .member(user) // 신고자를 설정하기 위해서는 User 엔티티를 가져와야함
+                .user(user) // 신고자를 설정하기 위해서는 User 엔티티를 가져와야함
                 .build();
     }
 
