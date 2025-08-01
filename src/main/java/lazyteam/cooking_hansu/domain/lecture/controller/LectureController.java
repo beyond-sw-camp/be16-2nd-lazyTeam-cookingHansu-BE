@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +27,9 @@ public class LectureController {
 
 //    강의등록
 
-//    메모 : 아마존 config 추가, 강의ID > id로 통일시키기 , yaml 질문 ,findbyemail 구현필ㄹ요한데..
+//    메모 : 강의ID > id로 통일시키기
 
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER', 'BOTH')")
     @PostMapping("/post")
     public ResponseEntity<?> create(@Valid @RequestPart LectureCreateDto lectureCreateDto,
                                     @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
