@@ -48,8 +48,8 @@ public class Report extends BaseIdAndTimeEntity {
 
     // 신고한 회원ID (FK)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User member;
+    @JoinColumn(name = "reporter_id")
+    private User user;
 
     // 신고를 처리한 관리자ID (FK)
     @ManyToOne(fetch = FetchType.LAZY)

@@ -32,4 +32,18 @@ public class BaseIdAndTimeAndApprovalEntity{
 
     @UpdateTimestamp
     private LocalDateTime updatedAt; // 수정 시간
+
+
+    public void approve(){
+        this.approvalStatus = ApprovalStatus.APPROVED;
+        this.approvalTime = LocalDateTime.now();
+        this.rejectionReason = null; // 승인 시 반려 사유 초기화
+        this.rejectionTime = null; // 승인 시 반려 일자 초기화
+    }
+    public void reject(String reason){
+        this.approvalStatus = ApprovalStatus.REJECTED;
+        this.rejectionReason = reason;
+        this.rejectionTime = LocalDateTime.now();
+        this.approvalTime = null; // 반려 시 승인 일자 초기화
+    }
 }

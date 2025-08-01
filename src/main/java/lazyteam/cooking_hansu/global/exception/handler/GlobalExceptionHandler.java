@@ -257,8 +257,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         log.error("[HttpMessageNotReadableException] {}", e.getMessage());
-        // return buildError(HttpStatus.BAD_REQUEST, "JSON 요청을 읽을 수 없습니다.");
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+         return buildError(HttpStatus.BAD_REQUEST, "JSON 요청을 읽을 수 없습니다.");
+//        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     // 요청 body나 multipart 데이터 누락
