@@ -19,12 +19,12 @@ public class NoticeCreateDto {
 
     private MultipartFile noticeImage; // 공지사항 이미지 파일
 
-    public Notice NoticeToEntity(String imageUrl, Admin admin) {
+    public Notice toEntity(Admin admin, String imageUrl) {
         return Notice.builder()
                 .title(this.title)
                 .content(this.content)
-                .imageUrl(imageUrl)
-                .admin(admin)
+                .admin(admin) // 공지사항 작성자 정보
+                .imageUrl(imageUrl) // 이미지 URL
                 .build();
     }
 }
