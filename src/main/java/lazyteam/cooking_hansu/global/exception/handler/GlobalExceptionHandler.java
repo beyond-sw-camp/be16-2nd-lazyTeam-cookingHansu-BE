@@ -265,16 +265,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException e) {
         log.error("[MissingServletRequestPartException] {}", e.getMessage());
-        // return buildError(HttpStatus.BAD_REQUEST, "요청에 필요한 데이터가 누락되었습니다.");
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+         return buildError(HttpStatus.BAD_REQUEST, "요청에 필요한 데이터가 누락되었습니다.");
+//        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     // 핸들러를 찾을 수 없음 (404)
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<?> handleNoHandlerFound(NoHandlerFoundException e) {
         log.error("[NoHandlerFoundException] {} {}", e.getHttpMethod(), e.getRequestURL());
-        // return buildError(HttpStatus.NOT_FOUND, "요청한 API 엔드포인트를 찾을 수 없습니다.");
-        return buildError(HttpStatus.NOT_FOUND, e.getMessage());
+         return buildError(HttpStatus.NOT_FOUND, "요청한 API 엔드포인트를 찾을 수 없습니다.");
+//        return buildError(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     /**

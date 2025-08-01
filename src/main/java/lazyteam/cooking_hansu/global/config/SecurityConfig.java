@@ -48,7 +48,8 @@ public class SecurityConfig {
                         "/docs",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
                         "/v3/api-docs/**",       // OpenAPI JSON
-                        "/swagger-resources/**" // Swagger 리소스
+                        "/swagger-resources/**", // Swagger 리소스
+                        "/notice/**" // 공지사항 테스트용 임시 허용
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

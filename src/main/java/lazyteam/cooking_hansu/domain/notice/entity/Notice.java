@@ -5,6 +5,7 @@ import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lazyteam.cooking_hansu.domain.notice.dto.NoticeUpdateDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Notice extends BaseIdAndTimeEntity {
     private String content;
 
     // 공지사항 이미지 URL
-    @Column(length = 255)
+    @Column(length = 1000)
     private String imageUrl;
 
     // 삭제 시간
@@ -42,10 +43,10 @@ public class Notice extends BaseIdAndTimeEntity {
     @JoinColumn(name = "administrator_id", nullable = false)
     private Admin admin;
 
-    public void updateNotice(NoticeDetailDto noticeDetailDto, Admin admin) {
-        this.title = noticeDetailDto.getTitle();
-        this.content = noticeDetailDto.getContent();
-        this.imageUrl = noticeDetailDto.getImageUrl();
+    public void updateNotice(NoticeUpdateDto noticeUpdateDto, String imageUrl, Admin admin) {
+        this.title = noticeUpdateDto.getTitle();
+        this.content = noticeUpdateDto.getContent();
+        this.imageUrl = imageUrl;
         this.admin = admin;
     }
 }

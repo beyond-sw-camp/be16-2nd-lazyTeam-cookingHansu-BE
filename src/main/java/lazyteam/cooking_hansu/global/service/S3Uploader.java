@@ -3,11 +3,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.UUID;
 
 @Component
@@ -29,7 +32,7 @@ public class S3Uploader {
                     .contentType(file.getContentType())
                     .build();
 
-            s3Client.putObject(request, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
             return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
 
@@ -58,10 +61,19 @@ public class S3Uploader {
 
     // URL에서 key 추출하는 유틸 함수
     private String extractKeyFromUrl(String fileUrl) {
-        int index = fileUrl.indexOf(".amazonaws.com/");
-        if (index == -1) {
-            throw new IllegalArgumentException("잘못된 S3 URL 형식입니다.");
+        try {
+            int index = fileUrl.indexOf(".amazonaws.com/");
+            if (index == -1) {
+                throw new IllegalArgumentException("잘못된 S3 URL 형식입니다.");
+            }
+            
+            String encodedKey = fileUrl.substring(index + ".amazonaws.com/".length());
+            
+            // URL 디코딩을 수행하여 한글 파일명을 원래대로 복원
+            return URLDecoder.decode(encodedKey, "UTF-8");
+            
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("URL 디코딩 실패", e);
         }
-        return fileUrl.substring(index + ".amazonaws.com/".length());
     }
 }
