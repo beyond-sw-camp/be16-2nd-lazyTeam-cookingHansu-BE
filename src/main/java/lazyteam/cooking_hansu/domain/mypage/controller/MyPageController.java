@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.recipe.controller;
+package lazyteam.cooking_hansu.domain.mypage.controller;
 
 import lazyteam.cooking_hansu.domain.recipe.dto.MyRecipeListDto;
 import lazyteam.cooking_hansu.domain.recipe.service.MyRecipeService;
@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/my")
-public class MyRecipeController {
+public class MyPageController {
 
     private final MyRecipeService myRecipeService;
 
