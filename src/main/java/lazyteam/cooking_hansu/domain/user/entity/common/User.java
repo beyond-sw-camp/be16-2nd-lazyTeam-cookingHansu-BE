@@ -59,7 +59,7 @@ public class User extends BaseIdAndTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private LoginStatus loginStatus = LoginStatus.LOGGED_IN; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
+    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -161,4 +161,7 @@ public class User extends BaseIdAndTimeEntity {
 //
 //    // 비즈니스 메서드 관련은 추후 구현 예정
 
+    public void updateStatus(LoginStatus loginStatus) {
+        this.loginStatus = loginStatus;
+    }
 }

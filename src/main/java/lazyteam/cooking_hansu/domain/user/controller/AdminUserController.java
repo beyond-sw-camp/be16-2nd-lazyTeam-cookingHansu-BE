@@ -43,7 +43,21 @@ public class AdminUserController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getUserList(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<User> userList = userService.getUserList(pageable);
+        Page<UserListDto> userList = userService.getUserList(pageable);
         return new ResponseEntity<>(ResponseDto.ok(userList, HttpStatus.OK), HttpStatus.OK);
+    }
+
+//    사용자 활성화
+    @PatchMapping("/active/{userId}")
+    public ResponseEntity<?> activateUser(@PathVariable UUID userId){
+        userService.activateUser(userId);
+        return new ResponseEntity<>(ResponseDto.ok("사용자를 활성화 하였습니다.", HttpStatus.OK), HttpStatus.OK);
+    }
+
+//    사용자 비활성화
+    @PatchMapping("/inactive/{userId}")
+    public ResponseEntity<?> inactiveUser(@PathVariable  UUID userId){
+        userService.inactiveUser(userId);
+        return new ResponseEntity<>(ResponseDto.ok("사용자를 비활성화 하였습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 }

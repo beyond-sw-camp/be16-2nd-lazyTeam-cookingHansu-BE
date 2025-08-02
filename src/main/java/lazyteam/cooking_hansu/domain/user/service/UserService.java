@@ -2,8 +2,10 @@ package lazyteam.cooking_hansu.domain.user.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
+import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
@@ -30,7 +32,7 @@ public class UserService {
 
     // TODO: 회원 서비스 메서드 구현 예정
 
-//    강의 승인 메서드
+//    사용자 승인
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
@@ -45,6 +47,7 @@ public class UserService {
         }
     }
 
+//    사용자 승인 거절
     public void rejectUser(UUID userId, RejectRequestDto rejectRequestDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
@@ -59,7 +62,27 @@ public class UserService {
         }
     }
 
-    public Page<User> getUserList(Pageable pageable) {
-        return userRepository.findAll(pageable);
+//    모든 사용자 조회
+    public Page<UserListDto> getUserList(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(UserListDto::fromEntity);
+    }
+
+//    사용자 활성화
+    public void activateUser(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
+        if(user.getLoginStatus().equals(LoginStatus.ACTIVE)) {
+            throw new IllegalArgumentException("이미 활성화된 사용자입니다. userId: " + userId);
+        }
+        user.updateStatus(LoginStatus.INACTIVE);
+    }
+
+//    사용자 비활성화
+    public void inactiveUser(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
+        if(user.getLoginStatus().equals(LoginStatus.INACTIVE)) {
+            throw new IllegalArgumentException("이미 비활성화된 사용자입니다. userId: " + userId);
+        }
+        user.updateStatus(LoginStatus.INACTIVE);
     }
 }
