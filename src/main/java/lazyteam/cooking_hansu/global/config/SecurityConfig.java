@@ -50,7 +50,8 @@ public class SecurityConfig {
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
                         "/admin/**", // Admin 관련 API
-                        "/report/**" // Report 관련 API
+                        "/report/**", // Report 관련 API
+                        "/api/my/**" // Mypage 관련 API
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
