@@ -1,9 +1,11 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
-import lazyteam.cooking_hansu.domain.post.dto.MyPostListDto;
-import lazyteam.cooking_hansu.domain.post.service.PostService;
-import lazyteam.cooking_hansu.domain.recipe.dto.MyRecipeListDto;
-import lazyteam.cooking_hansu.domain.recipe.service.MyRecipeService;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyLectureListDto;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyPostListDto;
+import lazyteam.cooking_hansu.domain.mypage.service.MyLectureService;
+import lazyteam.cooking_hansu.domain.mypage.service.MyPostService;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyRecipeListDto;
+import lazyteam.cooking_hansu.domain.mypage.service.MyRecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +17,8 @@ import java.util.List;
 public class MyPageController {
 
     private final MyRecipeService myRecipeService;
-    private final PostService postService;
+    private final MyPostService myPostService;
+    private final MyLectureService myLectureService;
 
     @GetMapping("/recipes")
     public List<MyRecipeListDto> myRecipeList() {
@@ -24,7 +27,11 @@ public class MyPageController {
 
     @GetMapping("/posts")
     public List<MyPostListDto> myPostList() {
-        return postService.myPostList();
+        return myPostService.myPostList();
     }
 
+    @GetMapping("/lectures")
+    public List<MyLectureListDto> getMyLectures() {
+        return myLectureService.getMyLectures();
+    }
 }

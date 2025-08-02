@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.post.dto;
+package lazyteam.cooking_hansu.domain.mypage.dto;
 
 import lombok.*;
 

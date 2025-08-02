@@ -1,7 +1,6 @@
-package lazyteam.cooking_hansu.domain.recipe.service;
+package lazyteam.cooking_hansu.domain.mypage.service;
 
-import lazyteam.cooking_hansu.domain.recipe.dto.MyRecipeListDto;
-import lazyteam.cooking_hansu.domain.recipe.entity.Ingredients;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyRecipeListDto;
 import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
 import lazyteam.cooking_hansu.domain.recipe.repository.RecipeRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;

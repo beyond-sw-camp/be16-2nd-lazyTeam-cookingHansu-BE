@@ -1,6 +1,6 @@
-package lazyteam.cooking_hansu.domain.post.service;
+package lazyteam.cooking_hansu.domain.mypage.service;
 
-import lazyteam.cooking_hansu.domain.post.dto.MyPostListDto;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyPostListDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PostService {
+public class MyPostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;

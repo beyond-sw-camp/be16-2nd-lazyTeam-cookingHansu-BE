@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.recipe.dto;
+package lazyteam.cooking_hansu.domain.mypage.dto;
 
 import lombok.Builder;
 import lombok.Getter;
