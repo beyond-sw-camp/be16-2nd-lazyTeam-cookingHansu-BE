@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.report.controller;
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.report.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportDetailDto;
 import lazyteam.cooking_hansu.domain.report.service.ReportService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;

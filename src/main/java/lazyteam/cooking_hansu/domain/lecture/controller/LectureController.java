@@ -9,6 +9,4 @@ import org.springframework.web.bind.annotation.RestController;
 //Lecture, CopyOfLectureStep, LectureIngredientsList, LectureVideo 엔티티 서비스
 public class LectureController {
 
-
-
 }

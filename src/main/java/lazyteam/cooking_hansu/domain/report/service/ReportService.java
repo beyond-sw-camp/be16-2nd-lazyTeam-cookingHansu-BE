@@ -2,14 +2,12 @@ package lazyteam.cooking_hansu.domain.report.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
-import lazyteam.cooking_hansu.domain.report.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportCreateDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportDetailDto;
 import lazyteam.cooking_hansu.domain.report.entity.Report;
 import lazyteam.cooking_hansu.domain.report.repository.ReportRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
-import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
