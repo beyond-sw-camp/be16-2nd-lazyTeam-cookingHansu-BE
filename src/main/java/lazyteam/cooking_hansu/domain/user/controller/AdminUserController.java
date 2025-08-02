@@ -3,9 +3,14 @@ package lazyteam.cooking_hansu.domain.user.controller;
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.service.UserService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,8 +42,8 @@ public class AdminUserController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> getUserList() {
-        List<UserListDto> userList = userService.getUserList();
+    public ResponseEntity<?> getUserList(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<User> userList = userService.getUserList(pageable);
         return new ResponseEntity<>(ResponseDto.ok(userList, HttpStatus.OK), HttpStatus.OK);
     }
 }

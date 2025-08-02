@@ -9,7 +9,10 @@ import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -18,6 +21,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -53,5 +57,9 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("사용자의 역할이 거절 대상이 아닙니다. userId: " + userId);
         }
+    }
+
+    public Page<User> getUserList(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 }
