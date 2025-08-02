@@ -12,4 +12,5 @@ public class MyRecipeListDto {
     private String title;
     private List<String> ingredients;
     private LocalDateTime createdAt;
+    private String thumbnailUrl;
 }

@@ -43,6 +43,7 @@ public class MyRecipeService {
                                         .collect(Collectors.toList())
                         )
                         .createdAt(recipe.getCreatedAt())
+                        .thumbnailUrl(recipe.getThumbnailUrl())
                         .build())
                 .collect(Collectors.toList());
 
