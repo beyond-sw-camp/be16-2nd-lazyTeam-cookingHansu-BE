@@ -5,9 +5,14 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.WaitingLectureDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
+import lazyteam.cooking_hansu.domain.lecture.repository.LectureVideoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -19,10 +24,29 @@ import java.util.UUID;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
+    private final LectureVideoRepository lectureVideoRepository;
 
     @Autowired
-    public LectureService(LectureRepository lectureRepository) {
+    public LectureService(LectureRepository lectureRepository, LectureVideoRepository lectureVideoRepository) {
         this.lectureRepository = lectureRepository;
+        this.lectureVideoRepository = lectureVideoRepository;
+    }
+
+
+//    강의 목록 조회(승인 안된 강의 목록 조회)
+    public Page<WaitingLectureDto> getWaitingLectureList(Pageable pageable){
+        Page<Lecture> lectures = lectureRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
+        return lectures.map(lecture -> WaitingLectureDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .description(lecture.getDescription())
+                .imageUrl(lecture.getThumbUrl())
+                .category(lecture.getCategory())
+                .instructorName(lecture.getSubmittedBy().getName())
+                .status(lecture.getApprovalStatus())
+                .price(lecture.getPrice())
+                .duration(lectureVideoRepository.findById(lecture.getId()).orElseThrow(() -> new EntityNotFoundException("강의 비디오를 찾을 수 없습니다. lectureId: " + lecture.getId())).getDuration())
+                .build());
     }
 
 //    강의 승인

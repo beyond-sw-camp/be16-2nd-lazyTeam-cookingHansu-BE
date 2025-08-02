@@ -1,7 +1,8 @@
-package lazyteam.cooking_hansu.domain.lecture.entity;
+package lazyteam.cooking_hansu.domain.lecture.dto;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lombok.*;
 
 @Entity

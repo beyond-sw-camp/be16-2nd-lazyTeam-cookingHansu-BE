@@ -4,7 +4,9 @@ import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
-public interface LectureVideoRepository extends JpaRepository<LectureVideo,Long> {
+public interface LectureVideoRepository extends JpaRepository<LectureVideo, UUID> {
 
 }

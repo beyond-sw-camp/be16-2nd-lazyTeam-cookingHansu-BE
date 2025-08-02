@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.lecture.repository;
 
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureStep;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureStep;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
