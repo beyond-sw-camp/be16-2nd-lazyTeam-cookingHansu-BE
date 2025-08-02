@@ -40,6 +40,7 @@ public class LectureCreateDto {
 
     private Integer price;
 
+    @Builder.Default
     private List<LectureIngredientsListDto> lectureIngredientsListDtos = new ArrayList<>();
 
 

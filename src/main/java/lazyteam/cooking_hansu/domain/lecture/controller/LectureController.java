@@ -2,12 +2,12 @@ package lazyteam.cooking_hansu.domain.lecture.controller;
 
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.lecture.dto.LectureCreateDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.LectureIngredientsListDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.LectureStepDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.*;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
+import lazyteam.cooking_hansu.domain.lecture.service.LectureReviewService;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +34,12 @@ public class LectureController {
     public ResponseEntity<?> create(@Valid @RequestPart LectureCreateDto lectureCreateDto,
                                     @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
                                     @RequestPart List<LectureStepDto> lectureStepDto,
+                                    @RequestPart List<LectureVideoDto> lectureVideoDto,
+                                    @RequestPart List<MultipartFile> lectureVideoFiles,
                                     @RequestPart MultipartFile multipartFile) {
-        Long lectureId = lectureService.create(lectureCreateDto, lectureIngredientsListDto,lectureStepDto ,multipartFile);
-        return null;
+        Long lectureId = lectureService.create(lectureCreateDto, lectureIngredientsListDto,lectureStepDto,lectureVideoDto,lectureVideoFiles, multipartFile);
+
+        return new ResponseEntity<>("lecture id : " + lectureId, HttpStatus.CREATED);
     }
 
 //    @PostMapping("/update")

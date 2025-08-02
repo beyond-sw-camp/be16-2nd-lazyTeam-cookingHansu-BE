@@ -36,4 +36,5 @@ public class LectureVideo extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Integer duration; // 초단위로 데이터 받을 예정 > 250 : 4분10초
+
 }

@@ -48,6 +48,10 @@ dependencies {
 	// aws 의존성
 	implementation 'software.amazon.awssdk:s3:2.17.58'
 
+	// 영상 길이 추출 (JAVE2 / FFmpeg 기반)을 위한 의존성 추가 : 강의 영상 길이
+
+	implementation 'ws.schild:jave-core:3.3.1'
+
 }
 
 tasks.named('test') {
