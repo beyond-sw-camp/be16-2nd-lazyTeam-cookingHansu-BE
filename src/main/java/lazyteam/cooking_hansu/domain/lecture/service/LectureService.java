@@ -45,7 +45,7 @@ public class LectureService {
                 .instructorName(lecture.getSubmittedBy().getName())
                 .status(lecture.getApprovalStatus())
                 .price(lecture.getPrice())
-                .duration(lectureVideoRepository.findById(lecture.getId()).orElseThrow(() -> new EntityNotFoundException("강의 비디오를 찾을 수 없습니다. lectureId: " + lecture.getId())).getDuration())
+                .duration(lectureVideoRepository.getTotalDurationByLectureId(lecture.getId()))
                 .build());
     }
 

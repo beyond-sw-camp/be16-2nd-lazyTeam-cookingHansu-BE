@@ -49,6 +49,9 @@ public class ReportService {
 
     public void approveReport(UUID id) {
         Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("승인할 신고가 없습니다."));
+        if (report.getStatus() == Status.APPROVED) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다. 다시 확인해주세요.");
+        }
         report.updateStatus(Status.APPROVED, null); // 승인 상태로 업데이트, 거절 사유는 null
 
         //        TODO:나중에 승인 알림 기능 추가 필요
@@ -56,6 +59,9 @@ public class ReportService {
 
     public void rejectReport(UUID id, RejectRequestDto rejectRequestDto) {
         Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("반려할 신고가 없습니다."));
+        if (report.getStatus() == Status.REJECTED) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다. 다시 확인해주세요.");
+        }
         report.updateStatus(Status.REJECTED, rejectRequestDto.getReason());
 
         //        TODO:나중에 승인 알림 기능 추가 필요

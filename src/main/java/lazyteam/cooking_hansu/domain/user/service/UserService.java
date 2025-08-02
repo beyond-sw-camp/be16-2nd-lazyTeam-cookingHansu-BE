@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
@@ -52,11 +53,17 @@ public class UserService {
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
-        if(user.getRole().equals("CHEF")) {
+        if(user.getRole() == Role.CHEF) {
             Chef chef = chefRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("셰프를 찾을 수 없습니다. userId: " + userId));
+            if (chef.getApprovalStatus() == ApprovalStatus.APPROVED) {
+                throw new IllegalArgumentException("이미 승인된 셰프입니다. userId: " + userId);
+            }
             chef.approve();
-        } else if(user.getRole().equals("OWNER")) {
+        } else if(user.getRole() == Role.OWNER) {
             Business business = businessRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사업자를 찾을 수 없습니다. userId: " + userId));
+            if (business.getApprovalStatus() == ApprovalStatus.APPROVED) {
+                throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
+            }
             business.approve();
         } else {
             throw new IllegalArgumentException("사용자의 역할이 승인 대상이 아닙니다. userId: " + userId);
@@ -67,11 +74,17 @@ public class UserService {
     public void rejectUser(UUID userId, RejectRequestDto rejectRequestDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
-        if(user.getRole().equals("CHEF")) {
+        if(user.getRole() == Role.CHEF) {
             Chef chef = chefRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("셰프를 찾을 수 없습니다. userId: " + userId));
+            if (chef.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                throw new IllegalArgumentException("이미 거절된 셰프입니다. userId: " + userId);
+            }
             chef.reject(rejectRequestDto.getReason());
-        } else if(user.getRole().equals("OWNER")) {
+        } else if(user.getRole() == Role.OWNER) {
             Business business = businessRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사업자를 찾을 수 없습니다. userId: " + userId));
+            if (business.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                throw new IllegalArgumentException("이미 거절된 사업자입니다. userId: " + userId);
+            }
             business.reject(rejectRequestDto.getReason());
         } else {
             throw new IllegalArgumentException("사용자의 역할이 거절 대상이 아닙니다. userId: " + userId);
@@ -87,16 +100,16 @@ public class UserService {
 //    사용자 활성화
     public void activateUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
-        if(user.getLoginStatus().equals(LoginStatus.ACTIVE)) {
+        if(user.getLoginStatus() == LoginStatus.ACTIVE) {
             throw new IllegalArgumentException("이미 활성화된 사용자입니다. userId: " + userId);
         }
-        user.updateStatus(LoginStatus.INACTIVE);
+        user.updateStatus(LoginStatus.ACTIVE);
     }
 
 //    사용자 비활성화
     public void inactiveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
-        if(user.getLoginStatus().equals(LoginStatus.INACTIVE)) {
+        if(user.getLoginStatus() == LoginStatus.INACTIVE) {
             throw new IllegalArgumentException("이미 비활성화된 사용자입니다. userId: " + userId);
         }
         user.updateStatus(LoginStatus.INACTIVE);
