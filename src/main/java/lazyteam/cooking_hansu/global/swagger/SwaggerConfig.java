@@ -12,21 +12,16 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        // JWT Security 설정 추가
-        SecurityScheme securityScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-                .in(SecurityScheme.In.HEADER)
-                .name("Authorization");
 
         return new OpenAPI()
-                .info(new Info()
-                        .title("요리한수 API")
-                        .version("v1.0")
-                        .description("요리한수 프로젝트 API 명세서"))
-                .components(new Components().addSecuritySchemes("BearerAuth", securityScheme))
-                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
+                .components(new Components())
+                .info(info());
     }
 
+    private Info info() {
+        return new Info()
+                .title("요리한수 API")
+                .version("1.0.0")
+                .description("요리한수의 API 문서입니다.");
+    }
 }

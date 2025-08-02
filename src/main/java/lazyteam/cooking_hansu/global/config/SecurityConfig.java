@@ -45,8 +45,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
-                        "/docs",
+                        "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
+                        "/api-docs/**",       // OpenAPI JSON
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
                         "/notice/**",
