@@ -1,8 +1,11 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
+import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
+import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
@@ -31,6 +34,19 @@ public class UserService {
     private final BusinessRepository businessRepository;
 
     // TODO: 회원 서비스 메서드 구현 예정
+
+
+//    요리업종 승인 대기 목록 조회
+    public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
+        Page<Chef> waitingChefs = chefRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
+        return waitingChefs.map(WaitingChefListDto::fromEntity);
+    }
+
+//    사업자 승인 대기 목록 조회
+    public Page<WaitingBusinessListDto> getWaitingBusinessList(Pageable pageable) {
+        Page<Business> waitingBusinesses = businessRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
+        return waitingBusinesses.map(WaitingBusinessListDto::fromEntity);
+    }
 
 //    사용자 승인
     public void approveUser(UUID userId) {
