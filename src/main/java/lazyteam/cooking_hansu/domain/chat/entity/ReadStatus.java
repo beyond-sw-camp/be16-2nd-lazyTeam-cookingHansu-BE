@@ -31,4 +31,7 @@ public class ReadStatus extends BaseIdAndTimeEntity {
     @Column(name = "is_read", nullable = false, length = 1)
     private String isRead = "N"; // 기본값은 "N" (읽지 않음)
 
+    public void updateIsRead(String isRead) {
+        this.isRead = isRead; // 읽음 상태로 업데이트
+    }
 }

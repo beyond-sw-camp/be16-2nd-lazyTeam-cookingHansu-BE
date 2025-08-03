@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.chat.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
+import lazyteam.cooking_hansu.domain.chat.entity.ReadStatus;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatRoomRepository;
@@ -10,9 +11,12 @@ import lazyteam.cooking_hansu.domain.chat.repository.ReadStatusRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +31,7 @@ public class ChatService {
     private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
 
+//    채팅방 생성 or 기존 채팅방 조회
     public UUID getOrCreateChatRoom(UUID otherUserId) {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
@@ -50,11 +55,23 @@ public class ChatService {
         return newRoom.getId();
     }
 
+    // 채팅방 참여자 추가
     public void addParticipantToRoom(ChatRoom chatRoom, User user) {
         ChatParticipant chatParticipant = ChatParticipant.builder()
                 .chatRoom(chatRoom)
                 .user(user)
                 .build();
         chatParticipantRepository.save(chatParticipant);
+    }
+
+    //    메시지 읽음
+    public void messageRead(UUID roomId) {
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        List<ReadStatus> readStatuses = readStatusRepository.findByChatRoomAndUser(chatRoom, user);
+        for (ReadStatus r : readStatuses) {
+            r.updateIsRead("Y");
+        }
     }
 }
