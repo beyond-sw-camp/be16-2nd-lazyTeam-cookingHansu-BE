@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
+
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
@@ -8,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 

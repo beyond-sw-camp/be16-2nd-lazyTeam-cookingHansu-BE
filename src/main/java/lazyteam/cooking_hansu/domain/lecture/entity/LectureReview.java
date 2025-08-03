@@ -22,6 +22,7 @@ public class LectureReview extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
+
     private User writer;
 
     @Column(nullable = false)

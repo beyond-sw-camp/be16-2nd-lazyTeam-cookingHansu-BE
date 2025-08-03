@@ -1,7 +1,9 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
+
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+
 import lombok.*;
 
 @Entity
@@ -31,4 +33,5 @@ public class LectureVideo extends BaseIdAndTimeEntity {
 
     @Column(nullable = false)
     private Integer duration; // 초단위로 데이터 받을 예정 > 250 : 4분10초
+
 }

@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Business extends BaseIdAndTimeAndApprovalEntity {
 
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
     private User user;

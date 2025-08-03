@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(jwtAuthorizationHandler)
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
+
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
@@ -53,9 +54,11 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
+                        "lecture/**",
                         "user/**"
 
                 ).permitAll().anyRequest().authenticated())
+
                 .build();
     }
 

@@ -24,6 +24,7 @@ import java.util.List;
 @ToString
 @Builder
 
+
 public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -70,8 +71,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Column(columnDefinition = "TEXT")
     private String videoUrl;
 
+
     // 역방향 관계설정(조회용)
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
+
     private List<LectureReview> reviews;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
@@ -89,4 +92,8 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
+
+    public void updateImageUrl(String url) {
+        this.thumbUrl = url;
+    }
 }
