@@ -31,7 +31,7 @@ public class LectureController {
 
 //    메모 : 강의ID > id로 통일시키기
 
-    @PreAuthorize("hasAnyRole('CHEF', 'OWNER', 'BOTH')")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @PostMapping("/post")
     public ResponseEntity<?> create(@Valid @RequestPart LectureCreateDto lectureCreateDto,
                                     @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,

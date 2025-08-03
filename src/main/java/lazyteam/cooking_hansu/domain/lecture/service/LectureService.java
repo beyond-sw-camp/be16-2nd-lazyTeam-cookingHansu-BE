@@ -77,16 +77,16 @@ public class LectureService {
 
 //        재료목록 저장
         List<LectureIngredientsList> ingredientsList = lectureIngredientsListDto.stream().map(a -> a.toEntity(lecture)).toList();
-        for (LectureIngredientsList ingredients : ingredientsList) {
-            lectureIngredientsListRepository.save(ingredients);
-        }
+
+            lectureIngredientsListRepository.saveAll(ingredientsList);
+
 
 //            재료순서 저장
         List<LectureStep> lectureStepList = lectureStepDto.stream().map(a -> a.toEntity(lecture)).toList();
-        for (LectureStep steps : lectureStepList) {
-            lectureStepRepository.save(steps);
-        }
-        System.out.println("재료순서");
+
+            lectureStepRepository.saveAll(lectureStepList);
+
+
 //        강의 영상 자료 저장
 
         for (int i = 0; i < lectureVideoDto.size(); i++) {
