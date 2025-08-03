@@ -44,16 +44,17 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("강의등록번호 : " + lectureId,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-    @PostMapping("/update")
+    @PatchMapping("/update/{lectureId}")
     public ResponseEntity<?> lectureUpdate(@Valid @RequestPart LectureUpdateDto lectureUpdateDto,
+                                           @PathVariable UUID lectureId,
                                            @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
                                            @RequestPart List<LectureStepDto> lectureStepDto,
                                            @RequestPart List<LectureVideoDto> lectureVideoDto,
                                            @RequestPart List<MultipartFile> lectureVideoFiles,
                                            @RequestPart MultipartFile multipartFile) {
-        UUID lectureId = lectureService.update(lectureUpdateDto, lectureIngredientsListDto,lectureStepDto,lectureVideoDto,lectureVideoFiles, multipartFile);
+        UUID lectureID = lectureService.update( lectureUpdateDto, lectureId, lectureIngredientsListDto,lectureStepDto,lectureVideoDto,lectureVideoFiles, multipartFile);
 
-        return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureId,HttpStatus.CREATED), HttpStatus.CREATED);
+        return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureID,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
 

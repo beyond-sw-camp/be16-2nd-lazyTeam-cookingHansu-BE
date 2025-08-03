@@ -99,8 +99,6 @@ public class LectureService {
                 String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
                 String videoUrl = s3Uploader.upload(file,fileName);
 
-
-
                 // 영상 길이 추출 (ffprobe 사용) → 초 단위
                 log.info("파일 길이 생성");
                 int duration = videoUtil.extractDuration(file);
@@ -131,6 +129,7 @@ public class LectureService {
 //    강의 수정
 
     public UUID update(LectureUpdateDto lectureUpdateDto,
+                       UUID lectureId,
                        List<LectureIngredientsListDto> lectureIngredientsListDto,
                        List<LectureStepDto> lectureStepDto,
                        List<LectureVideoDto> lectureVideoDto,
@@ -140,7 +139,12 @@ public class LectureService {
 //        테스트용 UUID 유저 세팅
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
-        Lecture lecture = lectureRepository.findById(user.getId()).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
+
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
+
+        if (!lecture.getSubmittedBy().getId().equals(user.getId())) {
+            throw new EntityNotFoundException("이 강의에 대한 수정 권한이 없습니다.");
+        }
 
 
 //        강의 정보 수정
@@ -177,7 +181,6 @@ public class LectureService {
         }
 
 //        강의영상  수정
-
 
         if (lectureVideoDto.size() != lectureVideoFiles.size()) {
             throw new IllegalArgumentException("영상 정보와 파일 수가 일치하지 않습니다.");
@@ -216,12 +219,8 @@ public class LectureService {
 // DB 저장
             lectureVideoRepository.saveAll(newVideos);
         }
+        return lectureId;
 
-
-
-
-//        강의 ID값 리턴
-        return lecture.getId();
     }
 
 
