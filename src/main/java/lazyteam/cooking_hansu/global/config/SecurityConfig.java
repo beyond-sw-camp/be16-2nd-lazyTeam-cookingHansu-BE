@@ -55,7 +55,9 @@ public class SecurityConfig {
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "lecture/**",
-                        "user/**"
+                        "user/**",
+                        "/api/my/recipes/**", // 레시피 API 임시 허용 (테스트용)
+                        "/api/posts/recipes/**" // 레시피 공유 게시글 API 임시 허용 (테스트용)
 
                 ).permitAll().anyRequest().authenticated())
 

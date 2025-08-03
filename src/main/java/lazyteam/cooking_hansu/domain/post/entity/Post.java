@@ -105,4 +105,28 @@ public class Post extends BaseIdAndTimeEntity {
 
 //   공개 게시글 여부
     public boolean isPublic() { return this.isOpen != null && this.isOpen; }
+    
+    // PostService용 메서드 추가 (RecipeService 스타일과 통일)
+    public void updatePost(String title, String description, String thumbnailUrl, CategoryEnum category, Boolean isOpen) {
+        if (title != null && !title.trim().isEmpty()) {
+            this.title = title.trim();
+        }
+        if (description != null) {
+            this.description = description.trim();
+        }
+        if (thumbnailUrl != null) {
+            this.thumbnailUrl = thumbnailUrl.trim();
+        }
+        if (category != null) {
+            this.category = category;
+        }
+        if (isOpen != null) {
+            this.isOpen = isOpen;
+        }
+    }
+    
+    // 소유자 확인 (RecipeService 스타일과 통일)
+    public boolean isOwnedBy(User user) {
+        return this.user != null && this.user.getId().equals(user.getId());
+    }
 }
