@@ -33,7 +33,7 @@ public class LectureUpdateDto {
 
     public Lecture toEntity(User user) {
         return Lecture.builder()
-                .user(user)
+                .submittedBy(user)
                 .title(title)
                 .description(description)
                 .level(level)

@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.purchase.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseTimeEntity;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
@@ -12,11 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PurchasedLecture extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long purchasedId;
+public class PurchasedLecture extends BaseIdAndTimeEntity {
 
     // 회원 정보
     @ManyToOne(fetch = FetchType.LAZY)

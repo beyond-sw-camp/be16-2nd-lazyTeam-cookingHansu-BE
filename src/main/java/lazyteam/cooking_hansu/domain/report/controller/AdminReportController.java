@@ -21,11 +21,11 @@ public class AdminReportController {
 
     private final ReportService reportService;
 
-//    @GetMapping("/list")
-//    public ResponseEntity<?> getReportList(@Valid @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<ReportDetailDto> dtos = reportService.findAll(pageable);
-//        return new ResponseEntity<>(ResponseDto.ok(dtos, HttpStatus.OK), HttpStatus.OK);
-//    }
+    @GetMapping("/list")
+    public ResponseEntity<?> getReportList(@Valid @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<ReportDetailDto> dtos = reportService.findAll(pageable);
+        return new ResponseEntity<>(ResponseDto.ok(dtos, HttpStatus.OK), HttpStatus.OK);
+    }
 
     @PatchMapping("/approve/{id}")
     public ResponseEntity<?> approveReport(@PathVariable Long id) {

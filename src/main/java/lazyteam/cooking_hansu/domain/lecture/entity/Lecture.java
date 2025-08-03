@@ -1,13 +1,17 @@
 package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
-import lazyteam.cooking_hansu.domain.common.StatusEnum;
-import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureIngredientsList;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
+import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
@@ -20,76 +24,72 @@ import java.util.List;
 @ToString
 @Builder
 
-public class Lecture {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long lectureId;
 
+public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id") // FK 컬럼 이름
-    private User user;
+    @JoinColumn(name = "submitted_id") // FK 컬럼 이름
+    private User submittedBy; // 강의 제출자
 
     // 승인 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approve_admin_id")
-    private Admin approveAdminId;
+    private Admin approvedBy;
 
     // 거절 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reject_admin_id")
-    private Admin rejectAdminId;
+    private Admin rejectedBy;
 
-    @NotNull
+    @NotBlank(message = "강의 제목은 필수입니다")
+    @Size(max = 100, message = "강의 제목은 100자 이하여야 합니다")
+    @Column(nullable = false)
     private String title;
 
+    @Size(max = 1000, message = "강의 설명은 1000자 이하여야 합니다")
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotNull
+    @NotNull(message = "강의 난이도는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LevelEnum level;
 
-    @NotNull
+    @NotNull(message = "강의 카테고리는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private CategoryEnum category;
 
-    @NotNull
+    @NotNull(message = "강의 가격은 필수입니다")
+    @Min(value = 0, message = "강의 가격은 0원 이상이어야 합니다")
+    @Column(nullable = false)
     private Integer price;
 
     @Column(columnDefinition = "TEXT")
     private String thumbUrl;
 
-    @NotNull
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private StatusEnum status = StatusEnum.PENDING;
-
-    private String approvedAt;
-
-    private String rejectedAt;
-
     @Column(columnDefinition = "TEXT")
-    private String reject_reason;
+    private String videoUrl;
 
 
+    // 역방향 관계설정(조회용)
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
 
-//    역방향 관계설정(조회용)
-
-    @OneToMany(mappedBy = "lecture")
     private List<LectureReview> reviews;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<LectureQna> qnas;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<LectureVideo> videos;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<LectureIngredientsList> ingredientsList;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<PurchasedLecture> purchases;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
 

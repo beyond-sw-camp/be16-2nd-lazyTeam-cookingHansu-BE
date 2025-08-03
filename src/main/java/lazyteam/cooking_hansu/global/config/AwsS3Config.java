@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.global.config;
 
 
-//s3에 접근하기 위한 스프링빈 생성
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,13 +14,17 @@ import software.amazon.awssdk.services.s3.S3Client;
 public class AwsS3Config {
     @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
+
     @Value("${cloud.aws.credentials.secret-key}")
     private String secretKey;
+
     @Value("${cloud.aws.region.static}")
     private String region;
 
     @Bean
+
     public S3Client s3Client() {
+
         AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(accessKey,secretKey);
         return S3Client.builder()
                 .region(Region.of(region))

@@ -29,8 +29,19 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//	swagger-ui 의존성
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+
+	// jwt 의존성
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	//    aws sdk 의존성 추가
+	implementation 'software.amazon.awssdk:s3:2.17.58'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -40,17 +51,10 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// jwt 의존성
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-	// aws 의존성
-	implementation 'software.amazon.awssdk:s3:2.17.58'
 
 	// 영상 길이 추출 (JAVE2 / FFmpeg 기반)을 위한 의존성 추가 : 강의 영상 길이
-
 	implementation 'ws.schild:jave-core:3.3.1'
+
 
 }
 

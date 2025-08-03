@@ -17,6 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.WaitingLectureDto;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
+import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -26,6 +33,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.List;
 
+import java.util.UUID;
+
 @Service
 @Transactional
 @Slf4j
@@ -34,6 +43,7 @@ import java.util.List;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
+
     private final S3Client s3Client;
     private final UserRepository userRepository;
     private final LectureIngredientsListRepository lectureIngredientsListRepository;
@@ -47,7 +57,7 @@ public class LectureService {
 
 
     // ====== 강의 등록 ======
-    public Long create(LectureCreateDto lectureCreateDto,
+    public UUID create(LectureCreateDto lectureCreateDto,
                        List<LectureIngredientsListDto> lectureIngredientsListDto,
                        List<LectureStepDto> lectureStepDto,
                        List<LectureVideoDto> lectureVideoDto,
@@ -60,19 +70,20 @@ public class LectureService {
         );
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-        User user = userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("유저없음"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
 //        재료목록 저장
-            List<LectureIngredientsList> ingredientsList = lectureIngredientsListDto.stream().map(a->a.toEntity(lecture)).toList();
-            for(LectureIngredientsList ingredients : ingredientsList) {
-                lectureIngredientsListRepository.save(ingredients);
-            }
+        List<LectureIngredientsList> ingredientsList = lectureIngredientsListDto.stream().map(a -> a.toEntity(lecture)).toList();
+        for (LectureIngredientsList ingredients : ingredientsList) {
+            lectureIngredientsListRepository.save(ingredients);
+        }
 
 //            재료순서 저장
-        List<LectureStep> lectureStepList = lectureStepDto.stream().map(a->a.toEntity(lecture)).toList();
-        for(LectureStep steps : lectureStepList) {
+        List<LectureStep> lectureStepList = lectureStepDto.stream().map(a -> a.toEntity(lecture)).toList();
+        for (LectureStep steps : lectureStepList) {
             lectureStepRepository.save(steps);
         }
         System.out.println("재료순서");
@@ -84,7 +95,7 @@ public class LectureService {
 
             try {
                 log.info("파일이름생성");
-                String fileName = "lecture-" + lecture.getLectureId() + "-video-" + dto.getSequence() + ".mp4";
+                String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
 
 
                 log.info("업로드요청 생성");
@@ -122,26 +133,66 @@ public class LectureService {
         }
 
 
-
-
 //            강의 썸네일 저장
         MultipartFile image = multipartFile;
-        if(image != null) {
+        if (image != null) {
 
-            String fileName = "lecture-" + lecture.getLectureId() + "-thumImage-" + image.getOriginalFilename();
+            String fileName = "lecture-" + lecture.getId() + "-thumImage-" + image.getOriginalFilename();
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(fileName)
                     .contentType(image.getContentType())
                     .build();
-            try {s3Client.putObject(putObjectRequest, RequestBody.fromBytes(image.getBytes()));}
-            catch (Exception e) {throw new IllegalArgumentException("이미지 업로드 실패");}
+            try {
+                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(image.getBytes()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("이미지 업로드 실패");
+            }
 
-            String imgUrl = s3Client.utilities().getUrl(a->a.bucket(bucket).key(fileName)).toExternalForm();
+            String imgUrl = s3Client.utilities().getUrl(a -> a.bucket(bucket).key(fileName)).toExternalForm();
             lecture.updateImageUrl(imgUrl);
 
         }
-        return lecture.getLectureId();
+        return lecture.getId();
+
+
+    }
+
+
+
+
+//    강의 목록 조회(승인 안된 강의 목록 조회)
+    public Page<WaitingLectureDto> getWaitingLectureList(Pageable pageable){
+        Page<Lecture> lectures = lectureRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
+        return lectures.map(lecture -> WaitingLectureDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .description(lecture.getDescription())
+                .imageUrl(lecture.getThumbUrl())
+                .category(lecture.getCategory())
+                .instructorName(lecture.getSubmittedBy().getName())
+                .status(lecture.getApprovalStatus())
+                .price(lecture.getPrice())
+                .duration(lectureVideoRepository.getTotalDurationByLectureId(lecture.getId()))
+                .build());
+    }
+
+//    강의 승인
+    public void approveLecture(UUID lectureId){
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. lectureId: " + lectureId));
+        if(lecture.getApprovalStatus() != null && lecture.getApprovalStatus().equals(ApprovalStatus.APPROVED)) {
+            throw new IllegalArgumentException("이미 승인된 강의입니다. lectureId: " + lectureId);
+        }
+        lecture.approve();
+    }
+
+//    강의 거절
+    public void rejectLecture(UUID lectureId, RejectRequestDto rejectRequestDto) {
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. lectureId: " + lectureId));
+        if (lecture.getApprovalStatus() != null && lecture.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
+            throw new IllegalArgumentException("이미 거절된 강의입니다. lectureId: " + lectureId);
+        }
+        lecture.reject(rejectRequestDto.getReason());
 
     }
     // ====== 강의 수정(레디스에 있는지 확인 후 있으면 수정?) ======
