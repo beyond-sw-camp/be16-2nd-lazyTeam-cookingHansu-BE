@@ -2,14 +2,12 @@ package lazyteam.cooking_hansu.domain.report.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.dto.Status;
-import lazyteam.cooking_hansu.domain.report.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportCreateDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportDetailDto;
 import lazyteam.cooking_hansu.domain.report.entity.Report;
 import lazyteam.cooking_hansu.domain.report.repository.ReportRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
-import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -52,6 +49,9 @@ public class ReportService {
 
     public void approveReport(UUID id) {
         Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("승인할 신고가 없습니다."));
+        if (report.getStatus() == Status.APPROVED) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다. 다시 확인해주세요.");
+        }
         report.updateStatus(Status.APPROVED, null); // 승인 상태로 업데이트, 거절 사유는 null
 
         //        TODO:나중에 승인 알림 기능 추가 필요
@@ -59,6 +59,9 @@ public class ReportService {
 
     public void rejectReport(UUID id, RejectRequestDto rejectRequestDto) {
         Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("반려할 신고가 없습니다."));
+        if (report.getStatus() == Status.REJECTED) {
+            throw new IllegalArgumentException("이미 처리된 신고입니다. 다시 확인해주세요.");
+        }
         report.updateStatus(Status.REJECTED, rejectRequestDto.getReason());
 
         //        TODO:나중에 승인 알림 기능 추가 필요

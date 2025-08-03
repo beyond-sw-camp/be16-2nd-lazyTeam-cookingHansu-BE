@@ -18,6 +18,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class ReportCreateDto {
+
     @NotNull(message = "신고 유형은 필수 입력입니다.")
     private ReportType reportType; // 신고 유형 (예: 레시피, 사용자, 댓글 등)
     private UUID targetId; // 신고 대상 ID (예: 레시피 ID, 사용자 ID, 댓글 ID)
