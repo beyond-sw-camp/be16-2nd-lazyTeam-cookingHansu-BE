@@ -12,6 +12,7 @@ import lazyteam.cooking_hansu.domain.lecture.repository.LectureVideoRepository;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,9 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,6 +49,7 @@ public class LectureService {
     private final LectureStepRepository lectureStepRepository;
     private final LectureVideoRepository lectureVideoRepository;
     private final VideoUtil videoUtil;
+    private final S3Uploader s3Uploader;
 
 
     @Value("${cloud.aws.s3.bucket}")
@@ -94,27 +94,11 @@ public class LectureService {
             MultipartFile file = lectureVideoFiles.get(i);
 
             try {
-                log.info("파일이름생성");
+
                 String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
+                String videoUrl = s3Uploader.upload(file,fileName);
 
 
-                log.info("업로드요청 생성");
-                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(fileName)
-                        .contentType(file.getContentType())
-                        .build();
-
-                log.info("파일업로드 시작");
-                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
-                log.info("파일업로드 성공");
-
-                log.info("s3파일 url생성");
-                String videoUrl = s3Client.utilities()
-                        .getUrl(builder -> builder.bucket(bucket).key(fileName))
-                        .toExternalForm();
-
-                log.info("파일 url생성성공");
 
                 // 영상 길이 추출 (ffprobe 사용) → 초 단위
                 log.info("파일 길이 생성");
@@ -135,24 +119,9 @@ public class LectureService {
 
 //            강의 썸네일 저장
         MultipartFile image = multipartFile;
-        if (image != null) {
-
-            String fileName = "lecture-" + lecture.getId() + "-thumImage-" + image.getOriginalFilename();
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(fileName)
-                    .contentType(image.getContentType())
-                    .build();
-            try {
-                s3Client.putObject(putObjectRequest, RequestBody.fromBytes(image.getBytes()));
-            } catch (Exception e) {
-                throw new IllegalArgumentException("이미지 업로드 실패");
-            }
-
-            String imgUrl = s3Client.utilities().getUrl(a -> a.bucket(bucket).key(fileName)).toExternalForm();
-            lecture.updateImageUrl(imgUrl);
-
-        }
+        String fileName = "lecture-" + lecture.getId() + "-thumImage-" + image.getOriginalFilename();
+        String imageUrl = s3Uploader.upload(image,fileName);
+        lecture.updateImageUrl(imageUrl);
         return lecture.getId();
 
 
