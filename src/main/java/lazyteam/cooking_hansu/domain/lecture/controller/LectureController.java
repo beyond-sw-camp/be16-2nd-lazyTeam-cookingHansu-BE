@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.lecture.dto.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureReviewService;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class LectureController {
                                     @RequestPart MultipartFile multipartFile) {
         Long lectureId = lectureService.create(lectureCreateDto, lectureIngredientsListDto,lectureStepDto,lectureVideoDto,lectureVideoFiles, multipartFile);
 
-        return new ResponseEntity<>("lecture id : " + lectureId, HttpStatus.CREATED);
+        return new ResponseEntity<>(ResponseDto.ok("강의등록번호 : " + lectureId,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
 //    @PostMapping("/update")
