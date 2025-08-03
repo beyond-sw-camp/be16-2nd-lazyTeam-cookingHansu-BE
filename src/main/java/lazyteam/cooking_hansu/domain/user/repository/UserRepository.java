@@ -1,6 +1,5 @@
 package lazyteam.cooking_hansu.domain.user.repository;
 
-import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +11,6 @@ import java.util.UUID;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-
+//    이메일로 사용자 조회(테스트용)
+    Optional<User> findByEmail(String email);
 }
