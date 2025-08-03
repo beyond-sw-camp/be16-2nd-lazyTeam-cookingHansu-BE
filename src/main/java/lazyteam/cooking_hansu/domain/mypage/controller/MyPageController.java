@@ -1,14 +1,9 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
-import lazyteam.cooking_hansu.domain.mypage.dto.MyBookmarkListDto;
-import lazyteam.cooking_hansu.domain.mypage.dto.MyLectureListDto;
-import lazyteam.cooking_hansu.domain.mypage.dto.MyPostListDto;
-import lazyteam.cooking_hansu.domain.mypage.service.MyBookmarkService;
-import lazyteam.cooking_hansu.domain.mypage.service.MyLectureService;
-import lazyteam.cooking_hansu.domain.mypage.service.MyPostService;
-import lazyteam.cooking_hansu.domain.mypage.dto.MyRecipeListDto;
-import lazyteam.cooking_hansu.domain.mypage.service.MyRecipeService;
+import lazyteam.cooking_hansu.domain.mypage.dto.*;
+import lazyteam.cooking_hansu.domain.mypage.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +17,7 @@ public class MyPageController {
     private final MyPostService myPostService;
     private final MyLectureService myLectureService;
     private final MyBookmarkService myBookmarkService;
+    private final MyLikeService myLikeService;
 
     @GetMapping("/recipes")
     public List<MyRecipeListDto> myRecipeList() {
@@ -41,6 +37,11 @@ public class MyPageController {
     @GetMapping("/bookmarked-posts")
     public List<MyBookmarkListDto> myBookmarkedPosts() {
         return myBookmarkService.myBookmarkedPosts();
+    }
+
+    @GetMapping("/liked-posts")
+    public List<MyLikedListDto> myLikedPosts() {
+        return myLikeService.myLikedPosts();
     }
 
 }
