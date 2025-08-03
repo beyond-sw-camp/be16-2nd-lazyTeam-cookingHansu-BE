@@ -19,7 +19,8 @@ public class ChatController {
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
     public ResponseEntity<?> getMyChatRooms() {
-        return null;
+        var chatRooms = chatService.getMyChatRooms();
+        return new ResponseEntity<>(ResponseDto.ok(chatRooms, HttpStatus.OK), HttpStatus.OK);
     }
 
 //    채팅방 상세 메시지 조회
@@ -42,7 +43,7 @@ public class ChatController {
     }
 
 //    채팅방 생성
-    @GetMapping("/room/create")
+    @GetMapping("/room/create/{otherUserId}")
     public ResponseEntity<?> getOrCreateChatRoom(@PathVariable UUID otherUserId) {
         UUID roomId = chatService.getOrCreateChatRoom(otherUserId);
         return new ResponseEntity<>(ResponseDto.ok(roomId, HttpStatus.CREATED), HttpStatus.CREATED);

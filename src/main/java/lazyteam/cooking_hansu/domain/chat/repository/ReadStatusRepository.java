@@ -13,4 +13,6 @@ import java.util.UUID;
 public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
 
     List<ReadStatus> findByChatRoomAndUser(ChatRoom chatRoom, User user);
+
+    Long countByChatRoomAndUserIsReadFalse(ChatRoom chatRoom, User user);
 }

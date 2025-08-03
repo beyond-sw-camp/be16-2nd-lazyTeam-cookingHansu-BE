@@ -1,8 +1,10 @@
 package lazyteam.cooking_hansu.domain.chat.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
+import lazyteam.cooking_hansu.domain.chat.entity.ChatMessage;
 import lazyteam.cooking_hansu.domain.chat.entity.ReadStatus;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
@@ -11,14 +13,13 @@ import lazyteam.cooking_hansu.domain.chat.repository.ReadStatusRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,6 +31,43 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+
+
+//    내 채팅방 목록 조회
+    public List<MyChatListDto> getMyChatRooms() {
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByUser(user);
+        
+        return chatParticipants.stream()
+                .map(participant -> {
+                    ChatRoom chatRoom = participant.getChatRoom();
+                    
+                    // 상대방 정보 찾기 (현재 사용자가 아닌 다른 참여자)
+                    User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                            .map(ChatParticipant::getUser)
+                            .filter(u -> !u.getId().equals(user.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
+
+                    // 마지막 메시지 찾기
+                    ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom).orElseThrow(() -> new EntityNotFoundException("채팅방에 메시지가 없습니다."));
+                    
+                    // 읽지 않은 메시지 수 계산
+                    Integer unreadCount = readStatusRepository.countByChatRoomAndUserIsReadFalse(chatRoom, user).intValue();
+                    
+                    return MyChatListDto.builder()
+                            .chatRoomId(chatRoom.getId())
+                            .chatRoomName(chatRoom.getName())
+                            .otherUserName(otherUser.getName())
+                            .otherUserNickname(otherUser.getNickname())
+                            .otherUserProfileImage(otherUser.getProfileImageUrl())
+                            .lastMessage(lastMessage.getMessageText())
+                            .lastMessageTime(lastMessage.getCreatedAt())
+                            .unreadCount(unreadCount)
+                            .build();
+                }).collect(Collectors.toList());
+    }
 
 //    채팅방 생성 or 기존 채팅방 조회
     public UUID getOrCreateChatRoom(UUID otherUserId) {
