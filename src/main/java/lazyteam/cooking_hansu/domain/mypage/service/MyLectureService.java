@@ -29,7 +29,7 @@ public class MyLectureService {
     private String testUserIdStr;
 
     @Transactional(readOnly = true)
-    public List<MyLectureListDto> getMyLectures() {
+    public List<MyLectureListDto> myLectures() {
         UUID userId = UUID.fromString(testUserIdStr);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저 없음"));

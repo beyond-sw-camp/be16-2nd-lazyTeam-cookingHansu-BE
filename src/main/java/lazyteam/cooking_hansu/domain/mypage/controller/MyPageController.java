@@ -1,7 +1,9 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
+import lazyteam.cooking_hansu.domain.mypage.dto.MyBookmarkListDto;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyLectureListDto;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyPostListDto;
+import lazyteam.cooking_hansu.domain.mypage.service.MyBookmarkService;
 import lazyteam.cooking_hansu.domain.mypage.service.MyLectureService;
 import lazyteam.cooking_hansu.domain.mypage.service.MyPostService;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyRecipeListDto;
@@ -19,6 +21,7 @@ public class MyPageController {
     private final MyRecipeService myRecipeService;
     private final MyPostService myPostService;
     private final MyLectureService myLectureService;
+    private final MyBookmarkService myBookmarkService;
 
     @GetMapping("/recipes")
     public List<MyRecipeListDto> myRecipeList() {
@@ -31,7 +34,13 @@ public class MyPageController {
     }
 
     @GetMapping("/lectures")
-    public List<MyLectureListDto> getMyLectures() {
-        return myLectureService.getMyLectures();
+    public List<MyLectureListDto> myLectures() {
+        return myLectureService.myLectures();
     }
+
+    @GetMapping("/bookmarked-posts")
+    public List<MyBookmarkListDto> myBookmarkedPosts() {
+        return myBookmarkService.myBookmarkedPosts();
+    }
+
 }
