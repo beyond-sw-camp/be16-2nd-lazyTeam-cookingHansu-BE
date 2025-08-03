@@ -5,10 +5,7 @@ import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -49,6 +46,13 @@ public class ChatController {
     public ResponseEntity<?> getOrCreateChatRoom(@PathVariable UUID otherUserId) {
         UUID roomId = chatService.getOrCreateChatRoom(otherUserId);
         return new ResponseEntity<>(ResponseDto.ok(roomId, HttpStatus.CREATED), HttpStatus.CREATED);
+    }
+
+//    채팅방 나가기
+    @DeleteMapping("/room/{roomId}/leave")
+    public ResponseEntity<?> leaveChatRoom(@PathVariable UUID roomId) {
+        chatService.leaveChatRoom(roomId);
+        return new ResponseEntity<>(ResponseDto.ok("채팅방에서 나갔습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
 

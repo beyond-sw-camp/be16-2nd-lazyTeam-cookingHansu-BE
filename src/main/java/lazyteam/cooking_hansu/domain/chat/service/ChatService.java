@@ -74,4 +74,19 @@ public class ChatService {
             r.updateIsRead("Y");
         }
     }
+
+//    채팅방 나가기
+    public void leaveChatRoom(UUID roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
+        chatParticipantRepository.delete(chatParticipant);
+
+        // 채팅방에 참여자가 없으면 채팅방 삭제
+        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+        if(participants.isEmpty()) {
+            chatRoomRepository.delete(chatRoom);
+        }
+    }
 }
