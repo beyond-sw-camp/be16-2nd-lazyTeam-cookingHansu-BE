@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.UUID;
@@ -126,6 +127,103 @@ public class LectureService {
 
 
     }
+
+//    강의 수정
+
+    public UUID update(LectureUpdateDto lectureUpdateDto,
+                       List<LectureIngredientsListDto> lectureIngredientsListDto,
+                       List<LectureStepDto> lectureStepDto,
+                       List<LectureVideoDto> lectureVideoDto,
+                       List<MultipartFile> lectureVideoFiles,
+                       MultipartFile multipartFile) {
+
+//        테스트용 UUID 유저 세팅
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
+        Lecture lecture = lectureRepository.findById(user.getId()).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
+
+
+//        강의 정보 수정
+        lecture.updateInfo(lectureUpdateDto);
+
+//        강의 재료 리스트 수정
+        if(!lectureIngredientsListDto.isEmpty()) {
+            lectureIngredientsListRepository.deleteByLecture(lecture);
+            List<LectureIngredientsList> ingredientsList = lectureIngredientsListDto.stream()
+                    .map(dto -> dto.toEntity(lecture))
+                    .toList();
+            lectureIngredientsListRepository.saveAll(ingredientsList);
+        }
+
+//        강의 재료순서 수정
+        if(!lectureStepDto.isEmpty()) {
+            lectureStepRepository.deleteByLecture(lecture);
+            List<LectureStep> lectureStepList = lectureStepDto.stream()
+                    .map(dto -> dto.toEntity(lecture))
+                    .toList();
+            lectureStepRepository.saveAll(lectureStepList);
+        }
+
+        // 썸네일 수정
+        if (multipartFile != null && !multipartFile.isEmpty()) {
+            if (lecture.getThumbUrl() != null) {
+                s3Uploader.delete(lecture.getThumbUrl());
+            }
+
+            String thumbnailFileName = "lecture-" + lecture.getId() + "-thumbnail.png";
+            String thumbnailUrl = s3Uploader.upload(multipartFile, thumbnailFileName);
+
+            lecture.updateImageUrl(thumbnailUrl);
+        }
+
+//        강의영상  수정
+
+
+        if (lectureVideoDto.size() != lectureVideoFiles.size()) {
+            throw new IllegalArgumentException("영상 정보와 파일 수가 일치하지 않습니다.");
+        }
+
+        if(!lectureVideoDto.isEmpty()) {
+            // 기존 영상 제거
+            List<LectureVideo> oldVideos = lectureVideoRepository.findByLecture(lecture);
+            for (LectureVideo video : oldVideos) {
+                s3Uploader.delete(video.getVideoUrl());
+            }
+            lectureVideoRepository.deleteAll(oldVideos);
+
+// 새 영상 등록
+            List<LectureVideo> newVideos = new ArrayList<>();
+
+            for (int i = 0; i < lectureVideoDto.size(); i++) {
+                LectureVideoDto dto = lectureVideoDto.get(i);
+                MultipartFile file = lectureVideoFiles.get(i);
+
+                String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
+                String videoUrl = s3Uploader.upload(file, fileName);
+
+                int duration = 0;
+                try {
+                    duration = videoUtil.extractDuration(file);
+                } catch (IOException | InterruptedException e) {
+                    throw new IllegalArgumentException("강의 영상 수정 중 오류 발생", e);
+                }
+                boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
+
+                LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
+                newVideos.add(video);
+            }
+
+// DB 저장
+            lectureVideoRepository.saveAll(newVideos);
+        }
+
+
+
+
+//        강의 ID값 리턴
+        return lecture.getId();
+    }
+
 
 
 
