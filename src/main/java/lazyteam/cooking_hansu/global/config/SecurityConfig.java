@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
+                        "/user/google/login", // Google OAuth 로그인
                         "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
                         "/api-docs/**",       // OpenAPI JSON

@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
+import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
@@ -113,5 +114,20 @@ public class UserService {
             throw new IllegalArgumentException("이미 비활성화된 사용자입니다. userId: " + userId);
         }
         user.updateStatus(LoginStatus.INACTIVE);
+    }
+
+    public User getUserBySocialId(String socialId) {
+        User user = userRepository.findBySocialId(socialId).orElse(null);
+        return user;
+    }
+
+    public User createOauth(String socialId, String email, OauthType oauthType) {
+        User user = User.builder()
+                .email(email)
+                .oauthType(oauthType)
+                .socialId(socialId)
+                .build();
+        userRepository.save(user);
+        return user;
     }
 }

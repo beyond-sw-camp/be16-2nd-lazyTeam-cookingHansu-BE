@@ -48,6 +48,9 @@ public class User extends BaseIdAndTimeEntity {
     @Column(length = 512, nullable = false)
     private String profileImageUrl; // 프로필 이미지 URL
 
+    @NotBlank(message = "소셜 로그인 ID는 필수입니다")
+    private String socialId; // 소셜 로그인 ID (KAKAO, GOOGLE, NAVER 등에서 제공하는 고유 ID)
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
