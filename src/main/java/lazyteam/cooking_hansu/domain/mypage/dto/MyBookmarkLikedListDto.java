@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 
-public class MyBookmarkListDto {
+public class MyBookmarkLikedListDto {
     private String title;
     private String description;
     private String thumbnailUrl;

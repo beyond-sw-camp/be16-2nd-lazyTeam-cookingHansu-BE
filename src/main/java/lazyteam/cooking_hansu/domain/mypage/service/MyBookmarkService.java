@@ -1,8 +1,9 @@
 package lazyteam.cooking_hansu.domain.mypage.service;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.interaction.repository.BookmarkRepository;
-import lazyteam.cooking_hansu.domain.mypage.dto.MyBookmarkListDto;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyBookmarkLikedListDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -26,15 +27,15 @@ public class MyBookmarkService {
     private String testUserIdStr;
 
     @Transactional(readOnly = true)
-    public List<MyBookmarkListDto> myBookmarkedPosts() {
+    public List<MyBookmarkLikedListDto> myBookmarkedPosts() {
         UUID userId = UUID.fromString(testUserIdStr);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
 
         return bookmarkRepository.findAllByUser(user).stream()
                 .map(bookmark -> {
                     Post post = bookmark.getPost();
-                    return MyBookmarkListDto.builder()
+                    return MyBookmarkLikedListDto.builder()
                             .title(post.getTitle())
                             .description(post.getDescription())
                             .thumbnailUrl(post.getThumbnailUrl())
