@@ -119,7 +119,7 @@ public class ChatService {
                     ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom).orElseThrow(() -> new EntityNotFoundException("채팅방에 메시지가 없습니다."));
 
                     // 읽지 않은 메시지 수 계산
-                    Integer unreadCount = readStatusRepository.countByChatRoomAndUserIsReadFalse(chatRoom, user).intValue();
+                    Integer unreadCount = readStatusRepository.countByChatRoomAndUserAndIsRead(chatRoom, user,"N").intValue();
 
                     return MyChatListDto.builder()
                             .chatRoomId(chatRoom.getId())
@@ -190,9 +190,9 @@ public class ChatService {
         User otherUser = userRepository.findById(otherUserId).orElseThrow(() -> new EntityNotFoundException("상대 사용자를 찾을 수 없습니다."));
 
         // 채팅방이 이미 존재하는지 확인
-        Optional<ChatRoom> exsistingChatRoom = chatParticipantRepository.findExsistingChatRoom(user.getId(), otherUser.getId());
-        if (exsistingChatRoom.isPresent()) {
-            return exsistingChatRoom.get().getId();
+        Optional<ChatRoom> existingChatRoom = chatParticipantRepository.findExistingChatRoom(user.getId(), otherUser.getId());
+        if (existingChatRoom.isPresent()) {
+            return existingChatRoom.get().getId();
         }
 
 //        만약 나와 상대방 1:1채팅이 없을경우 채팅방 개설

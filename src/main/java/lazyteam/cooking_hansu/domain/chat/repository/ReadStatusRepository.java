@@ -14,5 +14,5 @@ public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
 
     List<ReadStatus> findByChatRoomAndUser(ChatRoom chatRoom, User user);
 
-    Long countByChatRoomAndUserIsReadFalse(ChatRoom chatRoom, User user);
+    Long countByChatRoomAndUserAndIsRead(ChatRoom chatRoom, User user, String isRead);
 }
