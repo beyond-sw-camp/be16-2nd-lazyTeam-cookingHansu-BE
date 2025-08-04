@@ -18,11 +18,12 @@ public class LectureReview extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id", nullable = false)
-    private Lecture lectureId;
+    private Lecture lecture;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
-    private User writerId;
+
+    private User writer;
 
     @Column(nullable = false)
     private Integer rating;

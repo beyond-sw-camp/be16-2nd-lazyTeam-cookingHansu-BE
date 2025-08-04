@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.report.controller;
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.report.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportDetailDto;
 import lazyteam.cooking_hansu.domain.report.service.ReportService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
@@ -12,14 +12,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/report")
 public class AdminReportController {
 

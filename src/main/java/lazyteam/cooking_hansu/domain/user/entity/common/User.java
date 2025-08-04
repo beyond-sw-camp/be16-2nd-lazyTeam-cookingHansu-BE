@@ -4,9 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 공통 회원 엔티티
@@ -59,7 +63,7 @@ public class User extends BaseIdAndTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private LoginStatus loginStatus = LoginStatus.LOGGED_IN; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
+    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,10 +100,10 @@ public class User extends BaseIdAndTimeEntity {
 //    @Builder.Default
 //    private List<ChatParticipant> chatParticipantList = new ArrayList<>();
 //
-//    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<Lecture> lectureList = new ArrayList<>();
+    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
+    @OneToMany(mappedBy = "submittedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Lecture> lectureList = new ArrayList<>();
 //
 //    // 강의 리뷰(LectureReview> 테이블에 FK writer_id(작성자 ID)로 1:n 연관 관계
 //    @OneToMany(mappedBy = "writerId", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -161,4 +165,7 @@ public class User extends BaseIdAndTimeEntity {
 //
 //    // 비즈니스 메서드 관련은 추후 구현 예정
 
+    public void updateStatus(LoginStatus loginStatus) {
+        this.loginStatus = loginStatus;
+    }
 }

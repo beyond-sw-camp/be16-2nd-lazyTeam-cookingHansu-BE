@@ -42,17 +42,25 @@ public class SecurityConfig {
                                 .accessDeniedHandler(jwtAuthorizationHandler)
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
+
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
-                        "/docs",
+                        "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
+                        "/api-docs/**",       // OpenAPI JSON
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
+                        "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "/api/my/**" // Mypage 관련 API
+                        "lecture/**",
+                        "user/**"
+
+
                 ).permitAll().anyRequest().authenticated())
+
                 .build();
     }
 
