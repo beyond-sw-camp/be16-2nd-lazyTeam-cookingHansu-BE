@@ -2,7 +2,7 @@ package lazyteam.cooking_hansu.domain.chat.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageTextDto;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -30,7 +30,7 @@ public class RedisPubSubService implements MessageListener {
         String payload = new String(message.getBody());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ChatMessageTextDto chatMessageDto = objectMapper.readValue(payload, ChatMessageTextDto.class);
+            ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
             messageTemplate.convertAndSend("/topic/" + chatMessageDto.getRoomId(), chatMessageDto);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

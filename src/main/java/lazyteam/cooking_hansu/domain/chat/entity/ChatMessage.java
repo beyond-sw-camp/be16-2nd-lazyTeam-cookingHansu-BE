@@ -32,13 +32,6 @@ public class ChatMessage extends BaseIdAndTimeEntity {
     @Column(name = "message_text", nullable = false, columnDefinition = "TEXT")
     private String messageText; // 메시지 내용
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type")
-    private MessageType messageType; // 메시지 타입 (예: TEXT, IMAGE, FILE 등)
-
-    @Size(max = 512, message = "파일 URL은 512자 이하여야 합니다")
-    @Column(name = "file_url")
-    private String fileUrl; // 파일 URL (이미지, 파일 등)
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
@@ -47,4 +40,7 @@ public class ChatMessage extends BaseIdAndTimeEntity {
     @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ReadStatus> readStatuses = new ArrayList<>(); // 읽음 상태
+
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatFile> files = new ArrayList<>();
 }
