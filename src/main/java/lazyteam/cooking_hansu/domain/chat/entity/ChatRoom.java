@@ -30,4 +30,8 @@ public class ChatRoom extends BaseIdAndTimeEntity {
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>(); // 채팅 메시지 목록
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }

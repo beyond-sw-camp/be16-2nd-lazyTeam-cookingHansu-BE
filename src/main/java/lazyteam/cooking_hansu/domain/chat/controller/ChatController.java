@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.chat.controller;
 
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageDto;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
+import lazyteam.cooking_hansu.domain.chat.entity.ChatMessage;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public class ChatController {
 //    채팅방 상세 메시지 조회
     @GetMapping("/room/{roomId}/history")
     public ResponseEntity<?> getChatHistory(@PathVariable UUID roomId) {
-        List<ChatMessageDto> chatHistory = chatService.getChatHistory(roomId);
+        List<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId);
         return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
 
@@ -39,17 +41,18 @@ public class ChatController {
         return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
-////    채팅방 참여
-//    @GetMapping("/room/{roomId}/join")
-//    public ResponseEntity<?> joinChatRoom(@PathVariable UUID roomId) {
-//        return null;
-//    }
-
 //    채팅방 생성
     @GetMapping("/room/create/{otherUserId}")
     public ResponseEntity<?> getOrCreateChatRoom(@PathVariable UUID otherUserId) {
         UUID roomId = chatService.getOrCreateChatRoom(otherUserId);
         return new ResponseEntity<>(ResponseDto.ok(roomId, HttpStatus.CREATED), HttpStatus.CREATED);
+    }
+
+//    채팅방 이름 수정
+    @PatchMapping("/room/{roomId}/name")
+    public ResponseEntity<?> updateChatRoomName(@PathVariable UUID roomId, @RequestBody ChatRoomUpdateDto updateDto) {
+        chatService.updateChatRoomName(roomId, updateDto);
+        return new ResponseEntity<>(ResponseDto.ok("채팅방 이름이 변경되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
 //    채팅방 나가기

@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.chat.dto;
 
 import jakarta.validation.constraints.Size;
-import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,9 +14,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Builder
-public class ChatMessageDto extends BaseIdAndTimeEntity {
+public class ChatMessageReqDto {
+    private UUID roomId; // 채팅방 ID
     private UUID senderId; // 발신자 ID
     @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
     private String message; // 메시지 내용
-    private List<MultiImages> file; // 업로드할 파일 목록
-}
+    private List<ChatFileReqDto> files; // 업로드할 파일 목록 (MultipartFile 포함)
+} 
