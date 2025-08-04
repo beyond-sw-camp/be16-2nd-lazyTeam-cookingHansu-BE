@@ -20,4 +20,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
 //    List<ChatMessage> findLastMessagesByRoomIds(@Param("roomIds") List<UUID> roomIds);
 
     Optional<ChatMessage> findTopByChatRoomOrderByCreatedAtDesc(ChatRoom chatRoom);
+
+    List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
 }

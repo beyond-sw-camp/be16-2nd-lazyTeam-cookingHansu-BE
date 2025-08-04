@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.chat.controller;
 
+import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageDto;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,7 +28,8 @@ public class ChatController {
 //    채팅방 상세 메시지 조회
     @GetMapping("/room/{roomId}/history")
     public ResponseEntity<?> getChatHistory(@PathVariable UUID roomId) {
-        return null;
+        List<ChatMessageDto> chatHistory = chatService.getChatHistory(roomId);
+        return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
 
 //    채팅방 메시지 읽음 처리
@@ -36,11 +39,11 @@ public class ChatController {
         return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
-//    채팅방 참여
-    @GetMapping("/room/{roomId}/join")
-    public ResponseEntity<?> joinChatRoom(@PathVariable UUID roomId) {
-        return null;
-    }
+////    채팅방 참여
+//    @GetMapping("/room/{roomId}/join")
+//    public ResponseEntity<?> joinChatRoom(@PathVariable UUID roomId) {
+//        return null;
+//    }
 
 //    채팅방 생성
     @GetMapping("/room/create/{otherUserId}")

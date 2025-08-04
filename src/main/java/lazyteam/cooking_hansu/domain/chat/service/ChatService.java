@@ -124,6 +124,26 @@ public class ChatService {
                 }).collect(Collectors.toList());
     }
 
+//    채팅방 상세 내역 조회
+    public List<ChatMessageDto> getChatHistory(UUID roomId){
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        // 현재 사용자가 채팅방 참여자인지 확인
+        boolean check = false;
+        for(ChatParticipant c: chatParticipants){
+            if(c.getUser().equals(user)){
+                check = true;
+            }
+        }
+        if(!check) throw new EntityNotFoundException("해당 채팅방에 참여하지 않은 사용자입니다.");
+
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc((chatRoom));
+//        TODO: 임시로 Null처리 해둠. PR확인 후 수정 필요
+        return null;
+    }
+
 //    채팅방 생성 or 기존 채팅방 조회
     public UUID getOrCreateChatRoom(UUID otherUserId) {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
