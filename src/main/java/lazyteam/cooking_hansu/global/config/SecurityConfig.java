@@ -55,7 +55,8 @@ public class SecurityConfig {
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "lecture/**",
-                        "user/**"
+                        "user/**",
+                        "cart/**"
 
                 ).permitAll().anyRequest().authenticated())
 

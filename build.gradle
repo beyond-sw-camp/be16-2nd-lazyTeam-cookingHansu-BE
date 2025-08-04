@@ -51,6 +51,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	//    Toss 결제서비스 json 직렬화를 위한 의존성 추가
+	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
 
 
