@@ -55,6 +55,4 @@ public class ChatController {
         chatService.leaveChatRoom(roomId);
         return new ResponseEntity<>(ResponseDto.ok("채팅방에서 나갔습니다.", HttpStatus.OK), HttpStatus.OK);
     }
-
-
 }

@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageTextDto;
 import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
@@ -32,6 +33,29 @@ public class ChatService {
     private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
 
+
+//    메세지 전송
+    public void saveMessage(UUID roomId, ChatMessageTextDto messageTextDto) {
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+
+        // 메시지 저장
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .sender(user)
+                .messageText(messageTextDto.getMessage())
+                .build();
+        chatMessageRepository.save(chatMessage);
+
+        // 읽음 상태 저장
+        ReadStatus readStatus = ReadStatus.builder()
+                .chatRoom(chatRoom)
+                .user(user)
+                .isRead("N") // 처음에는 읽지 않은 상태로 설정
+                .build();
+        readStatusRepository.save(readStatus);
+    }
 
 //    내 채팅방 목록 조회
     public List<MyChatListDto> getMyChatRooms() {
@@ -81,6 +105,7 @@ public class ChatService {
             return exsistingChatRoom.get().getId();
         }
 
+//        만약 나와 상대방 1:1채팅이 없을경우 채팅방 개설
         ChatRoom newRoom = ChatRoom.builder()
                 .name(user.getName() + "과 " + otherUser.getName() + "의 채팅방")
                 .build();
@@ -101,6 +126,21 @@ public class ChatService {
                 .build();
         chatParticipantRepository.save(chatParticipant);
     }
+
+//    방 참여자인지 확인
+    public boolean isRoomParticipant(UUID userId, UUID roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
+
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
+        for (ChatParticipant c : chatParticipants) {
+            if (c.getUser().equals(user)) {
+                return true; // 해당 이메일이 참여자 목록에 있으면 메서드 종료
+            }
+        }
+        return false;
+    }
+
 
     //    메시지 읽음
     public void messageRead(UUID roomId) {
