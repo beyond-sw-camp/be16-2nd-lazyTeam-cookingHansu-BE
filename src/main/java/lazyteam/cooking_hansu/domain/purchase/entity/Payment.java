@@ -46,6 +46,15 @@ public class Payment extends BaseIdAndTimeEntity {
     @Column(nullable = false)
     private LocalDateTime paidAt;
 
+    // 토스에서 내려주는 고유 결제 식별자 (중복 결제 방지용)
+    @Column(nullable = false, unique = true)
+    private String paymentKey;
+
+    // 우리 서버에서 만든 주문 번호 (프론트와 통신하며 고유 ID로 사용됨)
+    @Column(nullable = false, unique = true)
+    private String orderId;
+
+
     // 역방향 관계설정(조회용), 구매된강의와 연결
     @OneToMany(mappedBy = "payment")
     private List<PurchasedLecture> purchasedLectures;
