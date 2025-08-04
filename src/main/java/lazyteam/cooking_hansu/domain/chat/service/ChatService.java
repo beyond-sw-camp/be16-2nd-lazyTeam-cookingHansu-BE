@@ -54,7 +54,7 @@ public class ChatService {
                     .messageText(null)
                     .build();
             for(MultiImages file : chatMessageDto.getFile()) {
-                String imageUrl = s3Uploader.upload(file.getFile(), "chat");
+                String imageUrl = s3Uploader.upload(file.getFile(), "chat/" + chatRoom.getId() + "/");
                 ChatFile chatFile = ChatFile.builder()
                         .fileUrl(imageUrl)
                         .fileName(file.getFile().getOriginalFilename())
