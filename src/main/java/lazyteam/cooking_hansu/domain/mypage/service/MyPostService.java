@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.mypage.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyPostListDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
@@ -28,7 +29,7 @@ public class MyPostService {
     public List<MyPostListDto> myPostList() {
         UUID testUserId = UUID.fromString(testUserIdStr);
         User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
 
         List<Post> posts = postRepository.findAllByUser(user);
 

@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.mypage.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyRecipeListDto;
 import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
 import lazyteam.cooking_hansu.domain.recipe.repository.RecipeRepository;
@@ -28,7 +29,7 @@ public class MyRecipeService {
     public List<MyRecipeListDto> myRecipeList() {
         UUID testUserId = UUID.fromString( testUserIdStr);
         User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
 
 
         List<Recipe> recipes = recipeRepository.findAllByUser(user);

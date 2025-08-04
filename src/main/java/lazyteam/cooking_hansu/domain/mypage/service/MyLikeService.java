@@ -1,8 +1,9 @@
 package lazyteam.cooking_hansu.domain.mypage.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
 import lazyteam.cooking_hansu.domain.interaction.repository.LikesRepository;
-import lazyteam.cooking_hansu.domain.mypage.dto.MyLikedListDto;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyBookmarkLikedListDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -26,17 +27,17 @@ public class MyLikeService {
     private String testUserIdStr;
 
     @Transactional(readOnly = true)
-    public List<MyLikedListDto> myLikedPosts() {
+    public List<MyBookmarkLikedListDto> myLikedPosts() {
         UUID userId = UUID.fromString(testUserIdStr);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
 
         List<Likes> likesList = likesRepository.findAllByUser(user);
 
         return likesList.stream()
                 .map(like -> {
                     Post post = like.getPost();
-                    return MyLikedListDto.builder()
+                    return MyBookmarkLikedListDto.builder()
                             .title(post.getTitle())
                             .description(post.getDescription())
                             .thumbnailUrl(post.getThumbnailUrl())

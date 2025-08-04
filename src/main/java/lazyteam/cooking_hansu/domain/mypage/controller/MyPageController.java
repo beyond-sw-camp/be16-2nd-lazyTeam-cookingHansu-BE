@@ -2,7 +2,11 @@ package lazyteam.cooking_hansu.domain.mypage.controller;
 
 import lazyteam.cooking_hansu.domain.mypage.dto.*;
 import lazyteam.cooking_hansu.domain.mypage.service.*;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,29 +23,44 @@ public class MyPageController {
     private final MyBookmarkService myBookmarkService;
     private final MyLikeService myLikeService;
 
+
     @GetMapping("/recipes")
-    public List<MyRecipeListDto> myRecipeList() {
-        return myRecipeService.myRecipeList();
+    public ResponseEntity<?> myRecipeList() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myRecipeService.myRecipeList(), HttpStatus.OK),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/posts")
-    public List<MyPostListDto> myPostList() {
-        return myPostService.myPostList();
+    public ResponseEntity<?> myPostList() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myPostService.myPostList(), HttpStatus.OK),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/lectures")
-    public List<MyLectureListDto> myLectures() {
-        return myLectureService.myLectures();
+    public ResponseEntity<?> myLectures(@PageableDefault(size = 8) Pageable pageable) {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myLectureService.myLectures(pageable), HttpStatus.OK),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/bookmarked-posts")
-    public List<MyBookmarkListDto> myBookmarkedPosts() {
-        return myBookmarkService.myBookmarkedPosts();
+    public ResponseEntity<?> myBookmarkedPosts() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myBookmarkService.myBookmarkedPosts(), HttpStatus.OK),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/liked-posts")
-    public List<MyLikedListDto> myLikedPosts() {
-        return myLikeService.myLikedPosts();
+    public ResponseEntity<?> myLikedPosts() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myLikeService.myLikedPosts(), HttpStatus.OK),
+                HttpStatus.OK
+        );
     }
-
 }

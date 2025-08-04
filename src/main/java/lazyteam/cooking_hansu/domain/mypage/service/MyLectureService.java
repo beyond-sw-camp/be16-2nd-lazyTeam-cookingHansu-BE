@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.mypage.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureReviewRepository;
@@ -10,6 +11,8 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,20 +32,19 @@ public class MyLectureService {
     private String testUserIdStr;
 
     @Transactional(readOnly = true)
-    public List<MyLectureListDto> myLectures() {
+    public Page<MyLectureListDto> myLectures(Pageable pageable) {
         UUID userId = UUID.fromString(testUserIdStr);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
 
         // 해당 유저가 구매한 강의 목록
-        List<PurchasedLecture> purchases = purchasedLectureRepository.findAllByUser(user);
+        Page<PurchasedLecture> purchases = purchasedLectureRepository.findAllByUser(user, pageable);
 
-        return purchases.stream()
-                .map(purchase -> {
+        return purchases.map(purchase -> {
                     Lecture lecture = purchase.getLecture();
 
                     // 평균 평점 계산
-                    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lecture);
+                    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lecture.getId());
                     double avgRating = reviews.isEmpty() ? 0.0 :
                             reviews.stream().mapToInt(LectureReview::getRating).average().orElse(0.0);
 
@@ -57,7 +59,6 @@ public class MyLectureService {
                             .studentCount(studentCount)
                             .thumbnailUrl(lecture.getThumbUrl())
                             .build();
-                })
-                .collect(Collectors.toList());
+                });
     }
 }
