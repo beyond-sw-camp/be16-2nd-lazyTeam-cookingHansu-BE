@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,29 +98,32 @@ public class ChatService {
         }
     }
 
-    //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
     public List<MyChatListDto> getMyChatRooms() {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findByUser(user);
 
         return chatParticipants.stream()
                 .map(participant -> {
                     ChatRoom chatRoom = participant.getChatRoom();
 
-                    // 상대방 정보 찾기 (현재 사용자가 아닌 다른 참여자)
+                    // 상대방 찾기
                     User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
                             .map(ChatParticipant::getUser)
                             .filter(u -> !u.getId().equals(user.getId()))
                             .findFirst()
                             .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
 
-                    // 마지막 메시지 찾기
-                    ChatMessage lastMessage = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom).orElseThrow(() -> new EntityNotFoundException("채팅방에 메시지가 없습니다."));
+                    // 마지막 메시지
+                    Optional<ChatMessage> lastMessageOpt = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom);
+                    String lastMessage = lastMessageOpt.map(ChatMessage::getMessageText).orElse(null);
+                    LocalDateTime lastMessageTime = lastMessageOpt.map(ChatMessage::getCreatedAt).orElse(null);
 
-                    // 읽지 않은 메시지 수 계산
-                    Integer unreadCount = readStatusRepository.countByChatRoomAndUserAndIsRead(chatRoom, user,"N").intValue();
+                    // 안 읽은 메시지 수
+                    int unreadCount = readStatusRepository.countByChatRoomAndUserAndIsRead(chatRoom, user, "N").intValue();
 
                     return MyChatListDto.builder()
                             .chatRoomId(chatRoom.getId())
@@ -127,8 +131,8 @@ public class ChatService {
                             .otherUserName(otherUser.getName())
                             .otherUserNickname(otherUser.getNickname())
                             .otherUserProfileImage(otherUser.getProfileImageUrl())
-                            .lastMessage(lastMessage.getMessageText())
-                            .lastMessageTime(lastMessage.getCreatedAt())
+                            .lastMessage(lastMessage)
+                            .lastMessageTime(lastMessageTime)
                             .unreadCount(unreadCount)
                             .build();
                 }).collect(Collectors.toList());
@@ -197,7 +201,7 @@ public class ChatService {
 
 //        만약 나와 상대방 1:1채팅이 없을경우 채팅방 개설
         ChatRoom newRoom = ChatRoom.builder()
-                .name(user.getName() + "과 " + otherUser.getName() + "의 채팅방")
+                .name(otherUser.getName())
                 .build();
         chatRoomRepository.save(newRoom);
 
@@ -265,7 +269,7 @@ public class ChatService {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        if (isRoomParticipant(userId, roomId)) {
+        if (!isRoomParticipant(user.getId(), roomId)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
 
@@ -337,3 +341,4 @@ public class ChatService {
         }
     }
 }
+

@@ -2,7 +2,7 @@ package lazyteam.cooking_hansu.domain.chat.controller;
 
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
-import lazyteam.cooking_hansu.domain.chat.entity.ChatMessage;
+import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -23,42 +23,43 @@ public class ChatController {
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
     public ResponseEntity<?> getMyChatRooms() {
-        var chatRooms = chatService.getMyChatRooms();
-        return new ResponseEntity<>(ResponseDto.ok(chatRooms, HttpStatus.OK), HttpStatus.OK);
+        List<MyChatListDto> myChatRooms = chatService.getMyChatRooms();
+        return new ResponseEntity<>(ResponseDto.ok(myChatRooms, HttpStatus.OK), HttpStatus.OK);
     }
 
-//    채팅방 상세 메시지 조회
+    //    채팅방 상세 메시지 조회
     @GetMapping("/room/{roomId}/history")
     public ResponseEntity<?> getChatHistory(@PathVariable UUID roomId) {
         List<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId);
         return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
 
-//    채팅방 메시지 읽음 처리
+    //    채팅방 메시지 읽음 처리
     @GetMapping("/room/{roomId}/read")
     public ResponseEntity<?> messageRead(@PathVariable UUID roomId) {
         chatService.messageRead(roomId);
         return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
-//    채팅방 생성
+    //    채팅방 생성
     @GetMapping("/room/create/{otherUserId}")
     public ResponseEntity<?> getOrCreateChatRoom(@PathVariable UUID otherUserId) {
         UUID roomId = chatService.getOrCreateChatRoom(otherUserId);
         return new ResponseEntity<>(ResponseDto.ok(roomId, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-//    채팅방 이름 수정
+    //    채팅방 이름 수정
     @PatchMapping("/room/{roomId}/name")
     public ResponseEntity<?> updateChatRoomName(@PathVariable UUID roomId, @RequestBody ChatRoomUpdateDto updateDto) {
         chatService.updateChatRoomName(roomId, updateDto);
         return new ResponseEntity<>(ResponseDto.ok("채팅방 이름이 변경되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
-//    채팅방 나가기
+    //    채팅방 나가기
     @DeleteMapping("/room/{roomId}/leave")
     public ResponseEntity<?> leaveChatRoom(@PathVariable UUID roomId) {
         chatService.leaveChatRoom(roomId);
         return new ResponseEntity<>(ResponseDto.ok("채팅방에서 나갔습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 }
+

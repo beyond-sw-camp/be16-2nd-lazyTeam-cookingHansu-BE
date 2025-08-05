@@ -16,13 +16,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -53,8 +51,8 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
-                        "user/**"
-
+                        "user/**",
+                        "chat/**"
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
@@ -77,3 +75,4 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
+
