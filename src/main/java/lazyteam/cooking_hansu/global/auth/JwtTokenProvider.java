@@ -23,9 +23,11 @@ public class JwtTokenProvider {
 
     private Key secret_at_key;
 
-    @PostConstruct
-    public void init() {
-        secret_at_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyAt), SignatureAlgorithm.HS512.getJcaName());
+    public JwtTokenProvider(@Value("${jwt.secretKeyAt}") String secretKeyAt, @Value("${jwt.expirationAt}") int expirationAt) {
+        this.secretKeyAt = secretKeyAt;
+        this.expirationAt = expirationAt;
+        this.secret_at_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyAt), SignatureAlgorithm.HS512
+                .getJcaName());
     }
 
     public String createAtToken(User user) {

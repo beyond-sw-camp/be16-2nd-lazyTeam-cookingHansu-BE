@@ -19,42 +19,38 @@ import lombok.*;
 @Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = {"oauthType", "email"}))
 public class User extends BaseIdAndTimeEntity {
 
-    @NotBlank(message = "이름은 필수입니다")
-    @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
-    @Column(nullable = false)
-    private String name; // 이름
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private OauthType oauthType; // 소셜 로그인 유형 (KAKAO, GOOGLE, NAVER)
-
-    @NotBlank(message = "닉네임은 필수입니다")
-    @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
-    @Column(nullable = false)
-    private String nickname; // 닉네임
-
     @NotBlank(message = "이메일은 필수입니다")
     @Email(message = "유효한 이메일 형식이 아닙니다")
     @Column(nullable = false)
     private String email; // 이메일
 
-    @NotBlank(message = "비밀번호는 필수입니다")
-    @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
-    @Column(nullable = false)
-    private String password; // 비밀번호
+    @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
+    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
+    private String name; // 이름
 
-    @NotBlank(message = "프로필 이미지 URL은 필수입니다")
     @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
-    @Column(length = 512, nullable = false)
+    @Column(length = 512, nullable = true)
     private String profileImageUrl; // 프로필 이미지 URL
 
-    @NotBlank(message = "소셜 로그인 ID는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private OauthType oauthType; // 소셜 로그인 유형 (KAKAO, GOOGLE, NAVER)
+
+    @Column(nullable = true) // 일반 회원가입시에는 null
     private String socialId; // 소셜 로그인 ID (KAKAO, GOOGLE, NAVER 등에서 제공하는 고유 ID)
+
+    @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
+    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
+    private String nickname; // 닉네임
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private Role role = Role.GENERAL; // 회원 역활 (GENERAL, CHEF, OWNER, BOTH, ADMIN)
+
+    @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
+    @Column(nullable = true) // OAuth 사용자는 비밀번호가 없을 수 있음
+    private String password; // 비밀번호
 
     @Enumerated(EnumType.STRING)
     private GeneralType generalType; // 일반 회원 유형 (STUDENT, HOUSEWIFE, LIVINGALONE, ETC)
@@ -62,7 +58,7 @@ public class User extends BaseIdAndTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
+    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (ACTIVE, INACTIVE, SUSPENDED)
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -166,5 +162,19 @@ public class User extends BaseIdAndTimeEntity {
 
     public void updateStatus(LoginStatus loginStatus) {
         this.loginStatus = loginStatus;
+    }
+
+    // 추가 정보 업데이트 메서드
+    public void updateAdditionalInfo(String name, String nickname, String profileImageUrl) {
+        this.name = name;
+        this.nickname = nickname;
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
+    // OAuth 사용자의 완전한 회원가입 여부 확인
+    public boolean isCompleteProfile() {
+        return name != null && nickname != null;
     }
 }
