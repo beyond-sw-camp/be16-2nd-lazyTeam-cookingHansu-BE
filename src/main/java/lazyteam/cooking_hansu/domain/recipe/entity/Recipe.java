@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -45,6 +47,8 @@ public class Recipe extends BaseIdAndTimeEntity {
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private int cookTime; // 조리 시간 (분)
 
+    @OneToMany(mappedBy = "recipeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredients> ingredients;
     // ========== 생성자 ==========
     @Builder
     public Recipe(User user, String description, String title, String thumbnailUrl,

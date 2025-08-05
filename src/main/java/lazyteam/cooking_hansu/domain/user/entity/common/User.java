@@ -4,9 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 공통 회원 엔티티
@@ -96,10 +100,10 @@ public class User extends BaseIdAndTimeEntity {
 //    @Builder.Default
 //    private List<ChatParticipant> chatParticipantList = new ArrayList<>();
 //
-//    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<Lecture> lectureList = new ArrayList<>();
+    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
+    @OneToMany(mappedBy = "submittedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Lecture> lectureList = new ArrayList<>();
 //
 //    // 강의 리뷰(LectureReview> 테이블에 FK writer_id(작성자 ID)로 1:n 연관 관계
 //    @OneToMany(mappedBy = "writerId", cascade = CascadeType.ALL, orphanRemoval = true)

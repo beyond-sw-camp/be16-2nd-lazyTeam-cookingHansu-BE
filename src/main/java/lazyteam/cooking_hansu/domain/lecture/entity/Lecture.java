@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
@@ -95,5 +96,14 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     public void updateImageUrl(String url) {
         this.thumbUrl = url;
+    }
+
+    public void updateInfo(LectureUpdateDto dto) {
+        if (dto.getTitle() != null) this.title = dto.getTitle();
+        if (dto.getDescription() != null) this.description = dto.getDescription();
+        if (dto.getCategory() != null) this.category = dto.getCategory();
+        if (dto.getCategory() != null) this.level = dto.getLevel();
+        if (dto.getPrice() != null) this.price = dto.getPrice();
+
     }
 }

@@ -29,8 +29,6 @@ public class LectureUpdateDto {
 
     private Integer price;
 
-    private MultipartFile imageFile;
-
     public Lecture toEntity(User user) {
         return Lecture.builder()
                 .submittedBy(user)
