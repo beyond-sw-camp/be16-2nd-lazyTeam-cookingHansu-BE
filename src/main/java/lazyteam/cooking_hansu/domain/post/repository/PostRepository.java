@@ -1,10 +1,15 @@
 package lazyteam.cooking_hansu.domain.post.repository;
 
 import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostRepository extends JpaRepository<Post, Long> {
+import java.util.List;
+import java.util.UUID;
 
+public interface PostRepository extends JpaRepository<Post, UUID> {
+
+    List<Post> findAllByUser(User user);
 ////    기본조회
 //
 ////    삭제되지 않은 게시글만 조회

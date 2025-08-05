@@ -2,16 +2,19 @@ package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "recipe")
-public class Recipe extends BaseIdEntity {
+public class Recipe extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -44,4 +47,6 @@ public class Recipe extends BaseIdEntity {
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private int cookTime; // 조리 시간 (분)
 
+    @OneToMany(mappedBy = "recipeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredients> ingredients;
 }
