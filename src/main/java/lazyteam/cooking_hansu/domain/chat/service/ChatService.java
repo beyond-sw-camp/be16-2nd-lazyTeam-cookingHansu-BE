@@ -171,8 +171,31 @@ public class ChatService {
 
                     // 마지막 메시지
                     Optional<ChatMessage> lastMessageOpt = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom);
-                    String lastMessage = lastMessageOpt.map(ChatMessage::getMessageText).orElse(null);
+                    String lastMessage = null;
                     LocalDateTime lastMessageTime = lastMessageOpt.map(ChatMessage::getCreatedAt).orElse(null);
+                    
+                    if (lastMessageOpt.isPresent()) {
+                        ChatMessage lastMessageEntity = lastMessageOpt.get();
+                        // 텍스트 메시지가 있는 경우
+                        if (lastMessageEntity.getMessageText() != null && !lastMessageEntity.getMessageText().trim().isEmpty()) {
+                            lastMessage = lastMessageEntity.getMessageText();
+                        }
+                        // 파일이 있는 경우
+                        else if (lastMessageEntity.getFiles() != null && !lastMessageEntity.getFiles().isEmpty()) {
+                            ChatFile firstFile = lastMessageEntity.getFiles().get(0);
+                            switch (firstFile.getFileType()) {
+                                case IMAGE:
+                                    lastMessage = "이미지를 보냈습니다.";
+                                    break;
+                                case VIDEO:
+                                    lastMessage = "동영상을 보냈습니다.";
+                                    break;
+                                default:
+                                    lastMessage = "파일을 보냈습니다.";
+                                    break;
+                            }
+                        }
+                    }
 
                     // 안 읽은 메시지 수
                     int unreadCount = readStatusRepository.countByChatRoomAndUserAndIsRead(chatRoom, user, "N").intValue();
