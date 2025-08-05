@@ -36,6 +36,7 @@ public class MyRecipeService {
 
         return recipes.stream()
                 .map(recipe -> MyRecipeListDto.builder()
+                        .id(recipe.getId())
                         .title(recipe.getTitle())
                         .ingredients(
                                 recipe.getIngredients().stream()

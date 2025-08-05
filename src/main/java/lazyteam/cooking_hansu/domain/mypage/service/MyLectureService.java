@@ -52,6 +52,7 @@ public class MyLectureService {
                     int studentCount = purchasedLectureRepository.countByLecture(lecture);
 
                     return MyLectureListDto.builder()
+                            .id(lecture.getId())
                             .category(lecture.getCategory().toString())
                             .title(lecture.getTitle())
                             .description(lecture.getDescription())

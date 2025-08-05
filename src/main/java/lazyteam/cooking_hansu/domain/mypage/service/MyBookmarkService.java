@@ -36,6 +36,7 @@ public class MyBookmarkService {
                 .map(bookmark -> {
                     Post post = bookmark.getPost();
                     return MyBookmarkLikedListDto.builder()
+                            .id(post.getId())
                             .title(post.getTitle())
                             .description(post.getDescription())
                             .thumbnailUrl(post.getThumbnailUrl())

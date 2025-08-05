@@ -8,8 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface PurchasedLectureRepository extends JpaRepository<PurchasedLecture, Long> {
+public interface PurchasedLectureRepository extends JpaRepository<PurchasedLecture, UUID> {
     Page<PurchasedLecture> findAllByUser(User user, Pageable pageable);
     int countByLecture(Lecture lecture);
 

@@ -35,6 +35,7 @@ public class MyPostService {
 
         return posts.stream()
                 .map(post -> MyPostListDto.builder()
+                        .id(post.getId())
                         .title(post.getTitle())
                         .description(post.getDescription())
                         .thumbnailUrl(post.getThumbnailUrl())
