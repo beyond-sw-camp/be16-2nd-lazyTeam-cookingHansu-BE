@@ -36,7 +36,7 @@ public class ChatService {
 
 
     //    메세지 전송
-    public void saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
+    public ChatMessageResDto saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
         // 유효성 검사
         validateMessageAndFile(chatMessageReqDto);
 
@@ -85,6 +85,23 @@ public class ChatService {
                     .build();
             readStatusRepository.save(readStatus);
         }
+
+        return ChatMessageResDto.builder()
+                .id(chatMessage.getId())
+                .roomId(roomId)
+                .senderId(sender.getId())
+                .message(chatMessage.getMessageText())
+                .files(chatMessage.getFiles().stream()
+                        .map(file -> ChatFileUploadResDto.FileInfo.builder()
+                                .fileId(file.getId())
+                                .fileUrl(file.getFileUrl())
+                                .fileName(file.getFileName())
+                                .fileType(file.getFileType())
+                                .fileSize(file.getFileSize())
+                                .build())
+                        .collect(Collectors.toList()))
+                .createdAt(chatMessage.getCreatedAt()) // 생성 시간
+                .build();
     }
 
     //    채팅메시지 파일 업로드
