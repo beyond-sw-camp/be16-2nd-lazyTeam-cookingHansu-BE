@@ -35,7 +35,7 @@ public class ChatController {
     }
 
     //    채팅방 메시지 읽음 처리
-    @GetMapping("/room/{roomId}/read")
+    @PostMapping("/room/{roomId}/read")
     public ResponseEntity<?> messageRead(@PathVariable UUID roomId) {
         chatService.messageRead(roomId);
         return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);

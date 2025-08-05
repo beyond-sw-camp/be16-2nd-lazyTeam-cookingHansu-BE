@@ -52,7 +52,10 @@ public class SecurityConfig {
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "user/**",
-                        "chat/**"
+                        "chat/**",
+                        "/connect/**", // WebSocket 연결 엔드포인트
+                        "/topic/**", // WebSocket 토픽
+                        "/publish/**" // WebSocket 메시지 발행
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
