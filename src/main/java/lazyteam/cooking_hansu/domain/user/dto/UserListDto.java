@@ -18,7 +18,7 @@ public class UserListDto {
     private UUID userId; // 사용자 ID
     private String nickname; // 사용자 닉네임
     private String email; // 사용자 이메일
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String picture; // 프로필 이미지 URL
     private LocalDateTime createdAt; // 생성일시
     private LoginStatus loginStatus; // 로그인 상태
 
@@ -27,7 +27,7 @@ public class UserListDto {
                 .userId(user.getId())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .profileImageUrl(user.getProfileImageUrl())
+                .picture(user.getPicture())
                 .createdAt(user.getCreatedAt())
                 .loginStatus(user.getLoginStatus())
                 .build();

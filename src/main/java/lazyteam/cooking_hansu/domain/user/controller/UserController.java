@@ -5,14 +5,12 @@ import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
 import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.user.service.GoogleService;
 import lazyteam.cooking_hansu.domain.user.service.UserService;
 import lazyteam.cooking_hansu.global.auth.JwtTokenProvider;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +40,7 @@ public class UserController {
         // 회원 가입이 되어 있지 않다면 회원가입
         User originalUser = userService.getUserBySocialId(googleProfileDto.getSub());
         if (originalUser == null) {
-            originalUser = userService.createOauth(googleProfileDto.getSub(), googleProfileDto.getEmail(), OauthType.GOOGLE);
+            originalUser = userService.createOauth(googleProfileDto, OauthType.GOOGLE);
         }
         // 회원가입이 되어 있는 상태라면 토큰 발급
         String jwtToken = jwtTokenProvider.createAtToken(originalUser);

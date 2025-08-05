@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.user.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
@@ -121,11 +122,13 @@ public class UserService {
         return user;
     }
 
-    public User createOauth(String socialId, String email, OauthType oauthType) {
+    public User createOauth(GoogleProfileDto dto, OauthType oauthType) {
         User user = User.builder()
-                .email(email)
+                .email(dto.getEmail())
+                .name(dto.getName())
                 .oauthType(oauthType)
-                .socialId(socialId)
+                .socialId(dto.getSub())
+                .picture(dto.getPicture())
                 .build();
         userRepository.save(user);
         return user;

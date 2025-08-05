@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true) // 없는 필드는 자동 무시
 public class GoogleProfileDto {
     private String sub; // 구글에서 사용하는 고유 사용자 ID
+    private String name;
     private String email;
     private String picture;
 }

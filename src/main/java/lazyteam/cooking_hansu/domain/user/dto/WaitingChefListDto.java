@@ -25,7 +25,7 @@ public class WaitingChefListDto {
         return WaitingChefListDto.builder()
                 .userId(chef.getUser().getId())
                 .nickname(chef.getUser().getNickname())
-                .imageUrl(chef.getUser().getProfileImageUrl())
+                .imageUrl(chef.getUser().getPicture())
                 .LicenseNumber(chef.getLicenseNumber())
                 .LicenseImageUrl(chef.getLicenseUrl())
                 .cuisineType(chef.getCuisineType())

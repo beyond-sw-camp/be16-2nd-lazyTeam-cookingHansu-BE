@@ -25,12 +25,12 @@ public class User extends BaseIdAndTimeEntity {
     private String email; // 이메일
 
     @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
-    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
+//    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
     private String name; // 이름
 
     @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
     @Column(length = 512, nullable = true)
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String picture; // 프로필 이미지 URL
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
@@ -165,11 +165,11 @@ public class User extends BaseIdAndTimeEntity {
     }
 
     // 추가 정보 업데이트 메서드
-    public void updateAdditionalInfo(String name, String nickname, String profileImageUrl) {
+    public void updateAdditionalInfo(String name, String nickname, String picture) {
         this.name = name;
         this.nickname = nickname;
-        if (profileImageUrl != null) {
-            this.profileImageUrl = profileImageUrl;
+        if (picture != null) {
+            this.picture = picture;
         }
     }
 
