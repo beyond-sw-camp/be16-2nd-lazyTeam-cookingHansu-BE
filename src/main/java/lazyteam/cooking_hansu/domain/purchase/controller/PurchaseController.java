@@ -23,7 +23,7 @@ public class PurchaseController {
 
     @PostMapping(value = "/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody @Valid TossPaymentConfirmDto tossPaymentConfirmDto) {
-
+        System.out.println(tossPaymentConfirmDto);
 
         JSONObject paymentResult = purchaseService.confirmPayment(tossPaymentConfirmDto);
 

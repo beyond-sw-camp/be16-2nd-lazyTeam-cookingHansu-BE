@@ -16,12 +16,8 @@ import java.util.UUID;
 @Builder
 
 public class TossPaymentConfirmDto {
-    @NotBlank
     private String paymentKey;
-    @NotBlank
     private String orderId;
-    @NotBlank
     private String amount;
-    @NotNull(message = "결제할 강의 목록이 필요합니다.")
     private List<UUID> lectureIds;
 }
