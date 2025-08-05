@@ -1,12 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatFileReqDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatFileResDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageReqDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
-import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
+import lazyteam.cooking_hansu.domain.chat.dto.*;
 import lazyteam.cooking_hansu.domain.chat.entity.*;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
@@ -48,41 +43,35 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         User sender = userRepository.findById(chatMessageReqDto.getSenderId()).orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
 
-        ChatMessage chatMessage;
-        // 파일이 있는 경우
-        if (chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
-
-            chatMessage = ChatMessage.builder()
-                    .chatRoom(chatRoom)
-                    .sender(sender)
-                    .messageText(null)
-                    .build();
-            for (ChatFileReqDto file : chatMessageReqDto.getFiles()) {
-                // S3에 파일 업로드
-                String fileUrl = s3Uploader.upload(file.getFile(), "chat-files");
-
-                // ChatFile 엔티티 생성
-                ChatFile chatFile = ChatFile.builder()
-                        .chatMessage(chatMessage)
-                        .fileUrl(fileUrl)
-                        .fileName(file.getFile().getOriginalFilename())
-                        .fileSize((int) file.getFile().getSize())
-                        .fileType(file.getFileType())
-                        .build();
-
-                // ChatMessage에 파일 추가
-                chatMessage.getFiles().add(chatFile);
-            }
+        // 현재 사용자가 채팅방 참여자인지 확인
+        if (!isRoomParticipant(sender.getId(), roomId)) {
+            throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
-        // 텍스트 메시지인 경우
-        else {
-            chatMessage = ChatMessage.builder()
-                    .chatRoom(chatRoom)
-                    .sender(sender)
-                    .messageText(chatMessageReqDto.getMessage())
-                    .build();
-        }
+        // 메시지 생성
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .sender(sender)
+                .messageText(chatMessageReqDto.getMessage())
+                .isDeleted("N") // 기본값은 "N" (삭제되지 않음)
+                .build();
+
         chatMessageRepository.save(chatMessage);
+
+        // 파일이 있는 경우 파일 저장
+        if(chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
+            List<ChatFile> chatFiles = chatMessageReqDto.getFiles().stream()
+                    .map(file -> ChatFile.builder()
+                            .chatMessage(chatMessage)
+                            .fileUrl(file.getFileUrl())
+                            .fileName(file.getFileName())
+                            .fileType(file.getFileType())
+                            .fileSize(file.getFileSize())
+                            .build())
+                    .collect(Collectors.toList());
+            
+            // 파일들을 메시지에 추가
+            chatMessage.getFiles().addAll(chatFiles);
+        }
 
         // 메시지 읽음 상태 저장
         List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
@@ -98,6 +87,52 @@ public class ChatService {
         }
     }
 
+    //    채팅메시지 파일 업로드
+    public ChatFileUploadResDto uploadFiles(UUID roomId, ChatFileUploadReqDto requestDto) {
+        // 채팅방 존재 확인
+        chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        
+        // 현재 사용자가 채팅방 참여자인지 확인
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        if (!isRoomParticipant(userId, roomId)) {
+            throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
+        }
+        
+        List<MultipartFile> files = requestDto.getFiles();
+        List<FileType> fileTypes = requestDto.getFileTypes();
+        
+        // 파일 개수 검증
+        validateFileCount(files, fileTypes);
+        
+        List<ChatFileUploadResDto.FileInfo> uploadedFiles = new ArrayList<>();
+        
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            FileType fileType = fileTypes.get(i);
+            
+            // validateFileType에서 모든 검증 수행
+            validateFileType(file, fileType);
+            
+            // S3에 파일 업로드
+            String fileUrl = s3Uploader.upload(file, "chat-files/" + roomId);
+            
+            // 파일 정보 생성
+            ChatFileUploadResDto.FileInfo fileInfo = ChatFileUploadResDto.FileInfo.builder()
+                    .fileUrl(fileUrl)
+                    .fileName(file.getOriginalFilename())
+                    .fileType(fileType)
+                    .fileSize((int) file.getSize())
+                    .build();
+            
+            uploadedFiles.add(fileInfo);
+        }
+        
+        return ChatFileUploadResDto.builder()
+                .files(uploadedFiles)
+                .build();
+    }
+
+    //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
     public List<MyChatListDto> getMyChatRooms() {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -158,18 +193,17 @@ public class ChatService {
         List<ChatMessageResDto> result = new ArrayList<>();
         for (ChatMessage cm : chatMessages) {
             // 메시지에 파일이 있는 경우
-            List<ChatFileResDto> fileList = new ArrayList<>();
+            List<ChatFileUploadResDto.FileInfo> fileList = new ArrayList<>();
             if (cm.getFiles() != null && !cm.getFiles().isEmpty()) {
                 for (ChatFile file : cm.getFiles()) {
-                    ChatFileResDto fileDto = ChatFileResDto.builder()
-                            .id(file.getId())
+                    ChatFileUploadResDto.FileInfo fileInfo = ChatFileUploadResDto.FileInfo.builder()
+                            .fileId(file.getId())
                             .fileUrl(file.getFileUrl())
                             .fileName(file.getFileName())
-                            .fileSize(file.getFileSize())
                             .fileType(file.getFileType())
-                            .createdAt(file.getCreatedAt())
+                            .fileSize(file.getFileSize())
                             .build();
-                    fileList.add(fileDto);
+                    fileList.add(fileInfo);
                 }
             }
 
@@ -295,16 +329,6 @@ public class ChatService {
             if (chatMessageReqDto.getFiles().size() < 1) {
                 throw new IllegalArgumentException("파일은 최소 1개 이상 있어야 합니다.");
             }
-
-            // 각 파일에 대한 추가 검증
-            for (ChatFileReqDto fileReq : chatMessageReqDto.getFiles()) {
-                if (fileReq.getFile() == null || fileReq.getFile().isEmpty()) {
-                    throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다.");
-                }
-
-                // 파일 타입 검증
-                validateFileType(fileReq.getFile(), fileReq.getFileType());
-            }
         }
         // 둘 다 있는 경우 (허용하지 않음)
         else if (hasMessage && hasFile) {
@@ -318,6 +342,11 @@ public class ChatService {
 
     // 파일 타입 검증
     private void validateFileType(MultipartFile file, FileType fileType) {
+        // 빈 파일 검사
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다.");
+        }
+        
         String fileName = file.getOriginalFilename();
         if (fileName == null) {
             throw new IllegalArgumentException("파일명이 없습니다.");
@@ -332,12 +361,28 @@ public class ChatService {
                 }
                 break;
             case VIDEO:
-                if (!extension.matches("(pdf|doc|docx|txt|zip|rar|7z)")) {
+                if (!extension.matches("(mp4|avi|mov)")) {
                     throw new IllegalArgumentException("비디오 파일은 mp4, avi, mov 형식만 허용됩니다.");
                 }
                 break;
             default:
                 throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
+        }
+    }
+
+    // 파일 개수 검증
+    private void validateFileCount(List<MultipartFile> files, List<FileType> fileTypes) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+        if (files.size() < 1) {
+            throw new IllegalArgumentException("파일은 최소 1개 이상 있어야 합니다.");
+        }
+        if (files.size() > 10) {
+            throw new IllegalArgumentException("파일은 최대 10개까지 업로드할 수 있습니다.");
+        }
+        if (files.size() != fileTypes.size()) {
+            throw new IllegalArgumentException("파일과 파일 타입의 개수가 일치하지 않습니다.");
         }
     }
 }

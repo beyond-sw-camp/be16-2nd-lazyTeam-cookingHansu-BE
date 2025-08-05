@@ -20,7 +20,7 @@ public class ChatMessageResDto {
     private UUID senderId; // 발신자 ID
     @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
     private String message; // 메시지 내용
-    private List<ChatFileResDto> files; // 파일 목록 (S3 URL 포함)
+    private List<ChatFileUploadResDto.FileInfo> files; // 파일 목록 (S3 URL 포함)
     private LocalDateTime createdAt; // 생성 시간
     private LocalDateTime updatedAt; // 수정 시간
 }

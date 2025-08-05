@@ -1,5 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.controller;
 
+import lazyteam.cooking_hansu.domain.chat.dto.ChatFileUploadReqDto;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatFileUploadResDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
 import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
@@ -60,6 +62,13 @@ public class ChatController {
     public ResponseEntity<?> leaveChatRoom(@PathVariable UUID roomId) {
         chatService.leaveChatRoom(roomId);
         return new ResponseEntity<>(ResponseDto.ok("채팅방에서 나갔습니다.", HttpStatus.OK), HttpStatus.OK);
+    }
+
+    //    파일 업로드 API (최대 10개)
+    @PostMapping("/room/{roomId}/upload")
+    public ResponseEntity<?> uploadFiles(@PathVariable UUID roomId, @ModelAttribute ChatFileUploadReqDto requestDto) {
+        ChatFileUploadResDto result = chatService.uploadFiles(roomId, requestDto);
+        return new ResponseEntity<>(ResponseDto.ok(result, HttpStatus.OK), HttpStatus.OK);
     }
 }
 

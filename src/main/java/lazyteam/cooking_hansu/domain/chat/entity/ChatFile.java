@@ -18,7 +18,7 @@ public class ChatFile extends BaseIdAndTimeEntity {
     @JoinColumn(name = "chat_message_id")
     private ChatMessage chatMessage;
 
-    @Column(name = "file_url", nullable = false)
+    @Column(name = "file_url", nullable = false, length = 1000)
     private String fileUrl;
 
     @Column(name = "file_name", nullable = false)

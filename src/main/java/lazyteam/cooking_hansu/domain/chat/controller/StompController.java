@@ -3,7 +3,6 @@ package lazyteam.cooking_hansu.domain.chat.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageReqDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
 import lazyteam.cooking_hansu.domain.chat.service.RedisPubSubService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Controller

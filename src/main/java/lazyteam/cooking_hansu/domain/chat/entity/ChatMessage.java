@@ -42,5 +42,6 @@ public class ChatMessage extends BaseIdAndTimeEntity {
     private List<ReadStatus> readStatuses = new ArrayList<>(); // 읽음 상태
 
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ChatFile> files = new ArrayList<>();
 }
