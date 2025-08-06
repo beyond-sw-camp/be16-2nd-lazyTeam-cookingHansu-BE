@@ -53,6 +53,7 @@ public class SecurityConfig {
                         "/report/**", // Report 관련 API
                         "/api/my/**", // Mypage 관련 API
                         "lecture/**",
+                        "post/**",
                         "user/**",
                         "chat/**",
                         "/connect/**", // WebSocket 연결 엔드포인트

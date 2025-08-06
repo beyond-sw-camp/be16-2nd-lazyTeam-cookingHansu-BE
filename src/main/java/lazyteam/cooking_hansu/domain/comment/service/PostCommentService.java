@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.comment.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentCreateDto;
+import lazyteam.cooking_hansu.domain.comment.dto.PostCommentListResDto;
 import lazyteam.cooking_hansu.domain.comment.entity.PostComment;
 import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +24,7 @@ public class PostCommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+//    댓글 생성
     public void createComment(PostCommentCreateDto postCommentCreateDto) {
 
         // 유저가 존재하는지 확인
@@ -48,11 +51,41 @@ public class PostCommentService {
         else {
             postComment = PostComment.builder()
                     .post(post)
-                    .parentComment(null)
                     .user(user)
                     .content(postCommentCreateDto.getContent())
                     .build();
         }
         postCommentRepository.save(postComment);
+    }
+
+//    댓글 목록 조회
+    @Transactional(readOnly = true)
+    public List<PostCommentListResDto> findCommentList(UUID postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+
+        List<PostComment> comments = postCommentRepository.findAllByPost(post);
+        return comments.stream()
+                .map(c -> PostCommentListResDto.builder()
+                        .commentId(c.getId())
+                        .content(c.getContent())
+                        .createdAt(c.getCreatedAt())
+                        .updatedAt(c.getUpdatedAt())
+                        .authorProfileImage(c.getUser().getProfileImageUrl())
+                        .authorNickname(c.getUser().getNickname())
+                        .childComments(c.getChildComments().stream().map(child -> PostCommentListResDto.builder()
+                                .commentId(child.getId())
+                                .content(child.getContent())
+                                .createdAt(child.getCreatedAt())
+                                .updatedAt(child.getUpdatedAt())
+                                .authorProfileImage(child.getUser().getProfileImageUrl())
+                                .authorNickname(child.getUser().getNickname())
+                                .build()).toList())
+                        .build())
+                .toList();
+    }
+
+    // 댓글 수정
+    public void updateComment(UUID commentId, String content) {
+
     }
 }
