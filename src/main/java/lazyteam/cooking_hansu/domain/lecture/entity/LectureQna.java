@@ -5,6 +5,8 @@ import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "lecture_qna")
 @Getter
@@ -32,15 +34,11 @@ public class LectureQna extends BaseIdAndTimeEntity {
     @Column(length = 255, nullable = false)
     private String questionText;
 
-    //  질문 작성 시간
-    @Column(nullable = false)
-    private String questionCreatedAt;
-
     //  답변 내용 (nullable)
     @Column(length = 255)
     private String answerText;
 
     // 답변 시간 (nullable)
     @Column
-    private String answerCreatedAt;
+    private LocalDateTime answerTime;
 }
