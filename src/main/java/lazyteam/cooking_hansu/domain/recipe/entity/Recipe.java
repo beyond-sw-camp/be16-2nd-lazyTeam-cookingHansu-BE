@@ -47,7 +47,7 @@ public class Recipe extends BaseIdAndTimeEntity {
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private int cookTime; // 조리 시간 (분)
 
-    @OneToMany(mappedBy = "recipeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingredients> ingredients;
     // ========== 생성자 ==========
     @Builder

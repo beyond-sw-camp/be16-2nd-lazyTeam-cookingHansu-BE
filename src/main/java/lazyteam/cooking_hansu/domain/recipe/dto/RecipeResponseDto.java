@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.recipe.dto;
 import lazyteam.cooking_hansu.domain.recipe.entity.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,6 +26,8 @@ public class RecipeResponseDto {
     private CategoryType category;
     private Integer cookTime;
     private String userNickname;
+    private LocalDateTime createdAt;      // 생성일시 추가
+    private LocalDateTime updatedAt;      // 수정일시 추가
     private List<IngredientResponseDto> ingredients;
     private List<RecipeStepResponseDto> steps;
 

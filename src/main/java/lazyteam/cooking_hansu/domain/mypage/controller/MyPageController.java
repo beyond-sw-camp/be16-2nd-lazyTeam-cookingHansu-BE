@@ -24,7 +24,7 @@ public class MyPageController {
     private final MyLikeService myLikeService;
 
 
-    @GetMapping("/recipes")
+    @GetMapping("/recipe-list") //api겹쳐서 옮겨놓음 기존: "/recipes"
     public ResponseEntity<?> myRecipeList() {
         return new ResponseEntity<>(
                 ResponseDto.ok(myRecipeService.myRecipeList(), HttpStatus.OK),

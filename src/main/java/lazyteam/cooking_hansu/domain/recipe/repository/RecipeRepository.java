@@ -15,6 +15,8 @@ import java.util.UUID;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, UUID>{
 
+    List<Recipe> findAllByUser(User user);
+
     // 사용자별 개인 레시피 조회
     List<Recipe> findByUser(User user);
     Page<Recipe> findByUser(User user, Pageable pageable);
