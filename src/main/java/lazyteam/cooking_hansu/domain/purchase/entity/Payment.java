@@ -27,7 +27,7 @@ public class Payment extends BaseIdAndTimeEntity {
     @NotNull(message = "결제 금액은 필수입니다")
     @Min(value = 1, message = "결제 금액은 1원 이상이어야 합니다")
     @Column(nullable = false)
-    private Integer paidAmount;
+    private Long paidAmount;
 
     // 결제 수단
     @NotNull(message = "결제 수단은 필수입니다")

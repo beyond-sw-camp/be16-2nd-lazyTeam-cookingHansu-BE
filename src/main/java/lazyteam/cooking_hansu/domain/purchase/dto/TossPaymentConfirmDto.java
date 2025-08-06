@@ -18,6 +18,5 @@ import java.util.UUID;
 public class TossPaymentConfirmDto {
     private String paymentKey;
     private String orderId;
-    private String amount;
-    private List<UUID> lectureIds;
+    private Long amount;
 }

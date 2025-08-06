@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.purchase.controller;
 
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPaymentConfirmDto;
+import lazyteam.cooking_hansu.domain.purchase.dto.TossPrepayDto;
 import lazyteam.cooking_hansu.domain.purchase.service.PurchaseService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,16 @@ public class PurchaseController {
 
     private final PurchaseService purchaseService;
 
-    @PostMapping(value = "/confirm")
+
+
+    @PostMapping("/prepay")
+    public ResponseEntity<?> prepaymentSave(@RequestBody TossPrepayDto tossPrepayDto) {
+        purchaseService.prepaymentSave(tossPrepayDto);
+        return new ResponseEntity<>(ResponseDto.ok(tossPrepayDto,HttpStatus.OK),HttpStatus.OK);
+    }
+
+
+    @PostMapping("/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody @Valid TossPaymentConfirmDto tossPaymentConfirmDto) {
         System.out.println(tossPaymentConfirmDto);
 

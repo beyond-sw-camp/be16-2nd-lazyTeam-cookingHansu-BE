@@ -8,12 +8,15 @@ import lazyteam.cooking_hansu.domain.common.PaymentStatus;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPaymentConfirmDto;
+import lazyteam.cooking_hansu.domain.purchase.dto.TossPrepayDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.purchase.entity.Payment;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
+import lazyteam.cooking_hansu.domain.purchase.entity.TossPrePay;
 import lazyteam.cooking_hansu.domain.purchase.repository.CartItemRepository;
 import lazyteam.cooking_hansu.domain.purchase.repository.PaymentRepository;
 import lazyteam.cooking_hansu.domain.purchase.repository.PurchasedLectureRepository;
+import lazyteam.cooking_hansu.domain.purchase.repository.TossPrepayRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -46,10 +46,18 @@ public class PurchaseService {
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
+    private final TossPrepayRepository tossPrepayRepository;
 
     @Value("${toss.secret-key}")
     private String widgetSecretKey;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+
+
+    public void prepaymentSave(TossPrepayDto tossPrepayDto) {
+        tossPrepayRepository.save(tossPrepayDto.toEntity());
+        log.info("사전정보등록");
+    }
+
 
 
     // 프론트엔드에서 결제창에서 확인을 누르면 Controller를 통해 dto로 정보를 받아서 이 로직 실행
@@ -59,13 +67,22 @@ public class PurchaseService {
         UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(testUserId)
                 .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        log.info("dto 잘 들어 왔습니다." + tossPaymentConfirmDto);
 
+        log.info("테스트용 유저세팅완료");
         JSONParser parser = new JSONParser();
-        String orderId = tossPaymentConfirmDto.getOrderId();
-        String amount = tossPaymentConfirmDto.getAmount();
+
+        TossPrePay tossPrePay = tossPrepayRepository.findByOrderId(tossPaymentConfirmDto.getOrderId())
+                .orElseThrow(()-> new EntityNotFoundException("해당 주문번호가 없습니다."));
+
+        log.info("받아놓은 곳에서 아이디 추출");
+        String orderId = tossPrePay.getOrderId();
+        Long amount = tossPrePay.getAmount();
         String paymentKey = tossPaymentConfirmDto.getPaymentKey();
+        log.info("임시저장에서 추출 완료");
 
         try {
+            log.info("토스 요청 본문 생성중");
             // 1. Toss 요청 본문 생성
             JSONObject obj = new JSONObject();
             obj.put("orderId", orderId);
@@ -77,7 +94,7 @@ public class PurchaseService {
             String authHeader = "Basic " + new String(
                     encoder.encode((widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8))
             );
-
+            log.info("호출중");
             // 3. Toss 결제 승인 API 호출
             URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -85,13 +102,17 @@ public class PurchaseService {
             connection.setRequestProperty("Authorization", authHeader);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
-
+            log.info("호출성공");
+            // 프론트에서 SDK 호출 전 받아놓았던 값과 paymentkey(UUID로 생성한 값, dto로 받음)을 직렬화 하여 toss로 보냄
             try (OutputStream outputStream = connection.getOutputStream()) {
                 outputStream.write(obj.toString().getBytes(StandardCharsets.UTF_8));
             }
 
             int code = connection.getResponseCode();
+            // code가 200이면 성공이라는 뜻.
             boolean isSuccess = code == 200;
+
+            log.info("성공");
 
             // 4. 응답 파싱 (성공시 InputStream, 실패시 ErrorStream 사용)
             InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
@@ -103,14 +124,17 @@ public class PurchaseService {
             // 5. 결제 성공 시 후처리 로직
             if (isSuccess) {
                 try {
-                    List<UUID> lectureIds = tossPaymentConfirmDto.getLectureIds();
+                    List<UUID> lectureIds = tossPrePay.getLectureIds();
+
+                    log.info(jsonObject.get("method").toString());
+
 
                     // 5-1. 결제 정보 저장
                     Payment payment = Payment.builder()
                             .user(user)
                             .paymentKey(paymentKey)
                             .orderId(orderId)
-                            .paidAmount(Integer.parseInt(amount))
+                            .paidAmount(amount)
                             .payMethod(PayMethod.from((String) jsonObject.get("method")))
                             .paidAt(LocalDateTime.parse((String) jsonObject.get("approvedAt")))
                             .status(PaymentStatus.SUCCESS)
