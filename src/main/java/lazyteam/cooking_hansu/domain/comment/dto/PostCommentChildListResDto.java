@@ -6,14 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class PostCommentListResDto {
+public class PostCommentChildListResDto {
     private UUID commentId; // 댓글 ID
     private UUID postId; // 게시물 ID
     private UUID authorId; // 작성자 ID
@@ -22,6 +21,4 @@ public class PostCommentListResDto {
     private String content; // 댓글 내용
     private LocalDateTime createdAt; // 생성일시
     private LocalDateTime updatedAt; // 수정일시
-    private Boolean isDeleted; // 삭제 여부
-    private List<PostCommentChildListResDto> childComments; // 대댓글 목록
 }

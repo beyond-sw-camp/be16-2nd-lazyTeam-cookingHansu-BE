@@ -50,10 +50,6 @@ public class PostComment extends BaseIdAndTimeEntity {
     @Column(name = "comment_is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean commentIsDeleted =false;
 
-    @Builder.Default
-    @Column(name = "like_count", columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private Integer likeCount = 0;
-
     public void updateContent(String content) {
         this.content = content;
     }

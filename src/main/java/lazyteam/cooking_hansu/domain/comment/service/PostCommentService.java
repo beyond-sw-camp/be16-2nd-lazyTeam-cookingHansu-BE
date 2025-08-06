@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.comment.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import lazyteam.cooking_hansu.domain.comment.dto.PostCommentChildListResDto;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentCreateDto;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentListResDto;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentUpdateDto;
@@ -66,20 +67,26 @@ public class PostCommentService {
 
         List<PostComment> comments = postCommentRepository.findAllByPost(post);
         return comments.stream()
+                .filter(c -> !c.getCommentIsDeleted() || !c.getChildComments().isEmpty()) //  삭제된 댓글이지만 자식 있으면 남김
                 .map(c -> PostCommentListResDto.builder()
                         .commentId(c.getId())
+                        .postId(c.getPost().getId())
+                        .authorId(c.getUser().getId())
+                        .authorNickName(c.getUser().getNickname())
+                        .authorProfileImage(c.getUser().getProfileImageUrl())
                         .content(c.getContent())
                         .createdAt(c.getCreatedAt())
                         .updatedAt(c.getUpdatedAt())
-                        .authorProfileImage(c.getUser().getProfileImageUrl())
-                        .authorNickname(c.getUser().getNickname())
-                        .childComments(c.getChildComments().stream().map(child -> PostCommentListResDto.builder()
+                        .isDeleted(c.getCommentIsDeleted())
+                        .childComments(c.getChildComments().stream().map(child -> PostCommentChildListResDto.builder()
                                 .commentId(child.getId())
+                                .postId(child.getPost().getId())
+                                .authorId(child.getUser().getId())
+                                .authorNickName(child.getUser().getNickname())
+                                .authorProfileImage(child.getUser().getProfileImageUrl())
                                 .content(child.getContent())
                                 .createdAt(child.getCreatedAt())
                                 .updatedAt(child.getUpdatedAt())
-                                .authorProfileImage(child.getUser().getProfileImageUrl())
-                                .authorNickname(child.getUser().getNickname())
                                 .build()).toList())
                         .build())
                 .toList();
