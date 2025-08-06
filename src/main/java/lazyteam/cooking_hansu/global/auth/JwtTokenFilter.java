@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class JwtTokenFilter extends GenericFilter {
 
-    @Value("${jwt.secretKeyAt")
+    @Value("${jwt.secretKeyAt}")
     private String secretKey;
 
     @Override

@@ -43,9 +43,7 @@ public class SecurityConfig {
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
                 .authorizeHttpRequests(a -> a.requestMatchers(
-                        "/user/create",
-                        "/user/login",
-                        "/user/google/login", // Google OAuth 로그인
+                        "/user/**", // Google OAuth 로그인
                         "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
                         "/api-docs/**",       // OpenAPI JSON
@@ -53,9 +51,7 @@ public class SecurityConfig {
                         "/swagger-resources/**", // Swagger 리소스
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
-                        "/report/**", // Report 관련 API
-                        "user/**"
-
+                        "/report/**" // Report 관련 API
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

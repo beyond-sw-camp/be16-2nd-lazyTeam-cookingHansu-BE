@@ -39,6 +39,9 @@ public class User extends BaseIdAndTimeEntity {
     @Column(nullable = true) // 일반 회원가입시에는 null
     private String socialId; // 소셜 로그인 ID (KAKAO, GOOGLE, NAVER 등에서 제공하는 고유 ID)
 
+    @Builder.Default
+    private boolean isNewUser = true; // 신규 사용자 여부 (OAuth 사용자의 경우 처음에는 true로 설정)
+
     @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
     @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
     private String nickname; // 닉네임

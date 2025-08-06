@@ -1,7 +1,8 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.domain.user.dto.AccessTokenDto;
+import lazyteam.cooking_hansu.global.auth.dto.GoogleTokenDto;
 import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 @Service
+@Slf4j
 public class GoogleService {
 
     @Value("${oauth.google.client-id}")
@@ -22,7 +24,7 @@ public class GoogleService {
     private String googleRedirectUri;
 
 
-    public AccessTokenDto getAccessToken(String code){
+    public GoogleTokenDto getToken(String code){
 //        인가코드, clientId, client_secret, redirect_uri, grant_type
 
 //        Spring6부터 RestTemplate 비추천상태이기에, 대신 RestClient 사용
@@ -36,16 +38,16 @@ public class GoogleService {
         params.add("redirect_uri", googleRedirectUri);
         params.add("grant_type", "authorization_code");
 
-        ResponseEntity<AccessTokenDto> response =  restClient.post()
+        ResponseEntity<GoogleTokenDto> response = restClient.post()
                 .uri("https://oauth2.googleapis.com/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
 //                ?code=xxxx&client_id=yyyy&
                 .body(params)
 //                retrieve:응답 body값만을 추출
                 .retrieve()
-                .toEntity(AccessTokenDto.class);
+                .toEntity(GoogleTokenDto.class);
 
-        System.out.println("응답 accesstoken JSON " + response.getBody());
+        log.info("Google Token Response: {}", response.getBody());
         return response.getBody();
     }
 
@@ -56,7 +58,8 @@ public class GoogleService {
                 .header("Authorization", "Bearer "+token)
                 .retrieve()
                 .toEntity(GoogleProfileDto.class);
-        System.out.println("profile JSON" + response.getBody());
+
+        log.info("profile JSON: {}", response.getBody());
         return response.getBody();
     }
 }

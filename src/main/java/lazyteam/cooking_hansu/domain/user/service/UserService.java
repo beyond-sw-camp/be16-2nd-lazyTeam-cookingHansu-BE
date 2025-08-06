@@ -122,6 +122,7 @@ public class UserService {
         return user;
     }
 
+    // 사용자 생성 (OAuth 로그인용)
     public User createOauth(GoogleProfileDto dto, OauthType oauthType) {
         User user = User.builder()
                 .email(dto.getEmail())
@@ -133,4 +134,5 @@ public class UserService {
         userRepository.save(user);
         return user;
     }
+
 }
