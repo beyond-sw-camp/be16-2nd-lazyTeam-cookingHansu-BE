@@ -8,6 +8,8 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -23,9 +25,10 @@ public class PostComment extends BaseIdAndTimeEntity {
     @JoinColumn(name = "comment_parent_id")
     private PostComment parentComment;
 
-//    // 대댓글 목록
-//    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private List<Comment> childComments = new ArrayList<>();
+    // 대댓글 목록
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PostComment> childComments = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
