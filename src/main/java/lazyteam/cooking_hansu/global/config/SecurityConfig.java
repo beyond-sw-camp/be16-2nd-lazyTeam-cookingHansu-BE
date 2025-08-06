@@ -51,6 +51,8 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
+                        "/api/my/**", // Mypage 관련 API
+                        "lecture/**",
                         "user/**",
                         "chat/**",
                         "/connect/**", // WebSocket 연결 엔드포인트
@@ -78,4 +80,3 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
-

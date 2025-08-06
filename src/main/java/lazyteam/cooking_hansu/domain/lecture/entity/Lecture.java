@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
+import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
@@ -23,6 +24,7 @@ import java.util.List;
 @Getter
 @ToString
 @Builder
+
 
 public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
@@ -70,8 +72,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Column(columnDefinition = "TEXT")
     private String videoUrl;
 
+
     // 역방향 관계설정(조회용)
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
+
     private List<LectureReview> reviews;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
@@ -89,4 +93,17 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
+
+    public void updateImageUrl(String url) {
+        this.thumbUrl = url;
+    }
+
+    public void updateInfo(LectureUpdateDto dto) {
+        if (dto.getTitle() != null) this.title = dto.getTitle();
+        if (dto.getDescription() != null) this.description = dto.getDescription();
+        if (dto.getCategory() != null) this.category = dto.getCategory();
+        if (dto.getCategory() != null) this.level = dto.getLevel();
+        if (dto.getPrice() != null) this.price = dto.getPrice();
+
+    }
 }

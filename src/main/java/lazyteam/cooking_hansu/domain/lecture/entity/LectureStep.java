@@ -11,6 +11,7 @@ import lombok.*;
 @ToString
 @Builder
 //ERD상에서 조리순서(내레시피)가 두개라서 일단 클래스명 이렇게 명시했음.
+
 public class LectureStep extends BaseIdEntity {
 
     // FK: 강의

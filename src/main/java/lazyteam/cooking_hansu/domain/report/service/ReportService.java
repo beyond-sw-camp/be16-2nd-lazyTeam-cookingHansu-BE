@@ -40,6 +40,7 @@ public class ReportService {
         reportRepository.save(reportCreateDto.toEntity(user));
     }
 
+
     public Page<ReportDetailDto> findAll(Pageable pageable){
         Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
         //        TODO:나중에 실제 사용자의 ID로 변경 필요
