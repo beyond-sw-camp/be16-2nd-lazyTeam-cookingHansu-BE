@@ -50,7 +50,7 @@ public class ChatController {
         return new ResponseEntity<>(ResponseDto.ok(roomId, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-    //    채팅방 이름 수정
+    //    채팅방 이름 수정(상대방 이름 수정)
     @PatchMapping("/room/{roomId}/name")
     public ResponseEntity<?> updateChatRoomName(@PathVariable UUID roomId, @RequestBody ChatRoomUpdateDto updateDto) {
         chatService.updateChatRoomName(roomId, updateDto);

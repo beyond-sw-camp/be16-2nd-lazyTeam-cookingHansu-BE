@@ -202,7 +202,7 @@ public class ChatService {
 
                     return MyChatListDto.builder()
                             .chatRoomId(chatRoom.getId())
-                            .chatRoomName(chatRoom.getName())
+                            .customRoomName(participant.getCustomRoomName())
                             .otherUserName(otherUser.getName())
                             .otherUserNickname(otherUser.getNickname())
                             .otherUserProfileImage(otherUser.getProfileImageUrl())
@@ -280,17 +280,18 @@ public class ChatService {
         chatRoomRepository.save(newRoom);
 
         // 채팅방 참여자 추가
-        addParticipantToRoom(newRoom, user);
-        addParticipantToRoom(newRoom, otherUser);
+        addParticipantToRoom(newRoom, user, otherUser);
+        addParticipantToRoom(newRoom, otherUser, user);
 
         return newRoom.getId();
     }
 
     // 채팅방 참여자 추가
-    public void addParticipantToRoom(ChatRoom chatRoom, User user) {
+    public void addParticipantToRoom(ChatRoom chatRoom, User user, User otherUser) {
         ChatParticipant chatParticipant = ChatParticipant.builder()
                 .chatRoom(chatRoom)
                 .user(user)
+                .customRoomName(otherUser.getName())
                 .build();
         chatParticipantRepository.save(chatParticipant);
     }
@@ -335,7 +336,7 @@ public class ChatService {
         }
     }
 
-    //    채팅방 이름 변경
+    //    채팅방 이름 변경(상대방 이름 변경)
     public void updateChatRoomName(UUID roomId, ChatRoomUpdateDto updateDto) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
@@ -346,9 +347,11 @@ public class ChatService {
         if (!isRoomParticipant(user.getId(), roomId)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
+        // 채팅방 참여자 중 현재 사용자를 찾음
+        ChatParticipant participant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
+        // 참여자의 커스텀 채팅방 이름을 업데이트
+        participant.updateCustomRoomName(updateDto.getName());
 
-        // 채팅방 이름 변경
-        chatRoom.updateName(updateDto.getName());
     }
 
     // 메시지와 파일 유효성 검사

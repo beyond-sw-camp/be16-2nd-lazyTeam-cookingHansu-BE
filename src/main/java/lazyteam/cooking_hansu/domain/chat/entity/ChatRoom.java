@@ -18,6 +18,7 @@ import java.util.List;
 @Builder
 public class ChatRoom extends BaseIdAndTimeEntity {
 
+//    TODO: 채팅방 이름은 프론트에서 사용하지않지만 확장성을 대비하여 살려둠.
     @NotBlank(message = "채팅방 이름은 필수입니다")
     @Size(max = 100, message = "채팅방 이름은 100자 이하여야 합니다")
     @Column(name = "name", nullable = false, length = 100)
@@ -30,8 +31,4 @@ public class ChatRoom extends BaseIdAndTimeEntity {
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>(); // 채팅 메시지 목록
-
-    public void updateName(String name) {
-        this.name = name;
-    }
 }

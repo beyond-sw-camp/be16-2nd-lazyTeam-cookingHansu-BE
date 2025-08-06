@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 public class MyChatListDto {
     private UUID chatRoomId; // 채팅방 ID
-    private String chatRoomName; // 채팅방 이름
+    private String customRoomName; // 커스텀 채팅방 이름
     private String otherUserName; // 상대방 이름
     private String otherUserNickname; // 상대방 닉네임
     private String otherUserProfileImage; // 상대방 프로필 이미지 URL

@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.chat.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -23,4 +24,10 @@ public class ChatParticipant extends BaseIdAndTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // 참여자 정보
 
+    @Column(name = "custom_room_name", length = 100)
+    private String customRoomName; // 이 유저에게 보이는 채팅방 이름
+
+    public void updateCustomRoomName(String customRoomName) {
+        this.customRoomName = customRoomName;
+    }
 }
