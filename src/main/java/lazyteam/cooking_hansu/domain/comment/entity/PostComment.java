@@ -1,19 +1,16 @@
 package lazyteam.cooking_hansu.domain.comment.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.post.entity.Post;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
-import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
-/**
- * 레시피 공유 게시글의 조리순서별 추가 코멘트 엔티티
- * ERD의 post_comment 테이블과 매핑
- * 하나의 조리순서에 하나의 코멘트
- */
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "post_comment",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "step_id"}))
+@Table(name = "comment")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,39 +18,37 @@ import lombok.*;
 @ToString
 public class PostComment extends BaseIdAndTimeEntity {
 
+    // 부모 댓글 (자기참조)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_parent_id")
+    private PostComment parentComment;
+
+//    // 대댓글 목록
+//    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<Comment> childComments = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    private Post postId; // 게시글 ID
+    private Post post; //게시물 ID
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "step_id", nullable = false)
-    private RecipeStep stepId; // 조리순서 ID
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; //작성자 ID
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content; // 코멘트 내용
+    @NotBlank(message = "댓글 내용은 필수입니다")
+    @Size(max = 1000, message = "댓글 내용은 1000자 이하여야 합니다")
+    @Column(name = "comment_content", nullable = false , columnDefinition = "TEXT")
+    private String content;
 
-    // ========== 비즈니스 메서드 ==========
+    @Column(name = "comment_deleted_at")
+    private LocalDateTime commentDeletedAt;
 
-    /**
-     * 코멘트 내용 수정
-     */
-    public void updateContent(String content) {
-        if (content != null && !content.trim().isEmpty()) {
-            this.content = content.trim();
-        }
-    }
+    @Builder.Default
+    @Column(name = "comment_is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean commentIsDeleted =false;
 
-    /**
-     * 코멘트 유효성 확인
-     */
-    public boolean isValid() {
-        return this.content != null && !this.content.trim().isEmpty();
-    }
+    @Builder.Default
+    @Column(name = "like_count", columnDefinition = "INT UNSIGNED DEFAULT 0")
+    private Integer likeCount = 0;
 
-    /**
-     * 특정 게시글의 특정 조리순서에 대한 코멘트인지 확인
-     */
-    public boolean belongsTo(Long postId, Long stepId) {
-        return this.postId.equals(postId) && this.stepId.equals(stepId);
-    }
 }
