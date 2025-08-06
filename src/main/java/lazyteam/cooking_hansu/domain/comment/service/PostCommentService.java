@@ -27,7 +27,7 @@ public class PostCommentService {
     private final PostRepository postRepository;
 
 //    댓글 생성
-    public void createComment(PostCommentCreateDto postCommentCreateDto) {
+    public UUID createComment(PostCommentCreateDto postCommentCreateDto) {
 
         // 유저가 존재하는지 확인
         UUID userId =UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -58,6 +58,7 @@ public class PostCommentService {
                     .build();
         }
         postCommentRepository.save(postComment);
+        return postComment.getId();
     }
 
 //    댓글 목록 조회
@@ -93,10 +94,29 @@ public class PostCommentService {
     }
 
     // 댓글 수정
-    public void updateComment(UUID commentId, PostCommentUpdateDto postCommentUpdateDto) {
+    public UUID updateComment(UUID commentId, PostCommentUpdateDto postCommentUpdateDto) {
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
         postComment.updateContent(postCommentUpdateDto.getContent());
+        return postComment.getId();
     }
 
 
+    // 댓글 삭제
+    public void deleteComment(UUID commentId) {
+        PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+
+        if(postComment.getChildComments().isEmpty()) {
+            // 자식 댓글이 없는 경우 댓글 삭제
+            postCommentRepository.delete(postComment);
+        } else {
+            // 자식 댓글이 있는 경우 댓글을 삭제하지 않고 상태만 변경
+            postComment.deleteComment();
+        }
+
+//        원댓글도 삭제되었고 대댓글도 모두 삭제되었을 경우
+        if (postComment.getParentComment() != null && postComment.getParentComment().getChildComments().isEmpty()) {
+            // 부모 댓글이 있고, 부모 댓글의 자식 댓글이 모두 삭제된 경우
+            postCommentRepository.delete(postComment.getParentComment());
+        }
+    }
 }

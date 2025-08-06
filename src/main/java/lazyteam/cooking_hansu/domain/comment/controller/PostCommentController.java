@@ -24,8 +24,8 @@ public class PostCommentController {
 //    댓글 생성
     @PostMapping("/create")
     public ResponseEntity<?> createComment(@Valid @RequestBody PostCommentCreateDto postCommentCreateDto) {
-        postCommentService.createComment(postCommentCreateDto);
-        return new ResponseEntity<>(ResponseDto.ok("댓글이 등록되었습니다.", HttpStatus.CREATED), HttpStatus.CREATED);
+        UUID commentId = postCommentService.createComment(postCommentCreateDto);
+        return new ResponseEntity<>(ResponseDto.ok(commentId, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
 //    댓글 목록 조회
@@ -38,7 +38,14 @@ public class PostCommentController {
 //    댓글 수정
     @PatchMapping("/update/{commentId}")
     public ResponseEntity<?> updateComment(@PathVariable UUID commentId, @Valid @RequestBody PostCommentUpdateDto postCommentUpdateDto) {
-        postCommentService.updateComment(commentId, postCommentUpdateDto);
-        return new ResponseEntity<>(ResponseDto.ok("댓글이 수정되었습니다.", HttpStatus.OK), HttpStatus.OK);
+        UUID updateCommentId = postCommentService.updateComment(commentId, postCommentUpdateDto);
+        return new ResponseEntity<>(ResponseDto.ok(updateCommentId, HttpStatus.OK), HttpStatus.OK);
+    }
+
+//    댓글 삭제
+    @DeleteMapping("/delete/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable UUID commentId) {
+        postCommentService.deleteComment(commentId);
+        return new ResponseEntity<>(ResponseDto.ok("댓글이 삭제되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 }

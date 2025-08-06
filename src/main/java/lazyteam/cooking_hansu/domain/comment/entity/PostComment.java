@@ -53,4 +53,9 @@ public class PostComment extends BaseIdAndTimeEntity {
     public void updateContent(String content) {
         this.content = content;
     }
+
+    public void deleteComment() {
+        this.commentIsDeleted = true;
+        this.commentDeletedAt = LocalDateTime.now();
+    }
 }
