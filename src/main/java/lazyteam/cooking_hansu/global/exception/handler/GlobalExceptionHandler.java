@@ -261,12 +261,29 @@ public class GlobalExceptionHandler {
 //        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    // 요청 body나 multipart 데이터 누락
+    /**
+     * ======================== 파일 업로드 관련 예외 ========================
+     */
+
+    // 파일 업로드 크기 초과
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<?> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException e) {
+        log.error("[MaxUploadSizeExceededException] {}", e.getMessage());
+        return buildError(HttpStatus.PAYLOAD_TOO_LARGE, "업로드 파일 크기가 제한을 초과했습니다. 파일 크기를 확인해주세요.");
+    }
+
+    // 멀티파트 처리 에러
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<?> handleMultipartException(MultipartException e) {
+        log.error("[MultipartException] {}", e.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, "파일 업로드 처리 중 오류가 발생했습니다. 파일을 다시 선택해주세요.");
+    }
+
+    // 요청 body나 multipart 데이터 누락 (파일 관련)
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException e) {
         log.error("[MissingServletRequestPartException] {}", e.getMessage());
-         return buildError(HttpStatus.BAD_REQUEST, "요청에 필요한 데이터가 누락되었습니다.");
-//        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, "업로드할 파일이 누락되었습니다. 파일을 선택해주세요.");
     }
 
     // 핸들러를 찾을 수 없음 (404)
@@ -276,28 +293,6 @@ public class GlobalExceptionHandler {
          return buildError(HttpStatus.NOT_FOUND, "요청한 API 엔드포인트를 찾을 수 없습니다.");
 //        return buildError(HttpStatus.NOT_FOUND, e.getMessage());
     }
-
-    /**
-     * ======================== 파일 업로드 관련 예외 ========================
-     */
-
-    // 파일 업로드 크기 초과
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<?> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException e) {
-        log.error("[MaxUploadSizeExceededException] {}", e.getMessage());
-        // return buildError(HttpStatus.PAYLOAD_TOO_LARGE, "업로드 파일 크기가 제한을 초과했습니다.");
-        return buildError(HttpStatus.PAYLOAD_TOO_LARGE, e.getMessage());
-    }
-
-    // 멀티파트 처리 에러
-    @ExceptionHandler(MultipartException.class)
-    public ResponseEntity<?> handleMultipartException(MultipartException e) {
-        log.error("[MultipartException] {}", e.getMessage());
-        // return buildError(HttpStatus.BAD_REQUEST, "파일 업로드 처리 중 오류가 발생했습니다.");
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-
-
 
     /**
      * ======================== IO 관련 예외 ========================

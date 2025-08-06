@@ -16,7 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 
@@ -41,7 +40,6 @@ public class SecurityConfig {
                                 .accessDeniedHandler(jwtAuthorizationHandler)
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
-
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
@@ -54,6 +52,12 @@ public class SecurityConfig {
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "/api/my/**", // Mypage 관련 API
+                        "lecture/**",
+                        "user/**",
+                        "chat/**",
+                        "/connect/**", // WebSocket 연결 엔드포인트
+                        "/topic/**", // WebSocket 토픽
+                        "/publish/**", // WebSocket 메시지 발행
                         "/lecture/**",
                         "/user/**",
                         "/api/my/recipes/**", // 레시피 API 임시 허용 (테스트용)
@@ -61,7 +65,6 @@ public class SecurityConfig {
 
 
                 ).permitAll().anyRequest().authenticated())
-
                 .build();
     }
 
