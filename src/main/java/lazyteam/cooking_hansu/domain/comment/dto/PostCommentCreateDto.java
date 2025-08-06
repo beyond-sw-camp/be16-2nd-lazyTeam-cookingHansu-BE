@@ -17,12 +17,4 @@ public class PostCommentCreateDto {
     private UUID postId; // 게시글 ID
     private UUID parentCommentId; // 부모 댓글 ID (대댓글의 경우)
     private String content; // 댓글 내용
-
-    public PostCommentCreateDto toEntity(PostComment postComment) {
-        return PostCommentCreateDto.builder()
-                .postId(postComment.getPost().getId())
-                .parentCommentId(postComment.getParentComment() != null ? postComment.getParentComment().getId() : null)
-                .content(postComment.getContent())
-                .build();
-    }
 }

@@ -34,6 +34,10 @@ public class PostCommentService {
         // 부모 댓글이 없는 경우 null로 설정
         if(postCommentCreateDto.getParentCommentId() != null) {
             PostComment parentComment = postCommentRepository.findById(postCommentCreateDto.getParentCommentId()).orElseThrow(() -> new EntityNotFoundException("부모 댓글이 존재하지 않습니다."));
+            //  depth 1 제한
+            if (parentComment.getParentComment() != null) {
+                throw new IllegalArgumentException("대댓글에는 대댓글을 작성할 수 없습니다.");
+            }
             postComment = PostComment.builder()
                     .post(post)
                     .parentComment(parentComment)
