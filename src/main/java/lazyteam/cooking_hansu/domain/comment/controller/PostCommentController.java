@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.comment.controller;
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentCreateDto;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentListResDto;
+import lazyteam.cooking_hansu.domain.comment.dto.PostCommentUpdateDto;
 import lazyteam.cooking_hansu.domain.comment.service.PostCommentService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,12 @@ public class PostCommentController {
     public ResponseEntity<?> getCommentList(@PathVariable UUID postId) {
         List<PostCommentListResDto> commentList = postCommentService.findCommentList(postId);
         return new ResponseEntity<>(ResponseDto.ok(commentList, HttpStatus.OK), HttpStatus.OK);
+    }
+
+//    댓글 수정
+    @PatchMapping("/update/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable UUID commentId, @Valid @RequestBody PostCommentUpdateDto postCommentUpdateDto) {
+        postCommentService.updateComment(commentId, postCommentUpdateDto);
+        return new ResponseEntity<>(ResponseDto.ok("댓글이 수정되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 }

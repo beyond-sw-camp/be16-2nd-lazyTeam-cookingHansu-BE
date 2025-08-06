@@ -54,4 +54,7 @@ public class PostComment extends BaseIdAndTimeEntity {
     @Column(name = "like_count", columnDefinition = "INT UNSIGNED DEFAULT 0")
     private Integer likeCount = 0;
 
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

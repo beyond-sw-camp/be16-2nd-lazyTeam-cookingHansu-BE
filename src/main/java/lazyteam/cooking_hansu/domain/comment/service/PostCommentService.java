@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.comment.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentCreateDto;
 import lazyteam.cooking_hansu.domain.comment.dto.PostCommentListResDto;
+import lazyteam.cooking_hansu.domain.comment.dto.PostCommentUpdateDto;
 import lazyteam.cooking_hansu.domain.comment.entity.PostComment;
 import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
@@ -85,7 +86,10 @@ public class PostCommentService {
     }
 
     // 댓글 수정
-    public void updateComment(UUID commentId, String content) {
-
+    public void updateComment(UUID commentId, PostCommentUpdateDto postCommentUpdateDto) {
+        PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+        postComment.updateContent(postCommentUpdateDto.getContent());
     }
+
+
 }
