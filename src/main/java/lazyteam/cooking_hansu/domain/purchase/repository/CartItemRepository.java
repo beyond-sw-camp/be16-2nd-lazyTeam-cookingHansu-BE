@@ -24,6 +24,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
     void deleteAllByUser(User user);
 
     // 장바구니에서 유저의 강의 ID 조회하여 결제 완료시 삭제하기 위한 메서드
-    List<CartItem> findAllByUserAndLectureIdIn(User user, List<UUID> lectureIds);
+    CartItem findByUserAndLectureId(User user, UUID lectureId);
 
 }

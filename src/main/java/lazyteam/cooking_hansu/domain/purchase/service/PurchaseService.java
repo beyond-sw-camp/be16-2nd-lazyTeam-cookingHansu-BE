@@ -31,6 +31,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -67,22 +69,17 @@ public class PurchaseService {
         UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(testUserId)
                 .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
-        log.info("dto 잘 들어 왔습니다." + tossPaymentConfirmDto);
 
-        log.info("테스트용 유저세팅완료");
         JSONParser parser = new JSONParser();
 
         TossPrePay tossPrePay = tossPrepayRepository.findByOrderId(tossPaymentConfirmDto.getOrderId())
                 .orElseThrow(()-> new EntityNotFoundException("해당 주문번호가 없습니다."));
 
-        log.info("받아놓은 곳에서 아이디 추출");
         String orderId = tossPrePay.getOrderId();
         Long amount = tossPrePay.getAmount();
         String paymentKey = tossPaymentConfirmDto.getPaymentKey();
-        log.info("임시저장에서 추출 완료");
 
         try {
-            log.info("토스 요청 본문 생성중");
             // 1. Toss 요청 본문 생성
             JSONObject obj = new JSONObject();
             obj.put("orderId", orderId);
@@ -94,7 +91,6 @@ public class PurchaseService {
             String authHeader = "Basic " + new String(
                     encoder.encode((widgetSecretKey + ":").getBytes(StandardCharsets.UTF_8))
             );
-            log.info("호출중");
             // 3. Toss 결제 승인 API 호출
             URL url = new URL("https://api.tosspayments.com/v1/payments/confirm");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -102,7 +98,6 @@ public class PurchaseService {
             connection.setRequestProperty("Authorization", authHeader);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
-            log.info("호출성공");
             // 프론트에서 SDK 호출 전 받아놓았던 값과 paymentkey(UUID로 생성한 값, dto로 받음)을 직렬화 하여 toss로 보냄
             try (OutputStream outputStream = connection.getOutputStream()) {
                 outputStream.write(obj.toString().getBytes(StandardCharsets.UTF_8));
@@ -112,7 +107,6 @@ public class PurchaseService {
             // code가 200이면 성공이라는 뜻.
             boolean isSuccess = code == 200;
 
-            log.info("성공");
 
             // 4. 응답 파싱 (성공시 InputStream, 실패시 ErrorStream 사용)
             InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
@@ -120,14 +114,15 @@ public class PurchaseService {
             try (Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
                 jsonObject = (JSONObject) parser.parse(reader);
             }
+            log.info("응답파싱성공");
 
             // 5. 결제 성공 시 후처리 로직
             if (isSuccess) {
                 try {
+                    log.info("저장된 강의 ");
                     List<UUID> lectureIds = tossPrePay.getLectureIds();
 
-                    log.info(jsonObject.get("method").toString());
-
+                    log.info(jsonObject.toJSONString());
 
                     // 5-1. 결제 정보 저장
                     Payment payment = Payment.builder()
@@ -136,10 +131,11 @@ public class PurchaseService {
                             .orderId(orderId)
                             .paidAmount(amount)
                             .payMethod(PayMethod.from((String) jsonObject.get("method")))
-                            .paidAt(LocalDateTime.parse((String) jsonObject.get("approvedAt")))
+                            .paidAt(OffsetDateTime.parse((String) jsonObject.get("approvedAt")).toLocalDateTime())
                             .status(PaymentStatus.SUCCESS)
                             .build();
                     paymentRepository.save(payment);
+                    log.info("결제정보 저장 완료");
 
                     // 5-2. 구매 내역 저장
                     for (UUID lectureId : lectureIds) {
@@ -150,18 +146,23 @@ public class PurchaseService {
                                 .user(user)
                                 .lecture(lecture)
                                 .payment(payment)
+                                .lectureTitleSnapshot(lecture.getTitle())
+                                .priceSnapshot(Integer.parseInt(jsonObject.get("balanceAmount").toString()))
                                 .build();
                         purchasedLectureRepository.save(purchased);
                     }
+                    log.info("구매내역저장완료");
 
                     // 5-3. 장바구니에서 해당 강의만 삭제
                     deleteSelected(user.getId(), lectureIds);
+                    log.info("강의삭제완료");
 
                 } catch (Exception e) {
                     log.error("결제 후처리 중 오류 발생", e);
                     throw new RuntimeException("결제 후처리 중 오류 발생: " + e.getMessage(), e);
                 }
             }
+            log.info("리턴 전" + jsonObject.toJSONString());
 
             return jsonObject;
 
@@ -177,7 +178,11 @@ public class PurchaseService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
 
-        List<CartItem> items = cartItemRepository.findAllByUserAndLectureIdIn(user, lectureIds);
+        List<CartItem> items = new ArrayList<>();
+
+        for(UUID id : lectureIds) {
+            items.add(cartItemRepository.findByUserAndLectureId(user, id));
+        }
 
         if (items.isEmpty()) {
             throw new IllegalArgumentException("삭제할 장바구니 항목이 없습니다.");

@@ -32,12 +32,12 @@ public class PurchaseController {
 
 
     @PostMapping("/confirm")
-    public ResponseEntity<?> confirmPayment(@RequestBody @Valid TossPaymentConfirmDto tossPaymentConfirmDto) {
+    public JSONObject confirmPayment(@RequestBody @Valid TossPaymentConfirmDto tossPaymentConfirmDto) {
         System.out.println(tossPaymentConfirmDto);
 
         JSONObject paymentResult = purchaseService.confirmPayment(tossPaymentConfirmDto);
 
-        return new ResponseEntity<>(ResponseDto.ok(paymentResult,HttpStatus.OK), HttpStatus.OK);
+        return paymentResult;
     }
 
 
