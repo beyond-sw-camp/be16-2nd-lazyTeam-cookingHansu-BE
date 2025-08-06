@@ -86,6 +86,15 @@ public class ChatService {
             readStatusRepository.save(readStatus);
         }
 
+        // 참여자 상태 복구
+        for (ChatParticipant participant : participants) {
+            if (!participant.getUser().getId().equals(sender.getId())) {
+                if ("N".equals(participant.getIsActive())) {
+                    participant.joinChatRoom(); // 참여자 상태 복구: isActive = "Y"
+                }
+            }
+        }
+
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
                 .roomId(roomId)
@@ -156,7 +165,7 @@ public class ChatService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByUser(user);
+    List<ChatParticipant> chatParticipants = chatParticipantRepository.findByUserAndIsActive(user, "Y");
 
         return chatParticipants.stream()
                 .map(participant -> {
@@ -229,7 +238,17 @@ public class ChatService {
         }
         if (!check) throw new EntityNotFoundException("해당 채팅방에 참여하지 않은 사용자입니다.");
 
-        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+        ChatParticipant participant = chatParticipantRepository
+                .findByChatRoomAndUser(chatRoom, user)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
+
+        List<ChatMessage> chatMessages;
+
+        if (participant.getLeftAt() != null) {
+            chatMessages = chatMessageRepository.findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(chatRoom, participant.getLeftAt());
+        } else {
+            chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+        }
         List<ChatMessageResDto> result = new ArrayList<>();
         for (ChatMessage cm : chatMessages) {
             // 메시지에 파일이 있는 경우
@@ -292,6 +311,7 @@ public class ChatService {
                 .chatRoom(chatRoom)
                 .user(user)
                 .customRoomName(otherUser.getName())
+                .isActive("Y")
                 .build();
         chatParticipantRepository.save(chatParticipant);
     }
@@ -327,10 +347,10 @@ public class ChatService {
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
-        chatParticipantRepository.delete(chatParticipant);
+        chatParticipant.leaveChatRoom();
 
         // 채팅방에 참여자가 없으면 채팅방 삭제
-        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoomAndIsActive(chatRoom, "Y");
         if (participants.isEmpty()) {
             chatRoomRepository.delete(chatRoom);
         }
