@@ -26,7 +26,7 @@ public class PostComment extends BaseIdAndTimeEntity {
     private PostComment parentComment;
 
     // 대댓글 목록
-    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
     @Builder.Default
     private List<PostComment> childComments = new ArrayList<>();
 

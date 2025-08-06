@@ -10,5 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface PostCommentRepository extends JpaRepository<PostComment, UUID> {
-    List<PostComment> findAllByPost(Post post);
+
+    List<PostComment> findAllByPostAndParentCommentIsNull(Post post);
 }

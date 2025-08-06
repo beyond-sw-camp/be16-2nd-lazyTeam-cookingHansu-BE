@@ -66,7 +66,7 @@ public class PostCommentService {
     public List<PostCommentListResDto> findCommentList(UUID postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
 
-        List<PostComment> comments = postCommentRepository.findAllByPost(post);
+        List<PostComment> comments = postCommentRepository.findAllByPostAndParentCommentIsNull(post);
         return comments.stream()
                 .filter(c -> !c.getCommentIsDeleted() || !c.getChildComments().isEmpty()) //  삭제된 댓글이지만 자식 있으면 남김
                 .map(c -> PostCommentListResDto.builder()
@@ -105,18 +105,16 @@ public class PostCommentService {
     public void deleteComment(UUID commentId) {
         PostComment postComment = postCommentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
 
-        if(postComment.getChildComments().isEmpty()) {
-            // 자식 댓글이 없는 경우 댓글 삭제
-            postCommentRepository.delete(postComment);
-        } else {
-            // 자식 댓글이 있는 경우 댓글을 삭제하지 않고 상태만 변경
-            postComment.deleteComment();
-        }
+        if (postComment.getParentComment() != null) {
+            PostComment parent = postComment.getParentComment();
+            parent.getChildComments().remove(postComment); // 부모 댓글에서 자식 댓글 제거
 
-//        원댓글도 삭제되었고 대댓글도 모두 삭제되었을 경우
-        if (postComment.getParentComment() != null && postComment.getParentComment().getChildComments().isEmpty()) {
-            // 부모 댓글이 있고, 부모 댓글의 자식 댓글이 모두 삭제된 경우
-            postCommentRepository.delete(postComment.getParentComment());
+            if (parent.getChildComments().isEmpty() && parent.getCommentIsDeleted()) {
+                postCommentRepository.delete(parent); // 자식도 없고 부모도 soft delete 된 경우
+            }
+        }
+        else{
+            postComment.deleteComment();
         }
     }
 }
