@@ -90,4 +90,9 @@ public class LectureQnaService {
         lectureQna.updateQnAText(lectureQnaUpdateDto);
     }
 
+    // Q&A 삭제
+    public void deleteQna(UUID qnaId) {
+        LectureQna lectureQna = lectureQnaRepository.findById(qnaId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 Q&A입니다. qnaId: " + qnaId));
+        lectureQnaRepository.delete(lectureQna);
+    }
 }

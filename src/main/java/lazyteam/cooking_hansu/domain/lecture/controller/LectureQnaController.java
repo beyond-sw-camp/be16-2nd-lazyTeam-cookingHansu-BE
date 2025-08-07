@@ -44,4 +44,10 @@ public class LectureQnaController {
         return new ResponseEntity<>(ResponseDto.ok("Q&A가 수정되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 
+//    Q&A 삭제
+    @DeleteMapping("/{qnaId}/delete")
+    public ResponseEntity<?> deleteQna(@PathVariable UUID qnaId) {
+        lectureQnaService.deleteQna(qnaId);
+        return new ResponseEntity<>(ResponseDto.ok("Q&A가 삭제되었습니다.", HttpStatus.OK), HttpStatus.OK);
+    }
 }

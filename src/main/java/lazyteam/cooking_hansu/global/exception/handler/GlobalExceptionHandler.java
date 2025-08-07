@@ -126,16 +126,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransactionSystemException.class)
     public ResponseEntity<?> handleTransactionSystem(TransactionSystemException e) {
         log.error("[TransactionSystemException] {}", e.getMessage(), e);
-        // return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "트랜잭션 처리 중 오류가 발생했습니다.");
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "트랜잭션 처리 중 오류가 발생했습니다.");
+//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     // JDBC 에러 (SQLSyntaxError, Connection 에러 등 포함)
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<?> handleSQLException(SQLException e) {
         log.error("[SQLException] {}", e.getMessage(), e);
-        // return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 처리 중 오류가 발생했습니다.");
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 처리 중 오류가 발생했습니다.");
+//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     /**
@@ -165,8 +165,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointer(NullPointerException e) {
         log.error("[NullPointerException]", e);
-        // return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부에서 Null 참조 오류가 발생했습니다.");
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부에서 Null 참조 오류가 발생했습니다.");
+//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     // 타임아웃
@@ -204,16 +204,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<?> handleHandlerMethodValidation(HandlerMethodValidationException e) {
         log.error("[HandlerMethodValidationException] {}", e.getMessage());
-        // return buildError(HttpStatus.BAD_REQUEST, "요청 파라미터가 유효하지 않습니다.");
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+         return buildError(HttpStatus.BAD_REQUEST, "요청 파라미터가 유효하지 않습니다.");
+//        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     // @Validated 메서드 파라미터 검증 실패
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraintViolation(ConstraintViolationException e) {
         log.error("[ConstraintViolationException] {}", e.getMessage());
-        // return buildError(HttpStatus.BAD_REQUEST, "요청 값이 유효하지 않습니다.");
-        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
+         return buildError(HttpStatus.BAD_REQUEST, "요청 값이 유효하지 않습니다.");
+//        return buildError(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     // 필수 요청 파라미터(@RequestParam) 누락
@@ -241,16 +241,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<?> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e) {
         log.error("[HttpRequestMethodNotSupportedException] {}", e.getMessage());
-//         return buildError(HttpStatus.METHOD_NOT_ALLOWED, String.format("지원하지 않는 HTTP 메서드입니다. 지원되는 메서드는 %s입니다.", e.getSupportedHttpMethods()));
-        return buildError(HttpStatus.METHOD_NOT_ALLOWED, e.getMessage());
+         return buildError(HttpStatus.METHOD_NOT_ALLOWED, String.format("지원하지 않는 HTTP 메서드입니다. 지원되는 메서드는 %s입니다.", e.getSupportedHttpMethods()));
+//        return buildError(HttpStatus.METHOD_NOT_ALLOWED, e.getMessage());
     }
 
     // 지원하지 않는 미디어 타입 (JSON만 지원하는데 XML 요청)
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<?> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException e) {
         log.error("[HttpMediaTypeNotSupportedException] {}", e.getContentType());
-        // return buildError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, String.format("지원하지 않는 미디어 타입: %s. 지원되는 타입은 %s입니다.", e.getContentType(), e.getSupportedMediaTypes()));
-        return buildError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
+         return buildError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, String.format("지원하지 않는 미디어 타입: %s. 지원되는 타입은 %s입니다.", e.getContentType(), e.getSupportedMediaTypes()));
+//        return buildError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, e.getMessage());
     }
 
     // JSON 파싱 에러
@@ -302,8 +302,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IOException.class)
     public ResponseEntity<?> handleIOException(IOException e) {
         log.error("[IOException] {}", e.getMessage(), e);
-        // return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
+//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     /**
@@ -313,8 +313,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         log.error("[Unhandled Exception] {}", e.getMessage(), e);
-        // return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
+//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     /**
