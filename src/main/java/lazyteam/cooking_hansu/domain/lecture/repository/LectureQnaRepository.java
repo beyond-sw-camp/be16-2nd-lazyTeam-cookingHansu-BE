@@ -12,5 +12,5 @@ import java.util.UUID;
 @Repository
 public interface LectureQnaRepository extends JpaRepository<LectureQna, UUID> {
 
-    List<LectureQna> findAllByLecture(Lecture lecture);
+    Optional<List<LectureQna>> findAllByLecture(Lecture lecture);
 }

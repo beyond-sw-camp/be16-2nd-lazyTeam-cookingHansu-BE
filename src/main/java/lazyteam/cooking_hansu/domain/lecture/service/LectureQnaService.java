@@ -59,7 +59,7 @@ public class LectureQnaService {
     // Q&A 목록 조회
     public List<LectureQnaListDto> getQnaList(UUID lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 강의입니다. lectureId: " + lectureId));
-        List<LectureQna> qnaList = lectureQnaRepository.findAllByLecture(lecture);
+        List<LectureQna> qnaList = lectureQnaRepository.findAllByLecture(lecture).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 Q&A 목록입니다. lectureId: " + lectureId));
 
         return qnaList.stream()
                 .filter(qna -> qna.getParent() == null)
