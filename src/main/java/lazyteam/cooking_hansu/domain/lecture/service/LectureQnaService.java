@@ -2,10 +2,7 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lazyteam.cooking_hansu.domain.lecture.dto.qna.LectureQnaCreateDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.qna.LectureQnaListDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.qna.LectureQnaUpdateDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.qna.QnaStatus;
+import lazyteam.cooking_hansu.domain.lecture.dto.qna.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureQnaRepository;
@@ -74,11 +71,10 @@ public class LectureQnaService {
                         .updatedAt(qna.getUpdatedAt())
                         .userName(qna.getUser().getName())
                         .answers(qna.getChild() != null
-                                ? List.of(LectureQnaListDto.builder()
+                                ? List.of(LectureQnaChildDto.builder()
                                 .id(qna.getChild().getId())
                                 .parentId(qna.getId())
                                 .content(qna.getChild().getContent())
-                                .status(qna.getChild().getStatus())
                                 .createdAt(qna.getChild().getCreatedAt())
                                 .updatedAt(qna.getChild().getUpdatedAt())
                                 .userName(qna.getChild().getUser().getName())
