@@ -64,16 +64,19 @@ public class NoticeService {
         if (noticeUpdateDto.getTitle() == null || noticeUpdateDto.getContent() == null) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
         }
-        // 기존 이미지 삭제
-        if (notice.getImageUrl() != null) {
-            s3Uploader.delete(notice.getImageUrl());
-        }
 
-        String newImageUrl = null;
+        String newImageUrl = notice.getImageUrl(); // 기존 이미지 URL 유지
 
-        if(noticeUpdateDto.getNoticeImage() !=null){
+        // 새 이미지가 있을 때만 기존 이미지 삭제하고 새 이미지 업로드
+        if(noticeUpdateDto.getNoticeImage() != null){
+            // 기존 이미지 삭제
+            if (notice.getImageUrl() != null) {
+                s3Uploader.delete(notice.getImageUrl());
+            }
+            // 새 이미지 업로드
             newImageUrl = s3Uploader.upload(noticeUpdateDto.getNoticeImage(), "notice/");
         }
+        // 새 이미지가 없으면 기존 이미지 URL 그대로 유지
 
         notice.updateNotice(noticeUpdateDto, newImageUrl, notice.getAdmin());
     }
