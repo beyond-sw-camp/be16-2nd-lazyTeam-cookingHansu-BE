@@ -25,7 +25,7 @@ public class RedisConfig {
     private int port;
 
     @Bean
-    @Qualifier("rtInventory")
+    @Qualifier("rtTemplate")
     public RedisConnectionFactory rtConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(host);
@@ -36,15 +36,12 @@ public class RedisConfig {
     }
 
     @Bean
-    @Qualifier("rtInventory")
-    public RedisTemplate<String, String> rtTemplate(@Qualifier("rtInventory") RedisConnectionFactory rtConnectionFactory) {
+    @Qualifier("rtTemplate")
+    public RedisTemplate<String, String> rtTemplate(@Qualifier("rtTemplate") RedisConnectionFactory rtConnectionFactory) {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(rtConnectionFactory);
-        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 }

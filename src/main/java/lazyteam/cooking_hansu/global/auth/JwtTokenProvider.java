@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.global.auth;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
@@ -79,37 +78,35 @@ public class JwtTokenProvider {
         return token;
     }
 
-    // Refresh Token 검증
-    public boolean validateRefreshToken(String token) {
+    // RT 유효 시간
+    public long getRefreshTokenExpirationTime() {
+        return expirationRt * 60 * 1000L; // milliseconds
+    }
+
+    // RT 튜효성 검증
+    public boolean validateRefreshToken(String refreshToken) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(secret_rt_key)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(refreshToken);
             return true;
-        } catch (ExpiredJwtException e) {
-            return false;
         } catch (Exception e) {
             return false;
         }
     }
 
-    // Refresh Token에서 사용자 이메일 추출
-    public String getEmailFromRefreshToken(String token) {
+    // RT 토큰에서 이메일 추출
+    public String getEmailFromRefreshToken(String refreshToken) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secret_rt_key)
                     .build()
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(refreshToken)
                     .getBody();
             return claims.getSubject();
         } catch (Exception e) {
             return null;
         }
-    }
-
-    // Refresh Token 만료 시간 반환 (초 단위)
-    public long getRefreshTokenExpirationTime() {
-        return expirationRt * 60L; // 분을 초로 변환
     }
 }

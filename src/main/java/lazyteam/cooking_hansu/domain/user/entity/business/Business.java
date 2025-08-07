@@ -37,4 +37,13 @@ public class Business extends BaseIdAndTimeAndApprovalEntity {
     @Column(nullable = false)
     private String shopCategory; // 사업 업종
 
+    // Business 정보 업데이트 메서드
+    public void updateBusinessInfo(String businessNumber, String businessUrl, String businessName,
+                                  String businessAddress, String shopCategory) {
+        this.businessNumber = businessNumber;
+        this.businessUrl = businessUrl;
+        this.businessName = businessName;
+        this.businessAddress = businessAddress;
+        this.shopCategory = shopCategory;
+    }
 }

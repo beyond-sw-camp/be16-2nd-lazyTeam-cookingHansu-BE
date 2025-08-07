@@ -18,7 +18,7 @@ public class RefreshTokenService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
-    public RefreshTokenService(@Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate,
+    public RefreshTokenService(@Qualifier("rtTemplate") RedisTemplate<String, String> redisTemplate,
                               JwtTokenProvider jwtTokenProvider,
                               UserRepository userRepository) {
         this.redisTemplate = redisTemplate;
@@ -29,14 +29,15 @@ public class RefreshTokenService {
     // Refresh Token 저장 (TTL 설정)
     public void saveRefreshToken(String userId, String refreshToken) {
         try {
-            long expiration = jwtTokenProvider.getRefreshTokenExpirationTime();
+            long expirationInMillis = jwtTokenProvider.getRefreshTokenExpirationTime();
+            long expirationInSeconds = expirationInMillis / 1000L; // 밀리초를 초로 변환
             redisTemplate.opsForValue().set(
                 "refresh_token:" + userId,
                 refreshToken,
-                expiration,
+                expirationInSeconds,
                 TimeUnit.SECONDS
             );
-            log.info("Refresh token saved for user: {}", userId);
+            log.info("Refresh token saved for user: {} with expiration: {} seconds", userId, expirationInSeconds);
         } catch (Exception e) {
             log.error("Failed to save refresh token for user: {}", userId, e);
             throw new RuntimeException("Refresh token 저장에 실패했습니다.");

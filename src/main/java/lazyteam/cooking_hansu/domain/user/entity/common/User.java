@@ -180,4 +180,31 @@ public class User extends BaseIdAndTimeEntity {
     public boolean isCompleteProfile() {
         return name != null && nickname != null;
     }
+
+    // 1단계 추가 정보 업데이트 (닉네임, 역할)
+    public void updateStep1Info(String nickname, Role role) {
+        this.nickname = nickname;
+        this.role = role;
+    }
+
+    // 일반 회원 2단계 추가 정보 업데이트
+    public void updateGeneralType(GeneralType generalType) {
+        this.generalType = generalType;
+        this.isNewUser = false;
+    }
+
+    // 신규 사용자 상태 업데이트
+    public void completeRegistration() {
+        this.isNewUser = false;
+    }
+
+    // Chef 엔티티 설정
+    public void setChef(Chef chef) {
+        this.chef = chef;
+    }
+
+    // Business 엔티티 설정
+    public void setBusiness(Business business) {
+        this.business = business;
+    }
 }

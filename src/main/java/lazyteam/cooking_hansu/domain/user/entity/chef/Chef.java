@@ -31,4 +31,11 @@ public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @Column(length = 512, nullable = false)
     private String licenseUrl; // 자격증 이미지 url
+
+    // Chef 정보 업데이트 메서드
+    public void updateChefInfo(String licenseNumber, CuisineType cuisineType, String licenseUrl) {
+        this.licenseNumber = licenseNumber;
+        this.cuisineType = cuisineType;
+        this.licenseUrl = licenseUrl;
+    }
 }
