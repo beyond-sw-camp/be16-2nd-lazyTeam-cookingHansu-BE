@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.purchase.controller;
 
 import jakarta.validation.Valid;
+import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteAllDto;
+import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteOneDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemAddDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemListDto;
 import lazyteam.cooking_hansu.domain.purchase.service.CartItemService;
@@ -37,16 +39,14 @@ public class CartItemController {
 
 //    장바구니 단건 삭제
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteOne(
-            @RequestParam UUID userId,
-            @RequestParam UUID lectureId) {
-        cartItemService.deleteOne(userId, lectureId);
+    public ResponseEntity<?> deleteOne(@RequestBody CartDeleteOneDto cartDeleteOneDto) {
+        cartItemService.deleteOne(cartDeleteOneDto);
         return new ResponseEntity<>(ResponseDto.ok("단건삭제 완료",HttpStatus.OK),HttpStatus.OK);
     }
 
     @DeleteMapping("/deleteAll")
-    public ResponseEntity<?> deleteAll(@RequestParam UUID userId) {
-        cartItemService.deleteAll(userId);
+    public ResponseEntity<?> deleteAll(@RequestBody CartDeleteAllDto cartDeleteAllDto) {
+        cartItemService.deleteAll(cartDeleteAllDto);
         return new ResponseEntity<>(ResponseDto.ok("전체삭제 완료",HttpStatus.OK),HttpStatus.OK);
     }
 

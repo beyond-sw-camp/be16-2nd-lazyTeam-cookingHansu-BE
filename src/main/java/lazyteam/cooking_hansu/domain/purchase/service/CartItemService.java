@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
+import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteAllDto;
+import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteOneDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemAddDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemListDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
@@ -58,10 +60,10 @@ public class CartItemService {
     }
 
 
-    public void deleteOne(UUID userId, UUID lectureId) {
-        User user = userRepository.findById(userId)
+    public void deleteOne(CartDeleteOneDto cartDeleteOneDto) {
+        User user = userRepository.findById(cartDeleteOneDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
-        Lecture lecture = lectureRepository.findById(lectureId)
+        Lecture lecture = lectureRepository.findById(cartDeleteOneDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의 없음"));
 
         CartItem cartItem = cartItemRepository.findByUserAndLecture(user, lecture)
@@ -71,8 +73,8 @@ public class CartItemService {
     }
 
 
-    public void deleteAll(UUID userId) {
-        User user = userRepository.findById(userId)
+    public void deleteAll(CartDeleteAllDto cartDeleteAllDto) {
+        User user = userRepository.findById(cartDeleteAllDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
         cartItemRepository.deleteAllByUser(user);
     }
