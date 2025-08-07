@@ -44,6 +44,8 @@ public class RecipeResponseDto {
                 .category(recipe.getCategory())
                 .cookTime(recipe.getCookTime())
                 .userNickname(recipe.getUser().getNickname())
+                .createdAt(recipe.getCreatedAt())
+                .updatedAt(recipe.getUpdatedAt())
                 .ingredients(ingredients.stream()
                         .map(IngredientResponseDto::fromEntity)
                         .collect(Collectors.toList()))
