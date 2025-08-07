@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -21,6 +22,7 @@ public class NoticeDetailDto {
     private String content;
     private String imageUrl; // 이미지 URL을 추가할 수 있습니다.
     private String adminName; // 작성 관리자
+    private LocalDateTime createdAt; // 생성일
 
 
 
@@ -31,6 +33,7 @@ public class NoticeDetailDto {
                 .content(notice.getContent())
                 .imageUrl(notice.getImageUrl())
                 .adminName(notice.getAdmin().getName())
+                .createdAt(notice.getCreatedAt())
                 .build();
     }
 
