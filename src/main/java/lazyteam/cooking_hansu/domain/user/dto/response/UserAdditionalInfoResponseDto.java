@@ -7,16 +7,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 1단계 추가 정보 입력 응답 DTO
+ * 회원 추가 정보 입력 통합 응답 DTO
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserAdditionalInfoStep1ResDto {
+public class UserAdditionalInfoResponseDto {
 
     private String message;
     private String nickname;
     private Role role;
-    private boolean isStep1Completed;
+    private boolean isRegistrationCompleted;
 }

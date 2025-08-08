@@ -1,11 +1,13 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.user.dto.request.*;
-import lazyteam.cooking_hansu.domain.user.dto.response.*;
+import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResponseDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.UserRegistrationStatusResDto;
 import lazyteam.cooking_hansu.domain.user.service.UserAdditionalInfoService;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,55 +23,22 @@ public class UserAdditionalInfoController {
     private final UserAdditionalInfoService userAdditionalInfoService;
 
     /**
-     * 1단계 추가 정보 입력 (닉네임, 역할 선택)
-     * POST /user/add-info/1
+     * 회원 추가 정보 입력 (통합)
+     * POST /user/add-info
      */
-    @PostMapping("/1")
-    public ResponseEntity<UserAdditionalInfoStep1ResDto> updateStep1Info(
+    @PostMapping
+    public ResponseDto<UserAdditionalInfoResponseDto> updateAdditionalInfo(
             @RequestParam UUID userId,
-            @Valid @RequestBody UserAdditionalInfoStep1RequestDto requestDto) {
+            @Valid @RequestBody UserAdditionalInfoRequestDto requestDto) {
 
-        UserAdditionalInfoStep1ResDto response = userAdditionalInfoService.updateStep1Info(userId, requestDto);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 일반 회원 2단계 추가 정보 입력
-     * POST /user/add-info/2/general
-     */
-    @PostMapping("/2/general")
-    public ResponseEntity<UserAdditionalInfoStep2ResDto> updateGeneralUserStep2Info(
-            @RequestParam UUID userId,
-            @Valid @RequestBody GeneralUserStep2RequestDto requestDto) {
-
-        UserAdditionalInfoStep2ResDto response = userAdditionalInfoService.updateGeneralUserStep2Info(userId, requestDto);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 요식업 종사자 2단계 추가 정보 입력
-     * POST /user/add-info/2/chef
-     */
-    @PostMapping("/2/chef")
-    public ResponseEntity<UserAdditionalInfoStep2ResDto> updateChefUserStep2Info(
-            @RequestParam UUID userId,
-            @Valid @RequestBody ChefUserStep2RequestDto requestDto) {
-
-        UserAdditionalInfoStep2ResDto response = userAdditionalInfoService.updateChefUserStep2Info(userId, requestDto);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 요식업 자영업자 2단계 추가 정보 입력
-     * POST /user/add-info/2/business
-     */
-    @PostMapping("/2/business")
-    public ResponseEntity<UserAdditionalInfoStep2ResDto> updateBusinessUserStep2Info(
-            @RequestParam UUID userId,
-            @Valid @RequestBody BusinessUserStep2RequestDto requestDto) {
-
-        UserAdditionalInfoStep2ResDto response = userAdditionalInfoService.updateBusinessUserStep2Info(userId, requestDto);
-        return ResponseEntity.ok(response);
+        try {
+            UserAdditionalInfoResponseDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
+            return ResponseDto.ok(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 정보 저장 중 오류가 발생했습니다.");
+        }
     }
 
     /**
@@ -77,10 +46,16 @@ public class UserAdditionalInfoController {
      * GET /user/add-info/status
      */
     @GetMapping("/status")
-    public ResponseEntity<UserRegistrationStatusResDto> getUserRegistrationStatus(
+    public ResponseDto<UserRegistrationStatusResDto> getUserRegistrationStatus(
             @RequestParam UUID userId) {
 
-        UserRegistrationStatusResDto response = userAdditionalInfoService.getUserRegistrationStatus(userId);
-        return ResponseEntity.ok(response);
+        try {
+            UserRegistrationStatusResDto response = userAdditionalInfoService.getUserRegistrationStatus(userId);
+            return ResponseDto.ok(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원가입 상태 조회 중 오류가 발생했습니다.");
+        }
     }
 }

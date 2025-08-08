@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
 import lazyteam.cooking_hansu.domain.user.dto.UserLoginDto;
-import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.global.auth.dto.GoogleTokenDto;
 import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
@@ -106,37 +105,6 @@ public class UserController {
         } catch (Exception e) {
             log.error("Token refresh failed", e);
             return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 갱신 중 오류가 발생했습니다.");
-        }
-    }
-
-    // 추가정보 입력 1단계 (역할 선택)
-    @PostMapping("/add-info/1")
-    public ResponseDto<?> addInfoStep1(@RequestBody Map<String, String> request) {
-        // Role 선택 처리
-        try {
-            String role = request.get("role");
-            if (role == null || role.isEmpty()) {
-                return ResponseDto.fail(HttpStatus.BAD_REQUEST, "Role is required");
-            }
-
-            if (role.equals(Role.CHEF.toString())) {
-                // Role.CHEF 데이터 처리
-                userService.setUserRole(Role.CHEF);
-                return ResponseDto.ok("역할: 요식업 종사자(Chef)로 설정되었습니다.", HttpStatus.OK);
-            } else if (role.equals(Role.OWNER.toString())) {
-                // Role.OWNER 데이터 처리
-                userService.setUserRole(Role.OWNER);
-                return ResponseDto.ok("역할: 요식업 자영업자(Owner)로 설정되었습니다.", HttpStatus.OK);
-            } else if (role.equals(Role.GENERAL.toString())) {
-                // Role.General 데이터 처리
-                userService.setUserRole(Role.GENERAL);
-                return ResponseDto.ok("역할: 일반 사용자(General)로 설정되었습니다.", HttpStatus.OK);
-            } else {
-                return ResponseDto.fail(HttpStatus.BAD_REQUEST, "Invalid role provided");
-            }
-        } catch (Exception e) {
-            log.error("Add info step 1 failed", e);
-            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "역할 설정 중 오류가 발생했습니다.");
         }
     }
 

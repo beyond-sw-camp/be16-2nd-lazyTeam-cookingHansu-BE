@@ -1,10 +1,10 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.domain.user.dto.request.*;
-import lazyteam.cooking_hansu.domain.user.dto.response.*;
+import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResponseDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.UserRegistrationStatusResDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
-import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
@@ -28,118 +28,98 @@ public class UserAdditionalInfoService {
     private final BusinessRepository businessRepository;
 
     /**
-     * 1단계 추가 정보 입력 (닉네임, 역할 선택)
+     * 회원 추가 정보 입력 (통합)
      */
-    public UserAdditionalInfoStep1ResDto updateStep1Info(UUID userId, UserAdditionalInfoStep1RequestDto requestDto) {
+    public UserAdditionalInfoResponseDto updateAdditionalInfo(UUID userId, UserAdditionalInfoRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 1단계 정보 업데이트
+        // 기본 정보 업데이트 (닉네임, 역할)
         user.updateStep1Info(requestDto.getNickname(), requestDto.getRole());
 
-        // Chef 또는 Owner 역할인 경우 해당 엔티티 생성
-        if (requestDto.getRole() == Role.CHEF) {
-            Chef chef = Chef.builder()
-                    .user(user)
-                    .build();
-            user.setChef(chef);
-        } else if (requestDto.getRole() == Role.OWNER) {
-            Business business = Business.builder()
-                    .user(user)
-                    .build();
-            user.setBusiness(business);
+        // 역할별 추가 정보 처리
+        switch (requestDto.getRole()) {
+            case GENERAL:
+                if (requestDto.getGeneralType() == null) {
+                    throw new RuntimeException("일반 회원 유형 선택은 필수입니다.");
+                }
+                user.updateGeneralType(requestDto.getGeneralType());
+                break;
+
+            case CHEF:
+                validateChefData(requestDto);
+                Chef chef = Chef.builder()
+                        .user(user)
+                        .licenseNumber(requestDto.getLicenseNumber())
+                        .cuisineType(requestDto.getCuisineType())
+                        .licenseUrl(requestDto.getLicenseUrl())
+                        .build();
+                user.setChef(chef);
+                user.completeRegistration();
+                break;
+
+            case OWNER:
+                validateBusinessData(requestDto);
+                Business business = Business.builder()
+                        .user(user)
+                        .businessNumber(requestDto.getBusinessNumber())
+                        .businessUrl(requestDto.getBusinessUrl())
+                        .businessName(requestDto.getBusinessName())
+                        .businessAddress(requestDto.getBusinessAddress())
+                        .shopCategory(requestDto.getShopCategory())
+                        .build();
+                user.setBusiness(business);
+                user.completeRegistration();
+                break;
+
+            default:
+                throw new RuntimeException("지원하지 않는 역할입니다.");
         }
 
         userRepository.save(user);
 
-        return UserAdditionalInfoStep1ResDto.builder()
-                .message("1단계 추가 정보가 성공적으로 저장되었습니다.")
+        return UserAdditionalInfoResponseDto.builder()
+                .message("회원 정보가 성공적으로 저장되었습니다.")
                 .nickname(user.getNickname())
                 .role(user.getRole())
-                .isStep1Completed(true)
+                .isRegistrationCompleted(!user.isNewUser())
                 .build();
     }
 
     /**
-     * 일반 회원 2단계 추가 정보 입력
+     * Chef 데이터 유효성 검증
      */
-    public UserAdditionalInfoStep2ResDto updateGeneralUserStep2Info(UUID userId, GeneralUserStep2RequestDto requestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        if (user.getRole() != Role.GENERAL) {
-            throw new RuntimeException("일반 회원이 아닙니다.");
+    private void validateChefData(UserAdditionalInfoRequestDto requestDto) {
+        if (requestDto.getLicenseNumber() == null || requestDto.getLicenseNumber().trim().isEmpty()) {
+            throw new RuntimeException("자격 번호는 필수입니다.");
         }
-
-        user.updateGeneralType(requestDto.getGeneralType());
-        userRepository.save(user);
-
-        return UserAdditionalInfoStep2ResDto.builder()
-                .message("일반 회원 정보가 성공적으로 저장되었습니다.")
-                .isRegistrationCompleted(true)
-                .build();
+        if (requestDto.getCuisineType() == null) {
+            throw new RuntimeException("자격 업종 선택은 필수입니다.");
+        }
+        if (requestDto.getLicenseUrl() == null || requestDto.getLicenseUrl().trim().isEmpty()) {
+            throw new RuntimeException("자격증 이미지 URL은 필수입니다.");
+        }
     }
 
     /**
-     * 요식업 종사자 2단계 추가 정보 입력
+     * Business 데이터 유효성 검증
      */
-    public UserAdditionalInfoStep2ResDto updateChefUserStep2Info(UUID userId, ChefUserStep2RequestDto requestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        if (user.getRole() != Role.CHEF) {
-            throw new RuntimeException("요식업 종사자가 아닙니다.");
+    private void validateBusinessData(UserAdditionalInfoRequestDto requestDto) {
+        if (requestDto.getBusinessNumber() == null || requestDto.getBusinessNumber().trim().isEmpty()) {
+            throw new RuntimeException("사업자 등록 번호는 필수입니다.");
         }
-
-        Chef chef = user.getChef();
-        if (chef == null) {
-            throw new RuntimeException("Chef 정보가 존재하지 않습니다.");
+        if (requestDto.getBusinessUrl() == null || requestDto.getBusinessUrl().trim().isEmpty()) {
+            throw new RuntimeException("사업자 등록증 파일 URL은 필수입니다.");
         }
-
-        // Chef 정보 업데이트
-        chef.updateChefInfo(requestDto.getLicenseNumber(), requestDto.getCuisineType(), requestDto.getLicenseUrl());
-        user.completeRegistration();
-
-        userRepository.save(user);
-
-        return UserAdditionalInfoStep2ResDto.builder()
-                .message("요식업 종사자 정보가 성공적으로 저장되었습니다.")
-                .isRegistrationCompleted(true)
-                .build();
-    }
-
-    /**
-     * 요식업 자영업자 2단계 추가 정보 입력
-     */
-    public UserAdditionalInfoStep2ResDto updateBusinessUserStep2Info(UUID userId, BusinessUserStep2RequestDto requestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        if (user.getRole() != Role.OWNER) {
-            throw new RuntimeException("요식업 자영업자가 아닙니다.");
+        if (requestDto.getBusinessName() == null || requestDto.getBusinessName().trim().isEmpty()) {
+            throw new RuntimeException("상호명은 필수입니다.");
         }
-
-        Business business = user.getBusiness();
-        if (business == null) {
-            throw new RuntimeException("Business 정보가 존재하지 않습니다.");
+        if (requestDto.getBusinessAddress() == null || requestDto.getBusinessAddress().trim().isEmpty()) {
+            throw new RuntimeException("사업지 주소는 필수입니다.");
         }
-
-        // Business 정보 업데이트
-        business.updateBusinessInfo(
-                requestDto.getBusinessNumber(),
-                requestDto.getBusinessUrl(),
-                requestDto.getBusinessName(),
-                requestDto.getBusinessAddress(),
-                requestDto.getShopCategory()
-        );
-        user.completeRegistration();
-
-        userRepository.save(user);
-
-        return UserAdditionalInfoStep2ResDto.builder()
-                .message("요식업 자영업자 정보가 성공적으로 저장되었습니다.")
-                .isRegistrationCompleted(true)
-                .build();
+        if (requestDto.getShopCategory() == null || requestDto.getShopCategory().trim().isEmpty()) {
+            throw new RuntimeException("사업 업종은 필수입니다.");
+        }
     }
 
     /**

@@ -135,8 +135,4 @@ public class UserService {
         return user;
     }
 
-    // 사용자 역할 선택 & User의 Role DB 업데이트
-    public void setUserRole(Role role) {
-
-    }
 }
