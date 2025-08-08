@@ -14,8 +14,9 @@ import java.util.UUID;
 @Data
 @Builder
 public class WaitingBusinessListDto {
-    private UUID id;
+    private UUID id; // 사업자 ID
     private String nickname; // 사용자 닉네임
+    private String imageUrl; // 프로필 이미지 URL
     private String businessName; // 사업자 이름
     private String businessNumber; // 사업자 등록 번호
     private String businessImageUrl; // 사업자 등록증 이미지 URL
@@ -28,6 +29,7 @@ public class WaitingBusinessListDto {
         return WaitingBusinessListDto.builder()
                 .id(business.getId())
                 .nickname(business.getUser().getNickname())
+                .imageUrl(business.getUser().getProfileImageUrl())
                 .businessName(business.getBusinessName())
                 .businessNumber(business.getBusinessNumber())
                 .businessImageUrl(business.getBusinessUrl())
