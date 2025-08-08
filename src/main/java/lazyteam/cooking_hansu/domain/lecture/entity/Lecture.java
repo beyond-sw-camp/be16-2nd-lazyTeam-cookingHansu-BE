@@ -69,9 +69,6 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Column(columnDefinition = "TEXT")
     private String thumbUrl;
 
-    @Column(columnDefinition = "TEXT")
-    private String videoUrl;
-
 
     // 역방향 관계설정(조회용)
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)

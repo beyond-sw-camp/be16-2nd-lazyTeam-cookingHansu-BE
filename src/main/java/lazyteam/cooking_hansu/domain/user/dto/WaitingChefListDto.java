@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 public class WaitingChefListDto {
     private UUID userId; // 사용자 ID
-    private String nickname; // 사용자 닉네임
+    private String name; // 사용자 닉네임
     private String imageUrl; // 프로필 이미지 URL
     private String LicenseNumber; // 요리사 면허 번호
     private String LicenseImageUrl; // 요리사 면허 이미지 URL
@@ -26,7 +26,7 @@ public class WaitingChefListDto {
     public static WaitingChefListDto fromEntity(Chef chef) {
         return WaitingChefListDto.builder()
                 .userId(chef.getUser().getId())
-                .nickname(chef.getUser().getNickname())
+                .name(chef.getUser().getName())
                 .imageUrl(chef.getUser().getProfileImageUrl())
                 .LicenseNumber(chef.getLicenseNumber())
                 .LicenseImageUrl(chef.getLicenseUrl())
