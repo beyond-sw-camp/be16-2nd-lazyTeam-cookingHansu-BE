@@ -27,7 +27,7 @@ public class Payment extends BaseIdAndTimeEntity {
     @NotNull(message = "결제 금액은 필수입니다")
     @Min(value = 1, message = "결제 금액은 1원 이상이어야 합니다")
     @Column(nullable = false)
-    private Integer paidAmount;
+    private Long paidAmount;
 
     // 결제 수단
     @NotNull(message = "결제 수단은 필수입니다")
@@ -45,6 +45,15 @@ public class Payment extends BaseIdAndTimeEntity {
     @NotNull(message = "결제 완료 시각은 필수입니다")
     @Column(nullable = false)
     private LocalDateTime paidAt;
+
+    // 토스에서 내려주는 고유 결제 식별자 (중복 결제 방지용)
+    @Column(nullable = false, unique = true)
+    private String paymentKey;
+
+    // 우리 서버에서 만든 주문 번호 (프론트와 통신하며 고유 ID로 사용됨)
+    @Column(nullable = false, unique = true)
+    private String orderId;
+
 
     // 역방향 관계설정(조회용), 구매된강의와 연결
     @OneToMany(mappedBy = "payment")
