@@ -22,13 +22,14 @@ public class TossPrePay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "주문번호는 필수입니다.")
     @Column(unique = true)
     private String orderId;
 
-    @NotNull
+    @NotNull(message = "주문금액은 필수입니다.")
     private Long amount;
 
+    @NotNull(message = "강의 ID는 필수입니다.")
     private List<UUID> lectureIds;
 
 

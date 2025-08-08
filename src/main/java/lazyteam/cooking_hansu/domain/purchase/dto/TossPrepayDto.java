@@ -15,11 +15,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class TossPrepayDto {
-    @NotNull
+    @NotNull(message = "주문번호는 필수입니다.")
     private String orderId;
-    @NotNull
+    @NotNull(message = "주문금액은 필수입니다.")
     private Long amount;
-    @NotNull
+    @NotNull(message = "강의ID는 필수입니다.")
     private List<UUID> lectureIds;
 
 
