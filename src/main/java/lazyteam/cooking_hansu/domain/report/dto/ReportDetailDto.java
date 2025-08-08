@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -19,15 +20,17 @@ public class ReportDetailDto {
     private String reportReasonType; // 신고 사유 유형
     private String content; // 신고 내용
     private UUID reporterId; // 신고자 ID
+    private LocalDateTime createdAt; // 신고 생성일시
 
-    public static ReportDetailDto fromEntity(Report report, UUID reporterId) {
+    public static ReportDetailDto fromEntity(Report report) {
         return ReportDetailDto.builder()
                 .id(report.getId())
                 .reportType(report.getReportType().name())
                 .targetId(report.getTargetId())
                 .reportReasonType(report.getReportReasonType().name())
                 .content(report.getContent())
-                .reporterId(reporterId)
+                .reporterId(report.getUser().getId())
+                .createdAt(report.getCreatedAt())
                 .build();
     }
 }

@@ -25,7 +25,7 @@ public class NoticeController {
 
     //     공지사항 전체 목록 조회
     @GetMapping("/list")
-    public ResponseEntity<?> noticeLists(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> noticeLists(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(ResponseDto.ok(noticeService.findAll(pageable), HttpStatus.OK), HttpStatus.OK);
     }
 
