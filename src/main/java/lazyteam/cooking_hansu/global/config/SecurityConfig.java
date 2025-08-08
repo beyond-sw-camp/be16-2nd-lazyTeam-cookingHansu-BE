@@ -16,13 +16,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -42,7 +40,6 @@ public class SecurityConfig {
                                 .accessDeniedHandler(jwtAuthorizationHandler)
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
-
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/user/create",
                         "/user/login",
@@ -54,13 +51,17 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
-                        "lecture/**",
-                        "user/**",
+                        "/api/my/**", // Mypage 관련 API
+                        "/lecture/**",
+                        "/user/**",
+                        "/chat/**",
+                        "/post/**",
                         "cart/**",
-                        "/purchase/**"
-
+                        "/purchase/**",
+                        "/connect/**", // WebSocket 연결 엔드포인트
+                        "/topic/**", // WebSocket 토픽
+                        "/publish/**" // WebSocket 메시지 발행
                 ).permitAll().anyRequest().authenticated())
-
                 .build();
     }
 
