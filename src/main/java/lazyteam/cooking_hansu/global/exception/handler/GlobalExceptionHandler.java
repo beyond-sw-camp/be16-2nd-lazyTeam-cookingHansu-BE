@@ -272,10 +272,12 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.PAYLOAD_TOO_LARGE, "업로드 파일 크기가 제한을 초과했습니다. 파일 크기를 확인해주세요.");
     }
 
-    // 멀티파트 처리 에러
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<?> handleMultipartException(MultipartException e) {
-        log.error("[MultipartException] {}", e.getMessage());
+        log.error("[MultipartException] {}", e.getMessage(), e);
+        if (e.getCause() != null) {
+            log.error("Root cause: {}", e.getCause().toString(), e.getCause());
+        }
         return buildError(HttpStatus.BAD_REQUEST, "파일 업로드 처리 중 오류가 발생했습니다. 파일을 다시 선택해주세요.");
     }
 

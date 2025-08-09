@@ -21,16 +21,25 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     WHERE cp.user.id IN (:userId1, :userId2)
     GROUP BY cp.chatRoom
     HAVING COUNT(DISTINCT cp.user.id) = 2
-""")
+    """)
     Optional<ChatRoom> findExistingChatRoom(@Param("userId") UUID userId, @Param("otherUserId") UUID otherUserId);
 
     Optional<ChatParticipant> findByChatRoomAndUser(ChatRoom chatRoom, User user);
 
     List<ChatParticipant> findByChatRoom(ChatRoom chatRoom);
 
-    List<ChatParticipant> findByUser(User user);
+    @Query("""
+        SELECT cp
+        FROM ChatParticipant cp
+        LEFT JOIN ChatMessage cm ON cm.chatRoom = cp.chatRoom
+        WHERE cp.user = :user
+          AND cp.isActive = 'Y'
+        GROUP BY cp.id, cp.chatRoom.id
+        ORDER BY
+          CASE WHEN MAX(cm.createdAt) IS NULL THEN 1 ELSE 0 END,
+          MAX(cm.createdAt) DESC
+    """)
+    List<ChatParticipant> findMyActiveParticipantsOrderByLastMessage(@Param("user") User user);
 
-    List<ChatParticipant> findByChatRoomAndIsActive(ChatRoom chatRoom, String isActive);
-
-    List<ChatParticipant> findByUserAndIsActive(User user, String isActive);
+    long countByChatRoomAndIsActive(ChatRoom chatRoom, String isActive);
 }
