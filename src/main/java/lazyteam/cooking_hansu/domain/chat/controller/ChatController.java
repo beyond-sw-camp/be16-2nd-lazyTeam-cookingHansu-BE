@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class ChatController {
 
     //    채팅방 이름 수정(상대방 이름 수정)
     @PatchMapping("/room/{roomId}/name")
-    public ResponseEntity<?> updateChatRoomName(@PathVariable UUID roomId, @RequestBody ChatRoomUpdateDto updateDto) {
+    public ResponseEntity<?> updateChatRoomName(@PathVariable UUID roomId, @Valid @RequestBody ChatRoomUpdateDto updateDto) {
         chatService.updateChatRoomName(roomId, updateDto);
         return new ResponseEntity<>(ResponseDto.ok("채팅방 이름이 변경되었습니다.", HttpStatus.OK), HttpStatus.OK);
     }

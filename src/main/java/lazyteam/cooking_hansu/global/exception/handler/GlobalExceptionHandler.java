@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileCountLimitExceededException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.TransactionSystemException;
@@ -47,6 +49,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleAuthenticationException(AuthenticationException e) {
         log.warn("[AuthenticationException] {}", e.getMessage());
 //        return buildError(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다. 다시 로그인 해주세요.");
+        return buildError(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    // 인증 서비스 예외 (WebSocket 등에서 사용)
+    @ExceptionHandler(AuthenticationServiceException.class)
+    public ResponseEntity<?> handleAuthenticationServiceException(AuthenticationServiceException e) {
+        log.warn("[AuthenticationServiceException] {}", e.getMessage());
         return buildError(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
@@ -177,6 +186,32 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.REQUEST_TIMEOUT, e.getMessage());
     }
 
+    // RuntimeException (일반적인 런타임 예외)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException e) {
+        // 결제 관련 런타임 에러는 특별 처리
+        if (e.getMessage() != null && e.getMessage().contains("결제")) {
+            log.error("[PaymentRuntimeException] {}", e.getMessage(), e);
+            return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 오류가 발생했습니다. 고객센터에 문의해주세요.");
+        }
+        
+        // Redis 관련 런타임 에러
+        if (e.getMessage() != null && e.getMessage().contains("Redis")) {
+            log.error("[RedisRuntimeException] {}", e.getMessage(), e);
+            return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "실시간 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
+        
+        // 영상 처리 관련 런타임 에러
+        if (e.getMessage() != null && e.getMessage().contains("영상")) {
+            log.error("[VideoRuntimeException] {}", e.getMessage(), e);
+            return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "영상 처리 중 오류가 발생했습니다.");
+        }
+        
+        // 그 외 일반적인 런타임 에러
+        log.error("[RuntimeException] {}", e.getMessage(), e);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "서버 처리 중 오류가 발생했습니다.");
+    }
+
     /**
      * ======================== 요청/검증 관련 예외 ========================
      */
@@ -272,6 +307,7 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.PAYLOAD_TOO_LARGE, "업로드 파일 크기가 제한을 초과했습니다. 파일 크기를 확인해주세요.");
     }
 
+    // Multipart 요청 처리 중 오류
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<?> handleMultipartException(MultipartException e) {
         log.error("[MultipartException] {}", e.getMessage(), e);
@@ -286,6 +322,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException e) {
         log.error("[MissingServletRequestPartException] {}", e.getMessage());
         return buildError(HttpStatus.BAD_REQUEST, "업로드할 파일이 누락되었습니다. 파일을 선택해주세요.");
+    }
+
+    @ExceptionHandler(FileCountLimitExceededException.class)
+    public ResponseEntity<?> handleFileCountLimitExceeded(FileCountLimitExceededException e) {
+        log.error("[FileCountLimitExceededException] {}", e.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, "업로드할 수 있는 파일 개수를 초과했습니다. 최대 10개까지 업로드 가능합니다.");
     }
 
     // 핸들러를 찾을 수 없음 (404)
