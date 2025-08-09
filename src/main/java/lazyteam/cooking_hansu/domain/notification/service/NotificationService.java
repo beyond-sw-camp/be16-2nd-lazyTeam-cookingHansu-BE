@@ -49,4 +49,16 @@ public class NotificationService {
         n.markRead();
     }
 
+    @Transactional
+    public void markDeleted(UUID notificationId, UUID userId) {
+        Notification n = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("알림을 찾을 수 없습니다."));
+
+        if (!n.getRecipient().getId().equals(userId)) {
+            throw new AccessDeniedException("본인의 알림이 아닙니다.");
+        }
+
+        n.markDeleted();
+    }
+
 }

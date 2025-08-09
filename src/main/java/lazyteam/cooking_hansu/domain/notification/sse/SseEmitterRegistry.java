@@ -16,14 +16,22 @@ public class SseEmitterRegistry {
         emitters.put(userId, emitter);
         emitter.onTimeout(() -> emitters.remove(userId));
         emitter.onCompletion(() -> emitters.remove(userId));
+        
         try { emitter.send(SseEmitter.event().name("connect").data("ok")); } catch (IOException ignored) {}
         return emitter;
     }
 
     public void send(UUID userId, Object payload) {
         SseEmitter e = emitters.get(userId);
-        if (e == null) return;
-        try { e.send(SseEmitter.event().name("notify").data(payload)); }
-        catch (IOException ex) { emitters.remove(userId); }
+        if (e == null) {
+            return;
+        }
+        
+        try { 
+            e.send(SseEmitter.event().name("notify").data(payload)); 
+        }
+        catch (IOException ex) { 
+            emitters.remove(userId); 
+        }
     }
 }

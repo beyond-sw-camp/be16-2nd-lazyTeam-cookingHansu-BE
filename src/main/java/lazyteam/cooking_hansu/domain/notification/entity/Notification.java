@@ -42,5 +42,9 @@ public class Notification extends BaseIdAndTimeEntity {
     public void markRead() {
         this.isRead = true;
     }
+    
+    public void markDeleted() {
+        this.isDeleted = true;
+    }
 
 }
