@@ -1,11 +1,13 @@
 package lazyteam.cooking_hansu.domain.post.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
 import lazyteam.cooking_hansu.domain.post.service.PostService;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -27,6 +30,23 @@ import java.util.UUID;
 public class PostController {
 
     private final PostService postService;
+    private final S3Uploader s3Uploader;
+    private final InteractionService interactionService;
+
+    // 게시글 썸네일 업로드
+    @PostMapping("/thumbnail")
+    public ResponseEntity<?> uploadPostThumbnail(@RequestParam("file") MultipartFile file) {
+        try {
+            String thumbnailUrl = s3Uploader.upload(file, "posts/thumbnails/");
+            log.info("게시글 썸네일 업로드 성공: {}", thumbnailUrl);
+            
+            return ResponseEntity.ok(ResponseDto.ok(thumbnailUrl, HttpStatus.OK));
+        } catch (Exception e) {
+            log.error("게시글 썸네일 업로드 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseDto.fail("파일 업로드에 실패했습니다: " + e.getMessage()));
+        }
+    }
 
     // 레시피 공유게시글 목록 조회
     @GetMapping
@@ -116,5 +136,33 @@ public class PostController {
         log.info("카테고리 {} 레시피 공유게시글 목록 조회 완료. 총 개수: {}", category, posts.getTotalElements());
         
         return ResponseEntity.ok(ResponseDto.ok(posts, HttpStatus.OK));
+    }
+
+    // 좋아요 추가/취소
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<?> toggleLike(@PathVariable UUID postId, @RequestParam UUID userId) {
+        String result = interactionService.toggleLike(postId, userId);
+        return ResponseEntity.ok(ResponseDto.ok(result, HttpStatus.OK));
+    }
+
+    // 북마크 추가/취소
+    @PostMapping("/{postId}/bookmarks")
+    public ResponseEntity<?> toggleBookmark(@PathVariable UUID postId, @RequestParam UUID userId) {
+        String result = interactionService.toggleBookmark(postId, userId);
+        return ResponseEntity.ok(ResponseDto.ok(result, HttpStatus.OK));
+    }
+
+    // 좋아요 상태 확인
+    @GetMapping("/{postId}/likes/status")
+    public ResponseEntity<?> getLikeStatus(@PathVariable UUID postId, @RequestParam UUID userId) {
+        boolean isLiked = interactionService.isLiked(postId, userId);
+        return ResponseEntity.ok(ResponseDto.ok(isLiked, HttpStatus.OK));
+    }
+
+    // 북마크 상태 확인
+    @GetMapping("/{postId}/bookmarks/status")
+    public ResponseEntity<?> getBookmarkStatus(@PathVariable UUID postId, @RequestParam UUID userId) {
+        boolean isBookmarked = interactionService.isBookmarked(postId, userId);
+        return ResponseEntity.ok(ResponseDto.ok(isBookmarked, HttpStatus.OK));
     }
 }

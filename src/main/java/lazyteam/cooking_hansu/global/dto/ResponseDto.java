@@ -23,10 +23,20 @@ public class ResponseDto<T> {
                 .build();
     }
 
-        public static <T> ResponseDto<T> fail(HttpStatus status, String message) {
+    public static <T> ResponseDto<T> fail(HttpStatus status, String message) {
         return ResponseDto.<T>builder()
                 .success(false)
                 .code(status.value())
+                .message(message)
+                .data(null)
+                .build();
+    }
+
+    // 간단한 fail 메서드 추가
+    public static <T> ResponseDto<T> fail(String message) {
+        return ResponseDto.<T>builder()
+                .success(false)
+                .code(HttpStatus.BAD_REQUEST.value())
                 .message(message)
                 .data(null)
                 .build();

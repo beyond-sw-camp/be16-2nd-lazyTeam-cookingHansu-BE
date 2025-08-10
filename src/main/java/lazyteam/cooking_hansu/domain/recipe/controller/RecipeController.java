@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.recipe.controller;
 import lazyteam.cooking_hansu.domain.recipe.dto.*;
 import lazyteam.cooking_hansu.domain.recipe.service.RecipeService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final S3Uploader s3Uploader;
 
 //    레시피작성
     @PostMapping
@@ -36,6 +39,35 @@ public class RecipeController {
         );
     }
 
+//    레시피 썸네일 업로드
+    @PostMapping("/thumbnail")
+    public ResponseEntity<?> uploadRecipeThumbnail(@RequestParam("file") MultipartFile file) {
+        try {
+            String thumbnailUrl = s3Uploader.upload(file, "recipes/thumbnails/");
+            log.info("레시피 썸네일 업로드 성공: {}", thumbnailUrl);
+            
+            return ResponseEntity.ok(ResponseDto.ok(thumbnailUrl, HttpStatus.OK));
+        } catch (Exception e) {
+            log.error("레시피 썸네일 업로드 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseDto.fail("파일 업로드에 실패했습니다: " + e.getMessage()));
+        }
+    }
+
+//    레시피 단계별 이미지 업로드
+    @PostMapping("/step-image")
+    public ResponseEntity<?> uploadRecipeStepImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = s3Uploader.upload(file, "recipes/steps/");
+            log.info("레시피 단계 이미지 업로드 성공: {}", imageUrl);
+            
+            return ResponseEntity.ok(ResponseDto.ok(imageUrl, HttpStatus.OK));
+        } catch (Exception e) {
+            log.error("레시피 단계 이미지 업로드 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ResponseDto.fail("파일 업로드에 실패했습니다: " + e.getMessage()));
+        }
+    }
 
 //    내 레시피 목록조회
     @GetMapping
