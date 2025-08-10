@@ -18,7 +18,7 @@ public class RecipeStep extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipeId; // 어떤 레시피의 조리 순서인지
+    private Recipe recipe; // 어떤 레시피의 조리 순서인지
 
     @Column(nullable = false, columnDefinition = "INT UNSIGNED")
     private Integer stepSequence; // 순서 번호 (1, 2, 3, ...)

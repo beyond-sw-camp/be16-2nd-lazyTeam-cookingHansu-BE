@@ -16,7 +16,7 @@ public class Ingredients extends BaseIdEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipeId; // 어떤 레시피의 재료인지
+    private Recipe recipe; // 어떤 레시피의 재료인지
 
     @Column(nullable = false, length = 255)
     private String name; // 재료명 (예: 돼지고기, 김치, 양파)
