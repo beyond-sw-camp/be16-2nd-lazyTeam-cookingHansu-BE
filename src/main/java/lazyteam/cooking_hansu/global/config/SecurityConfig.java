@@ -58,6 +58,7 @@ public class SecurityConfig {
                         "/post/**",
                         "cart/**",
                         "/purchase/**",
+                        "/review/**",
                         "/connect/**", // WebSocket 연결 엔드포인트
                         "/topic/**", // WebSocket 토픽
                         "/publish/**" // WebSocket 메시지 발행
