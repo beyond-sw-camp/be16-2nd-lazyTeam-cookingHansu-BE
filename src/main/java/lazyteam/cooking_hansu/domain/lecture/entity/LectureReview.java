@@ -13,6 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+// 복합 unique
+@Table(
+        name = "lecture_review",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_review_lecture_writer",
+                columnNames = {"lecture_id", "writer_id"}
+        )
+)
 
 public class LectureReview extends BaseIdAndTimeEntity {
 

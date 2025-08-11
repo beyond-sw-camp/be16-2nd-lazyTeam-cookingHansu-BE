@@ -18,15 +18,13 @@ import java.util.UUID;
 @ToString
 @Builder
 public class ReviewResDto {
-    private LectureReview lectureReviewPage;
-    private Lecture lecture;
-    private User writer;
+    private String writerNickname;
     private Integer rating;
     private String content;
 
     public static ReviewResDto fromEntity(User writer, Integer rating, String content) {
         return ReviewResDto.builder()
-                .writer(writer)
+                .writerNickname(writer.getNickname())
                 .rating(rating)
                 .content(content)
                 .build();
