@@ -6,13 +6,13 @@ import lazyteam.cooking_hansu.domain.chat.entity.*;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatRoomRepository;
-import lazyteam.cooking_hansu.domain.chat.repository.ReadStatusRepository;
 import lazyteam.cooking_hansu.domain.chat.util.ChatMessageFormatter;
 import lazyteam.cooking_hansu.domain.chat.util.ChatFileValidator;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,75 +27,78 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final ReadStatusRepository readStatusRepository;
+//    private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final S3Uploader s3Uploader;
 
 
     //    메세지 전송
     public ChatMessageResDto saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
-        // 유효성 검사
         ChatFileValidator.validateMessageAndFile(chatMessageReqDto);
 
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        User sender = userRepository.findById(chatMessageReqDto.getSenderId()).orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User sender = userRepository.findById(chatMessageReqDto.getSenderId())
+                .orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
 
-        // 현재 사용자가 채팅방 참여자인지 확인
-        if (!isRoomParticipant(sender.getId(), roomId)) {
+        if (!chatParticipantRepository.existsByChatRoomAndUser(chatRoom, sender)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
-        // 메시지 생성
+
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
                 .messageText(chatMessageReqDto.getMessage())
-                .isDeleted("N") // 기본값은 "N" (삭제되지 않음)
+                .isDeleted("N")
                 .build();
 
-        chatMessageRepository.save(chatMessage);
-
-        // 파일이 있는 경우 파일 저장
-        if(chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
-            List<ChatFile> chatFiles = chatMessageReqDto.getFiles().stream()
-                    .map(file -> ChatFile.builder()
+        // 파일 DTO가 있으면 엔티티 생성 후 add
+        if (chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
+            List<ChatFile> files = chatMessageReqDto.getFiles().stream()
+                    .map(f -> ChatFile.builder()
                             .chatMessage(chatMessage)
-                            .fileUrl(file.getFileUrl())
-                            .fileName(file.getFileName())
-                            .fileType(file.getFileType())
-                            .fileSize(file.getFileSize())
+                            .fileUrl(f.getFileUrl())
+                            .fileName(f.getFileName())
+                            .fileType(f.getFileType())
+                            .fileSize(f.getFileSize())
                             .build())
                     .collect(Collectors.toList());
-            
-            // 파일들을 메시지에 추가
-            chatMessage.getFiles().addAll(chatFiles);
+            chatMessage.getFiles().addAll(files);
         }
 
-        // 메시지 읽음 상태 저장
+        chatMessageRepository.save(chatMessage); // cascade 설정에 따라 files도 함께 저장
+
+        // 채팅방 참여자 중 발신자가 아닌 사람들은 비활성화 상태를 Y로 변경
         List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for (ChatParticipant participant : participants) {
-            String readFlag = participant.getUser().equals(sender) ? "Y" : "N";
-            ReadStatus readStatus = ReadStatus.builder()
-                    .chatRoom(chatRoom)
-                    .user(participant.getUser())
-                    .chatMessage(chatMessage)
-                    .isRead(readFlag)
-                    .build();
-            readStatusRepository.save(readStatus);
-        }
-
-        // 참여자 상태 복구
-        for (ChatParticipant participant : participants) {
-            if (!participant.getUser().getId().equals(sender.getId())) {
-                if ("N".equals(participant.getIsActive())) {
-                    participant.joinChatRoom(); // 참여자 상태 복구: isActive = "Y"
-                }
+        for (ChatParticipant p : participants) {
+            if (!p.getUser().getId().equals(sender.getId()) && "N".equals(p.getIsActive())) {
+                p.joinChatRoom();
             }
         }
+
+//        // 읽음 상태 – 보낸 사람은 Y, 나머지 N
+//        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+//        for (ChatParticipant p : participants) {
+//            String readFlag = p.getUser().getId().equals(sender.getId()) ? "Y" : "N";
+//            readStatusRepository.save(ReadStatus.builder()
+//                    .chatRoom(chatRoom)
+//                    .user(p.getUser())
+//                    .chatMessage(chatMessage)
+//                    .isRead(readFlag)
+//                    .build());
+//            // 비활성 복구
+//            if (!p.getUser().getId().equals(sender.getId()) && "N".equals(p.getIsActive())) {
+//                p.joinChatRoom();
+//            }
+//        }
+
+
 
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
@@ -111,7 +114,7 @@ public class ChatService {
                                 .fileSize(file.getFileSize())
                                 .build())
                         .collect(Collectors.toList()))
-                .createdAt(chatMessage.getCreatedAt()) // 생성 시간
+                .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
 
@@ -159,51 +162,35 @@ public class ChatService {
 
     //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
-    public List<MyChatListDto> getMyChatRooms() {
+    public List<ChatRoomListDto> getMyChatRooms() {
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        List<ChatParticipant> chatParticipants =
-                chatParticipantRepository.findMyActiveParticipantsOrderByLastMessage(user);
+        List<ChatParticipant> chatParticipants = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessage(user);
 
-        return chatParticipants.stream()
-                .map(participant -> {
-                    ChatRoom chatRoom = participant.getChatRoom();
+        return chatParticipants.stream().map(participant -> {
+            ChatRoom chatRoom = participant.getChatRoom();
+            User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+                    .map(ChatParticipant::getUser)
+                    .filter(u -> !u.getId().equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
 
-                    // 상대방 찾기 (현 구조 유지)
-                    User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
-                            .map(ChatParticipant::getUser)
-                            .filter(u -> !u.getId().equals(user.getId()))
-                            .findFirst()
-                            .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
+            // 읽지 않은 메시지 수
+            int newMessageCount = participant.getChatRoom().getMessages().size();
+            ChatMessage lastMessage = participant.getLastReadMessage();
 
-                    // 마지막 메시지(내용/시간)
-                    Optional<ChatMessage> lastMessageOpt =
-                            chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom);
 
-                    String lastMessage = ChatMessageFormatter.formatLastMessage(lastMessageOpt);
-                    LocalDateTime lastMessageTime = lastMessageOpt.map(ChatMessage::getCreatedAt).orElse(null);
+            if (lastMessage != null) {
+                newMessageCount = (int) participant.getChatRoom().getMessages().stream()
+                        .map(ChatMessage::getCreatedAt)
+                        .filter(createdAt -> createdAt.isAfter(lastMessage.getCreatedAt()))
+                        .count();
+            }
 
-                    // 미읽음 카운트
-                    int unreadCount = readStatusRepository
-                            .countByChatRoomAndUserAndIsRead(chatRoom, user, "N")
-                            .intValue();
 
-                    return MyChatListDto.builder()
-                            .chatRoomId(chatRoom.getId())
-                            .customRoomName(ChatMessageFormatter.formatChatRoomName(
-                                    participant.getCustomRoomName(), 
-                                    otherUser.getNickname()))
-                            .otherUserName(otherUser.getName())
-                            .otherUserNickname(otherUser.getNickname())
-                            .otherUserProfileImage(otherUser.getProfileImageUrl())
-                            .lastMessage(lastMessage)
-                            .lastMessageTime(lastMessageTime)
-                            .unreadCount(unreadCount)
-                            .build();
-                })
-                .collect(Collectors.toList());
+            return ChatRoomListDto.fromEntity(participant.getChatRoom(), otherUser, newMessageCount);
+        }).collect(Collectors.toList());
     }
 
     //    채팅방 상세 내역 조회
@@ -301,17 +288,14 @@ public class ChatService {
     }
 
     //    방 참여자인지 확인
+// 기존: 리스트 조회 후 루프
     public boolean isRoomParticipant(UUID userId, UUID roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
 
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for (ChatParticipant c : chatParticipants) {
-            if (c.getUser().equals(user)) {
-                return true; // 해당 이메일이 참여자 목록에 있으면 메서드 종료
-            }
-        }
-        return false;
+        return chatParticipantRepository.existsByChatRoomAndUser(chatRoom, user);
     }
 
     //    채팅방 나가기
@@ -344,6 +328,15 @@ public class ChatService {
         ChatParticipant participant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
         // 참여자의 커스텀 채팅방 이름을 업데이트
         participant.updateCustomRoomName(updateDto.getName());
+    }
+
+    //    메시지 읽음 처리
+    public void readMessages(UUID roomId, UUID userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("participant not found"));
+
+        chatParticipant.read(chatRoom.getMessages().get(chatRoom.getMessages().size() - 1));
 
     }
 }

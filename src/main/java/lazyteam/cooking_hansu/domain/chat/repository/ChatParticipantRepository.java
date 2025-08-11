@@ -41,5 +41,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     """)
     List<ChatParticipant> findMyActiveParticipantsOrderByLastMessage(@Param("user") User user);
 
+    boolean existsByChatRoomAndUser(ChatRoom chatRoom, User user);
+
     long countByChatRoomAndIsActive(ChatRoom chatRoom, String isActive);
 }

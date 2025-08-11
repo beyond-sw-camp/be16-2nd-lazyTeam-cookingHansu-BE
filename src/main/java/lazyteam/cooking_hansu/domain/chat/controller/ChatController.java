@@ -1,12 +1,8 @@
 package lazyteam.cooking_hansu.domain.chat.controller;
 
-import lazyteam.cooking_hansu.domain.chat.dto.ChatFileUploadReqDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatFileUploadResDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
-import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
+import lazyteam.cooking_hansu.domain.chat.dto.*;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
-import lazyteam.cooking_hansu.domain.chat.service.chatRedisService;
+import lazyteam.cooking_hansu.domain.chat.service.ChatRedisService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,12 +19,12 @@ import java.util.UUID;
 public class ChatController {
 
     private final ChatService chatService;
-    private final chatRedisService redisPubSubService;
+    private final ChatRedisService redisPubSubService;
 
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
     public ResponseEntity<?> getMyChatRooms() {
-        List<MyChatListDto> myChatRooms = chatService.getMyChatRooms();
+        List<ChatRoomListDto> myChatRooms = chatService.getMyChatRooms();
         return new ResponseEntity<>(ResponseDto.ok(myChatRooms, HttpStatus.OK), HttpStatus.OK);
     }
 

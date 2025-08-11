@@ -24,11 +24,12 @@ public class ChatRoom extends BaseIdAndTimeEntity {
     @Column(name = "name", nullable = false, length = 100)
     private String name; // 채팅방 이름
 
-    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<ChatParticipant> participants = new ArrayList<>(); // 채팅 참여자 목록
 
-    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
     @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>(); // 채팅 메시지 목록
 }

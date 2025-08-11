@@ -36,6 +36,10 @@ public class ChatParticipant extends BaseIdAndTimeEntity {
     @Column(name = "left_at")
     private LocalDateTime leftAt; // 나간 시간 기록
 
+    @ManyToOne
+    @JoinColumn(name = "chat_message_id")
+    private ChatMessage lastReadMessage;
+
     public void updateCustomRoomName(String customRoomName) {
         this.customRoomName = customRoomName;
     }
@@ -47,4 +51,9 @@ public class ChatParticipant extends BaseIdAndTimeEntity {
     public void joinChatRoom() {
         this.isActive = "Y"; // 채팅방 참여 상태를 활성화로 변경
     }
+
+    public void read(ChatMessage lastReadMessage) {
+        this.lastReadMessage = lastReadMessage;
+    }
+
 }

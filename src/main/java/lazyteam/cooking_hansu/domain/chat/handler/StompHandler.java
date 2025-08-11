@@ -50,7 +50,7 @@ public class StompHandler implements ChannelInterceptor {
             //         .getBody();
             // UUID userId = UUID.fromString(claims.getSubject());
             UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
-            UUID roomId = UUID.fromString(accessor.getDestination().split("/")[2]); // destination은 /topic/{roomId} 형태로 오기 때문에 split을 통해 roomId 추출
+            UUID roomId = UUID.fromString(accessor.getDestination().split("/")[3]); // destination은 /topic/{roomId} 형태로 오기 때문에 split을 통해 roomId 추출
             if(!chatService.isRoomParticipant(userId, roomId)){
                 throw new AuthenticationServiceException("해당 room에 권한이 없습니다.");
             }
