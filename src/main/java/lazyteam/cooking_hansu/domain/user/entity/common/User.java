@@ -51,9 +51,7 @@ public class User extends BaseIdAndTimeEntity {
     @Builder.Default
     private Role role = Role.GENERAL; // 회원 역활 (GENERAL, CHEF, OWNER, BOTH, ADMIN)
 
-    @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
-    @Column(nullable = true) // OAuth 사용자는 비밀번호가 없을 수 있음
-    private String password; // 비밀번호
+    // 비밀번호 컬럼 제거
 
     @Enumerated(EnumType.STRING)
     private GeneralType generalType; // 일반 회원 유형 (STUDENT, HOUSEWIFE, LIVINGALONE, ETC)

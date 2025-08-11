@@ -1,7 +1,8 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.global.auth.dto.GoogleTokenDto;
+import lazyteam.cooking_hansu.domain.user.dto.CommonProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
+import lazyteam.cooking_hansu.global.auth.dto.CommonTokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+/**
+ * 구글 OAuth 서비스 구현
+ * 구글 OAuth로 액세스 토큰 및 사용자 프로필 정보 처리
+ */
 @Service
 @Slf4j
-public class GoogleService {
+public class GoogleService implements OAuthService {
 
     @Value("${oauth.google.client-id}")
     private String googleClientId;
@@ -23,14 +28,11 @@ public class GoogleService {
     @Value("${oauth.google.redirect-uri}")
     private String googleRedirectUri;
 
-
-    public GoogleTokenDto getToken(String code){
-//        인가코드, clientId, client_secret, redirect_uri, grant_type
-
-//        Spring6부터 RestTemplate 비추천상태이기에, 대신 RestClient 사용
+    // 인가 코드를 통한 Access Token 발급
+    @Override
+    public CommonTokenDto getToken(String code) {
         RestClient restClient = RestClient.create();
 
-//        MultiValueMap을 통해 자동으로 form-data형식으로 body 조립 가능
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("code", code);
         params.add("client_id", googleClientId);
@@ -38,28 +40,40 @@ public class GoogleService {
         params.add("redirect_uri", googleRedirectUri);
         params.add("grant_type", "authorization_code");
 
-        ResponseEntity<GoogleTokenDto> response = restClient.post()
+        ResponseEntity<CommonTokenDto> response = restClient.post()
                 .uri("https://oauth2.googleapis.com/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
-//                ?code=xxxx&client_id=yyyy&
                 .body(params)
-//                retrieve:응답 body값만을 추출
                 .retrieve()
-                .toEntity(GoogleTokenDto.class);
+                .toEntity(CommonTokenDto.class);
 
         log.info("Google Token Response: {}", response.getBody());
         return response.getBody();
     }
 
-    public GoogleProfileDto getGoogleProfile(String token){
+    @Override
+    public CommonProfileDto getProfile(String token) {
         RestClient restClient = RestClient.create();
-        ResponseEntity<GoogleProfileDto> response =  restClient.get()
-                .uri("https://openidconnect.googleapis.com/v1/userinfo")
-                .header("Authorization", "Bearer "+token)
+        ResponseEntity<GoogleProfileDto> response = restClient.get()
+                .uri("https://www.googleapis.com/oauth2/v2/userinfo")
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .toEntity(GoogleProfileDto.class);
 
-        log.info("profile JSON: {}", response.getBody());
-        return response.getBody();
+        log.info("Google profile JSON: {}", response.getBody());
+
+        // 구글 프로필을 공통 프로필로 변환
+        GoogleProfileDto googleProfile = response.getBody();
+        return googleProfile != null ? googleProfile.toCommonProfile() : null;
+    }
+
+    @Override
+    public String getProviderName() {
+        return "google";
+    }
+
+    // 기존 메서드명과의 호환성을 위해 유지
+    public CommonProfileDto getGoogleProfile(String token) {
+        return getProfile(token);
     }
 }

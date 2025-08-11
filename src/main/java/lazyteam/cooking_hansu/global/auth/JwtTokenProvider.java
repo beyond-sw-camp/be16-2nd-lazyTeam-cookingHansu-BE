@@ -83,7 +83,7 @@ public class JwtTokenProvider {
         return expirationRt * 60 * 1000L; // milliseconds
     }
 
-    // RT 튜효성 검증
+    // RT 유효성 검증
     public boolean validateRefreshToken(String refreshToken) {
         try {
             Jwts.parserBuilder()
@@ -93,6 +93,20 @@ public class JwtTokenProvider {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    // AT 토큰에서 이메일 추출
+    public String getEmailFromAccessToken(String accessToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secret_at_key)
+                    .build()
+                    .parseClaimsJws(accessToken)
+                    .getBody();
+            return claims.getSubject();
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -109,4 +123,5 @@ public class JwtTokenProvider {
             return null;
         }
     }
+
 }
