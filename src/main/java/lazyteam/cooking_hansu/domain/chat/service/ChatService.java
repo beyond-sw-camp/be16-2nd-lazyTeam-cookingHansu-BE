@@ -33,7 +33,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-//    private final ReadStatusRepository readStatusRepository;
+    //    private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final S3Uploader s3Uploader;
 
@@ -99,7 +99,6 @@ public class ChatService {
 //        }
 
 
-
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
                 .roomId(roomId)
@@ -122,28 +121,28 @@ public class ChatService {
     public ChatFileUploadResDto uploadFiles(UUID roomId, ChatFileUploadReqDto requestDto) {
         // 채팅방 존재 확인
         chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        
+
         // 현재 사용자가 채팅방 참여자인지 확인
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         if (!isRoomParticipant(userId, roomId)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
-        
+
         List<MultipartFile> files = requestDto.getFiles();
         List<FileType> fileTypes = requestDto.getFileTypes();
-        
+
         // 업로드 요청 전체 검증 (파일 개수, 크기, 타입 등 모든 검증)
         ChatFileValidator.validateUploadRequest(files, fileTypes);
-        
+
         List<ChatFileUploadResDto.FileInfo> uploadedFiles = new ArrayList<>();
-        
+
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
             FileType fileType = fileTypes.get(i);
-            
+
             // S3에 파일 업로드
             String fileUrl = s3Uploader.upload(file, "chat-files/" + roomId);
-            
+
             // 파일 정보 생성
             ChatFileUploadResDto.FileInfo fileInfo = ChatFileUploadResDto.FileInfo.builder()
                     .fileUrl(fileUrl)
@@ -151,10 +150,10 @@ public class ChatService {
                     .fileType(fileType)
                     .fileSize((int) file.getSize())
                     .build();
-            
+
             uploadedFiles.add(fileInfo);
         }
-        
+
         return ChatFileUploadResDto.builder()
                 .files(uploadedFiles)
                 .build();
@@ -169,27 +168,32 @@ public class ChatService {
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessage(user);
 
         return chatParticipants.stream().map(participant -> {
-            ChatRoom chatRoom = participant.getChatRoom();
-            User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
+            User otherUser = chatParticipantRepository.findByChatRoom(participant.getChatRoom()).stream()
                     .map(ChatParticipant::getUser)
                     .filter(u -> !u.getId().equals(user.getId()))
                     .findFirst()
                     .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
 
-            // 읽지 않은 메시지 수
-            int newMessageCount = participant.getChatRoom().getMessages().size();
-            ChatMessage lastMessage = participant.getLastReadMessage();
+            // 가독성 위해 유틸 변수
+            ChatRoom room = participant.getChatRoom();
 
+            // 1) 기준점(baseline) 계산: 마지막 읽음 > 나간시각 > 방생성시각
+            LocalDateTime baseline =
+                    participant.getLastReadMessage() != null ? participant.getLastReadMessage().getCreatedAt() :
+                            participant.getLeftAt() != null ? participant.getLeftAt() :
+                                    room.getCreatedAt();
 
-            if (lastMessage != null) {
-                newMessageCount = (int) participant.getChatRoom().getMessages().stream()
-                        .map(ChatMessage::getCreatedAt)
-                        .filter(createdAt -> createdAt.isAfter(lastMessage.getCreatedAt()))
-                        .count();
-            }
+            // 2) 필터링: 삭제 제외 + 본인메시지 제외 + baseline 이후
+            int newMessageCount = (int) room.getMessages().stream()
+                    .filter(m -> "N".equals(m.getIsDeleted()))
+                    .filter(m -> !m.getSender().getId().equals(user.getId()))
+                    .filter(m -> {
+                        // == 같은 시각 메시지까지 읽은 것으로 처리하고 싶으면 isAfter 대신 !isBefore 사용
+                        return m.getCreatedAt().isAfter(baseline); // 필요시 >= 로 바꾸려면 !isBefore(baseline)
+                    })
+                    .count();
 
-
-            return ChatRoomListDto.fromEntity(participant.getChatRoom(), otherUser, newMessageCount);
+            return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount);
         }).collect(Collectors.toList());
     }
 
