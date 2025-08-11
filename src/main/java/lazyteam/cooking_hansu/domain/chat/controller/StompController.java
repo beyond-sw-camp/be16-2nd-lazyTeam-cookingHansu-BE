@@ -6,14 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageReqDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
-import lazyteam.cooking_hansu.domain.chat.service.RedisPubSubService;
+import lazyteam.cooking_hansu.domain.chat.service.chatRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Controller
@@ -21,7 +20,7 @@ import java.util.UUID;
 public class StompController {
 
     private final ChatService chatService;
-    private final RedisPubSubService redisPubSubService;
+    private final chatRedisService redisPubSubService;
 
 
     @MessageMapping("/{roomId}") // 클라이언트에서 특정 Publish/{roomId}로 메시지를 발행하면 해당 메소드가 호출됨

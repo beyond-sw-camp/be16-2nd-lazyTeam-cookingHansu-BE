@@ -12,13 +12,13 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RedisPubSubService implements MessageListener {
+public class chatRedisService implements MessageListener {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final SimpMessageSendingOperations messageTemplate;
     private final ObjectMapper objectMapper;
 
-    public RedisPubSubService(@Qualifier("chatPub") StringRedisTemplate stringRedisTemplate, SimpMessageSendingOperations messageTemplate) {
+    public chatRedisService(@Qualifier("chatPub") StringRedisTemplate stringRedisTemplate, SimpMessageSendingOperations messageTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.messageTemplate = messageTemplate;
         this.objectMapper = new ObjectMapper();
@@ -32,11 +32,16 @@ public class RedisPubSubService implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String payload = new String(message.getBody());
+
         try {
-            ChatMessageResDto chatMessageResDto = objectMapper.readValue(payload, ChatMessageResDto.class);
-            messageTemplate.convertAndSend("/topic/" + chatMessageResDto.getRoomId(), chatMessageResDto);
+            // JSON 문자열을 ChatMessageResDto 객체로 변환
+            ChatMessageResDto chatMessage = objectMapper.readValue(payload, ChatMessageResDto.class);
+
+            // 채팅 메시지를 특정 주제에 발행
+            messageTemplate.convertAndSend("/topic/" + chatMessage.getRoomId(), chatMessage);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            // 예외 처리 로직 추가 가능
         }
     }
 }

@@ -314,17 +314,6 @@ public class ChatService {
         return false;
     }
 
-    //    메시지 읽음
-    public void messageRead(UUID roomId) {
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        List<ReadStatus> readStatuses = readStatusRepository.findByChatRoomAndUser(chatRoom, user);
-        for (ReadStatus r : readStatuses) {
-            r.updateIsRead("Y");
-        }
-    }
-
     //    채팅방 나가기
     public void leaveChatRoom(UUID roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));

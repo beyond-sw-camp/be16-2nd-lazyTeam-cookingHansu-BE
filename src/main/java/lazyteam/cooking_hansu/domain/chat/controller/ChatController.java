@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatRoomUpdateDto;
 import lazyteam.cooking_hansu.domain.chat.dto.MyChatListDto;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
+import lazyteam.cooking_hansu.domain.chat.service.chatRedisService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class ChatController {
 
     private final ChatService chatService;
+    private final chatRedisService redisPubSubService;
 
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
@@ -37,12 +39,12 @@ public class ChatController {
         return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
 
-    //    채팅방 메시지 읽음 처리
-    @PostMapping("/room/{roomId}/read")
-    public ResponseEntity<?> messageRead(@PathVariable UUID roomId) {
-        chatService.messageRead(roomId);
-        return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
-    }
+//    //    채팅방 메시지 읽음 처리
+//    @PostMapping("/room/{roomId}/read")
+//    public ResponseEntity<?> messageRead(@PathVariable UUID roomId) {
+//        chatService.messageRead(roomId);
+//        return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
+//    }
 
     //    채팅방 생성
     @GetMapping("/room/create/{otherUserId}")
