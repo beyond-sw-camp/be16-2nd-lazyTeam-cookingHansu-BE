@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewModifyDto;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,5 +39,15 @@ public class LectureReview extends BaseIdAndTimeEntity {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    public void modifyReview(ReviewModifyDto reviewModifyDto) {
+        if(reviewModifyDto.getContent()!=null) {
+            this.content = reviewModifyDto.getContent();
+        }
+        if(reviewModifyDto.getRating()!=null) {
+            this.rating = reviewModifyDto.getRating();
+        }
+
+    }
 
 }

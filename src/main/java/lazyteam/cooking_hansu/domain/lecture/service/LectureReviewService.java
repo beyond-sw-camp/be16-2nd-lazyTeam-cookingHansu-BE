@@ -4,6 +4,7 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewCreateDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewModifyDto;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewResDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
@@ -42,7 +43,8 @@ public class LectureReviewService {
             throw new IllegalArgumentException("평점의 값이 1보다 작거나 5보다 큽니다.");
         }
 
-        Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId()).orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
+        Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
 
         lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
     }
@@ -60,6 +62,41 @@ public class LectureReviewService {
                         r.getContent()
                 ));
 
+    }
+
+//    강의 리뷰 수정
+    public void reviewModify(ReviewModifyDto reviewModifyDto) {
+        //        테스트용 유저 세팅
+        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        if(reviewModifyDto.getRating()!=null) {
+            if(reviewModifyDto.getRating()<1 || reviewModifyDto.getRating()>5) {
+
+                throw new IllegalArgumentException("평점의 값이 1보다 작거나 5보다 큽니다.");
+            }
+        }
+
+
+        Lecture lecture = lectureRepository.findById(reviewModifyDto.getLectureId())
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
+
+        LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lecture.getId(),user.getId())
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));
+
+        lectureReview.modifyReview(reviewModifyDto);
+
+    }
+
+//    강의 삭제
+    public void reviewDelete(UUID lectureId) {
+        //        테스트용 유저 세팅
+        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lectureId,user.getId())
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));
+        lectureReviewRepository.delete(lectureReview);
     }
 
 

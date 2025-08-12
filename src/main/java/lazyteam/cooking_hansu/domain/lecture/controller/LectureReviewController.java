@@ -2,11 +2,10 @@ package lazyteam.cooking_hansu.domain.lecture.controller;
 
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewCreateDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewResDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewModifyDto;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureReviewService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -40,8 +39,19 @@ public class LectureReviewController {
 
 
 //    리뷰 수정
+    @PatchMapping("/modify")
+    public ResponseEntity<?> reviewModify(@Valid @RequestBody ReviewModifyDto reviewModifyDto) {
+        lectureReviewService.reviewModify(reviewModifyDto);
+        return new ResponseEntity<>(ResponseDto.ok("리뷰가 수정되었습니다.", HttpStatus.OK),HttpStatus.OK);
+
+    }
 
 
 //    리뷰 삭제
+    @DeleteMapping("/delete/{lectureId}")
+    public ResponseEntity<?> reviewDelete(@PathVariable UUID lectureId) {
+        lectureReviewService.reviewDelete(lectureId);
+        return new ResponseEntity<>(ResponseDto.ok("리뷰가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
+    }
 
 }
