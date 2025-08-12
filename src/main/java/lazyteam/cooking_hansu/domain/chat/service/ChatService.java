@@ -13,6 +13,9 @@ import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -197,9 +200,9 @@ public class ChatService {
         }).collect(Collectors.toList());
     }
 
-    //    채팅방 상세 내역 조회
+    //    채팅방 상세 내역 조회 (Scroll Pagination)
     @Transactional(readOnly = true)
-    public List<ChatMessageResDto> getChatHistory(UUID roomId) {
+    public Slice<ChatMessageResDto> getChatHistory(UUID roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
@@ -217,15 +220,36 @@ public class ChatService {
                 .findByChatRoomAndUser(chatRoom, user)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
 
-        List<ChatMessage> chatMessages;
-
-        if (participant.getLeftAt() != null) {
-            chatMessages = chatMessageRepository.findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(chatRoom, participant.getLeftAt());
-        } else {
-            chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+        // 인덱스 기반 cursor pagination
+        int pageIndex = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            try {
+                pageIndex = Integer.parseInt(cursor);
+            } catch (NumberFormatException e) {
+                // cursor가 유효한 숫자가 아닌 경우 첫 페이지로
+                pageIndex = 0;
+            }
         }
+        
+        // Pageable 생성 (정확한 size로 조회)
+        PageRequest pageRequest = PageRequest.of(pageIndex, size);
+        
+        Slice<ChatMessage> chatMessagesSlice;
+        
+        if (participant.getLeftAt() != null) {
+            // 채팅방을 나갔다가 다시 들어온 경우, 나간 시간 이후 메시지만 조회
+            // 이 경우는 기존 List 방식 사용 (pagination 적용 어려움)
+            List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(
+                chatRoom, participant.getLeftAt());
+            chatMessagesSlice = new SliceImpl<>(chatMessages, pageRequest, false);
+        } else {
+            // 인덱스 기반 pagination 사용
+            chatMessagesSlice = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageRequest);
+        }
+        
+        // Slice를 ChatMessageResDto로 변환
         List<ChatMessageResDto> result = new ArrayList<>();
-        for (ChatMessage cm : chatMessages) {
+        for (ChatMessage cm : chatMessagesSlice.getContent()) {
             // 메시지에 파일이 있는 경우
             List<ChatFileUploadResDto.FileInfo> fileList = new ArrayList<>();
             if (cm.getFiles() != null && !cm.getFiles().isEmpty()) {
@@ -252,7 +276,9 @@ public class ChatService {
                     .build();
             result.add(chatMessageResDto);
         }
-        return result;
+        
+        // Slice 결과 반환
+        return new SliceImpl<>(result, pageRequest, chatMessagesSlice.hasNext());
     }
 
     //    채팅방 생성 or 기존 채팅방 조회

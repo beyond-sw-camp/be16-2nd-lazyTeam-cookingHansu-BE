@@ -5,6 +5,8 @@ import lazyteam.cooking_hansu.domain.chat.service.ChatService;
 import lazyteam.cooking_hansu.domain.chat.service.ChatRedisService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +30,14 @@ public class ChatController {
         return new ResponseEntity<>(ResponseDto.ok(myChatRooms, HttpStatus.OK), HttpStatus.OK);
     }
 
-    //    채팅방 상세 메시지 조회
+    //    채팅방 상세 메시지 조회 (Scroll Pagination)
     @GetMapping("/room/{roomId}/history")
-    public ResponseEntity<?> getChatHistory(@PathVariable UUID roomId) {
-        List<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId);
+    public ResponseEntity<?> getChatHistory(
+            @PathVariable UUID roomId,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String cursor
+    ) {
+        Slice<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId, size, cursor);
         return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
 
