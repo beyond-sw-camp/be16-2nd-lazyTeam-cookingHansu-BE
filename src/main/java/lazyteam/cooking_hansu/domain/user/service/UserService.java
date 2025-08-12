@@ -3,7 +3,6 @@ package lazyteam.cooking_hansu.domain.user.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
-import lazyteam.cooking_hansu.domain.user.dto.CommonProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
@@ -125,31 +124,46 @@ public class UserService {
         return userRepository.findBySocialId(socialId).orElse(null);
     }
 
-    // 사용자 생성 (OAuth 로그인용)
-    public User createOauth(CommonProfileDto dto, OauthType oauthType) {
+    // 구글 OAuth 사용자 생성
+    public User createGoogleOauth(String sub, String name, String email, String picture, OauthType oauthType) {
+        return createOauthUser(sub, name, email, picture, oauthType);
+    }
+
+    // 카카오 OAuth 사용자 생성
+    public User createKakaoOauth(String sub, String name, String email, String picture, OauthType oauthType) {
+        return createOauthUser(sub, name, email, picture, oauthType);
+    }
+
+    // 네이버 OAuth 사용자 생성
+    public User createNaverOauth(String sub, String name, String email, String picture, OauthType oauthType) {
+        return createOauthUser(sub, name, email, picture, oauthType);
+    }
+
+    // OAuth 사용자 생성 공통 메서드
+    private User createOauthUser(String sub, String name, String email, String picture, OauthType oauthType) {
         String uploadedPictureUrl = null;
 
         // 소셜 로그인에서 받은 프로필 이미지를 S3에 업로드
-        if (dto.getPicture() != null && !dto.getPicture().isEmpty()) {
+        if (picture != null && !picture.isEmpty()) {
             try {
-                String fileName = "profile-" + dto.getSub();
+                String fileName = "profile-" + sub;
                 uploadedPictureUrl = s3Uploader.uploadFromUrl(
-                    dto.getPicture(),
+                    picture,
                     "profiles/",
                     fileName
                 );
-                log.info("프로필 이미지 S3 업로드 성공: {} -> {}", dto.getPicture(), uploadedPictureUrl);
+                log.info("프로필 이미지 S3 업로드 성공: {} -> {}", picture, uploadedPictureUrl);
             } catch (Exception e) {
-                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용: {}", dto.getPicture(), e);
-                uploadedPictureUrl = dto.getPicture(); // 업로드 실패 시 원본 URL 사용
+                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용: {}", picture, e);
+                uploadedPictureUrl = picture; // 업로드 실패 시 원본 URL 사용
             }
         }
 
         User user = User.builder()
-                .email(dto.getEmail())
-                .name(dto.getName())
+                .email(email)
+                .name(name)
                 .oauthType(oauthType)
-                .socialId(dto.getSub())
+                .socialId(sub)
                 .picture(uploadedPictureUrl)
                 .build();
         userRepository.save(user);

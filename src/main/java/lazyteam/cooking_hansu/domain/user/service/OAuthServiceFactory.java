@@ -16,6 +16,7 @@ public class OAuthServiceFactory {
 
     private final GoogleService googleService;
     private final KakaoService kakaoService;
+    private final NaverService naverService;
 
     /**
      * OAuth 타입에 따른 적절한 서비스 반환
@@ -27,7 +28,7 @@ public class OAuthServiceFactory {
         return switch (oauthType) {
             case GOOGLE -> googleService;
             case KAKAO -> kakaoService;
-//            case NAVER -> naverService;
+            case NAVER -> naverService;
             default -> throw new IllegalArgumentException("지원하지 않는 OAuth 타입입니다: " + oauthType);
         };
     }
@@ -42,7 +43,7 @@ public class OAuthServiceFactory {
         return switch (providerName.toLowerCase()) {
             case "google" -> googleService;
             case "kakao" -> kakaoService;
-//            case "naver" -> naverService;
+            case "naver" -> naverService;
             default -> throw new IllegalArgumentException("지원하지 않는 OAuth 제공자입니다: " + providerName);
         };
     }
@@ -54,8 +55,8 @@ public class OAuthServiceFactory {
     public Map<String, OAuthService> getAllOAuthServices() {
         return Map.of(
             "google", googleService,
-            "kakao", kakaoService
-//            "naver", naverService
+            "kakao", kakaoService,
+            "naver", naverService
         );
     }
 }

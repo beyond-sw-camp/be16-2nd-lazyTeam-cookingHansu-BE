@@ -23,8 +23,20 @@ public class GoogleProfileDto {
     private String family_name;
     private String locale;
 
-    // 구글 프로필을 공통 프로필로 변환
-    public CommonProfileDto toCommonProfile() {
-        return new CommonProfileDto(sub, name, email, picture);
+    // CommonProfileDto와 동일한 인터페이스 제공을 위한 메서드들
+    public String getSub() {
+        return sub;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPicture() {
+        return picture;
     }
 }

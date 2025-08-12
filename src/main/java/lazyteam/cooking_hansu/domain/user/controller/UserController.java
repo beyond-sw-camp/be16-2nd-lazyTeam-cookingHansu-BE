@@ -2,14 +2,18 @@ package lazyteam.cooking_hansu.domain.user.controller;
 
 import lazyteam.cooking_hansu.domain.user.dto.HeaderProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserLoginDto;
+import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.KakaoProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.NaverProfileDto;
 import lazyteam.cooking_hansu.domain.user.service.OAuthServiceFactory;
 import lazyteam.cooking_hansu.global.auth.dto.CommonTokenDto;
-import lazyteam.cooking_hansu.domain.user.dto.CommonProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
 import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.service.OAuthService;
 import lazyteam.cooking_hansu.domain.user.service.UserService;
+import lazyteam.cooking_hansu.domain.user.service.GoogleService;
+import lazyteam.cooking_hansu.domain.user.service.KakaoService;
+import lazyteam.cooking_hansu.domain.user.service.NaverService;
 import lazyteam.cooking_hansu.global.auth.JwtTokenProvider;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lazyteam.cooking_hansu.global.service.RefreshTokenService;
@@ -31,72 +35,157 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuthServiceFactory oAuthServiceFactory;
     private final RefreshTokenService refreshTokenService;
+    private final GoogleService googleService;
+    private final KakaoService kakaoService;
+    private final NaverService naverService;
 
     // 구글 로그인 요청 처리
     @PostMapping("/google/login")
     public ResponseDto<?> googleLogin(@RequestBody RedirectDto redirectDto) {
-        return processOAuthLogin(redirectDto.getCode(), OauthType.GOOGLE);
+        return processGoogleOAuthLogin(redirectDto.getCode());
     }
 
     // 카카오 로그인 요청 처리
     @PostMapping("/kakao/login")
     public ResponseDto<?> kakaoLogin(@RequestBody RedirectDto redirectDto) {
-        return processOAuthLogin(redirectDto.getCode(), OauthType.KAKAO);
+        return processKakaoOAuthLogin(redirectDto.getCode());
     }
 
-    /*// 네이버 로그인 요청 처리
+    // 네이버 로그인 요청 처리
     @PostMapping("/naver/login")
     public ResponseDto<?> naverLogin(@RequestBody RedirectDto redirectDto) {
-        return processOAuthLogin(redirectDto.getCode(), OauthType.NAVER);
-    }*/
+        return processNaverOAuthLogin(redirectDto.getCode());
+    }
 
     /**
-     * OAuth 로그인 공통 처리 메서드
+     * 구글 OAuth 로그인 처리 메서드
      * @param code 인가 코드
-     * @param oauthType OAuth 제공자 타입
      * @return 로그인 응답
      */
-    private ResponseDto<?> processOAuthLogin(String code, OauthType oauthType) {
+    private ResponseDto<?> processGoogleOAuthLogin(String code) {
         try {
-            // OAuth 서비스 가져오기
-            OAuthService oAuthService = oAuthServiceFactory.getOAuthService(oauthType);
-
             // access token & refresh token 발급
-            CommonTokenDto commonTokenDto = oAuthService.getToken(code);
+            CommonTokenDto commonTokenDto = googleService.getToken(code);
 
             // 사용자 정보 얻기
-            CommonProfileDto commonProfileDto = oAuthService.getProfile(commonTokenDto.getAccess_token());
+            GoogleProfileDto googleProfileDto = googleService.getProfile(commonTokenDto.getAccess_token());
 
             // 새 사용자 여부 판단
-            User originalUser = userService.getUserBySocialId(commonProfileDto.getSub());
+            User originalUser = userService.getUserBySocialId(googleProfileDto.getSub());
             boolean isNewUser = (originalUser == null);
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (isNewUser) {
-                originalUser = userService.createOauth(commonProfileDto, oauthType);
+                originalUser = userService.createGoogleOauth(
+                    googleProfileDto.getSub(),
+                    googleProfileDto.getName(),
+                    googleProfileDto.getEmail(),
+                    googleProfileDto.getPicture(),
+                    OauthType.GOOGLE
+                );
             }
 
-            // JWT 토큰 발급
-            String jwtAtToken = jwtTokenProvider.createAtToken(originalUser);
-            String jwtRtToken = jwtTokenProvider.createRtToken(originalUser);
-
-            // Refresh Token을 Redis에 저장
-            refreshTokenService.saveRefreshToken(originalUser.getId().toString(), jwtRtToken);
-
-            // 프론트엔드 요구사항에 맞는 응답 데이터 생성
-            UserLoginDto userLoginDto = UserLoginDto.builder()
-                    .uuid(originalUser.getId())
-                    .accessToken(jwtAtToken)
-                    .refreshToken(jwtRtToken)
-                    .user(originalUser)
-                    .isNewUser(isNewUser)
-                    .build();
-
-            return ResponseDto.ok(userLoginDto, HttpStatus.OK);
+            return createLoginResponse(originalUser, isNewUser);
         } catch (Exception e) {
-            log.error("{} login failed", oauthType.name(), e);
-            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "로그인 처리 중 오류가 발생했습니다.");
+            log.error("Google login failed", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "구글 로그인 처리 중 오류가 발생했습니다.");
         }
+    }
+
+    /**
+     * 카카오 OAuth 로그인 처리 메서드
+     * @param code 인가 코드
+     * @return 로그인 응답
+     */
+    private ResponseDto<?> processKakaoOAuthLogin(String code) {
+        try {
+            // access token & refresh token 발급
+            CommonTokenDto commonTokenDto = kakaoService.getToken(code);
+
+            // 사용자 정보 얻기
+            KakaoProfileDto kakaoProfileDto = kakaoService.getProfile(commonTokenDto.getAccess_token());
+
+            // 새 사용자 여부 판단
+            User originalUser = userService.getUserBySocialId(kakaoProfileDto.getSub());
+            boolean isNewUser = (originalUser == null);
+
+            // 회원 가입이 되어 있지 않다면 회원가입
+            if (isNewUser) {
+                originalUser = userService.createKakaoOauth(
+                    kakaoProfileDto.getSub(),
+                    kakaoProfileDto.getName(),
+                    kakaoProfileDto.getEmail(),
+                    kakaoProfileDto.getPicture(),
+                    OauthType.KAKAO
+                );
+            }
+
+            return createLoginResponse(originalUser, isNewUser);
+        } catch (Exception e) {
+            log.error("Kakao login failed", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "카카오 로그인 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 네이버 OAuth 로그인 처리 메서드
+     * @param code 인가 코드
+     * @return 로그인 응답
+     */
+    private ResponseDto<?> processNaverOAuthLogin(String code) {
+        try {
+            // access token & refresh token 발급
+            CommonTokenDto commonTokenDto = naverService.getToken(code);
+
+            // 사용자 정보 얻기
+            NaverProfileDto naverProfileDto = naverService.getProfile(commonTokenDto.getAccess_token());
+
+            // 새 사용자 여부 판단
+            User originalUser = userService.getUserBySocialId(naverProfileDto.getId());
+            boolean isNewUser = (originalUser == null);
+
+            // 회원 가입이 되어 있지 않다면 회원가입
+            if (isNewUser) {
+                originalUser = userService.createNaverOauth(
+                    naverProfileDto.getId(),
+                    naverProfileDto.getName(),
+                    naverProfileDto.getEmail(),
+                    naverProfileDto.getPicture(),
+                    OauthType.NAVER
+                );
+            }
+
+            return createLoginResponse(originalUser, isNewUser);
+        } catch (Exception e) {
+            log.error("Naver login failed", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "네이버 로그인 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 로그인 응답 생성 공통 메서드
+     * @param user 사용자
+     * @param isNewUser 신규 사용자 여부
+     * @return 로그인 응답
+     */
+    private ResponseDto<?> createLoginResponse(User user, boolean isNewUser) {
+        // JWT 토큰 발급
+        String jwtAtToken = jwtTokenProvider.createAtToken(user);
+        String jwtRtToken = jwtTokenProvider.createRtToken(user);
+
+        // Refresh Token을 Redis에 저장
+        refreshTokenService.saveRefreshToken(user.getId().toString(), jwtRtToken);
+
+        // 프론트엔드 요구사항에 맞는 응답 데이터 생성
+        UserLoginDto userLoginDto = UserLoginDto.builder()
+                .uuid(user.getId())
+                .accessToken(jwtAtToken)
+                .refreshToken(jwtRtToken)
+                .user(user)
+                .isNewUser(isNewUser)
+                .build();
+
+        return ResponseDto.ok(userLoginDto, HttpStatus.OK);
     }
 
     // 구글 리프레시 토큰 갱신
@@ -111,11 +200,11 @@ public class UserController {
         return processTokenRefresh(request);
     }
 
-    /*// 네이버 리프레시 토큰 갱신
+    // 네이버 리프레시 토큰 갱신
     @PostMapping("/naver/refresh")
     public ResponseDto<?> naverRefresh(@RequestBody Map<String, String> request) {
         return processTokenRefresh(request);
-    }*/
+    }
 
     // 공통 리프레시 토큰 갱신
     @PostMapping("/refresh")

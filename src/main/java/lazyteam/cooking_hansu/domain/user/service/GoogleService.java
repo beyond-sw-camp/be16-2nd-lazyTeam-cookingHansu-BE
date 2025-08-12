@@ -1,6 +1,5 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.domain.user.dto.CommonProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
 import lazyteam.cooking_hansu.global.auth.dto.CommonTokenDto;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ import org.springframework.web.client.RestClient;
  */
 @Service
 @Slf4j
-public class GoogleService implements OAuthService {
+public class GoogleService implements OAuthService<GoogleProfileDto> {
 
     @Value("${oauth.google.client-id}")
     private String googleClientId;
@@ -52,7 +51,7 @@ public class GoogleService implements OAuthService {
     }
 
     @Override
-    public CommonProfileDto getProfile(String token) {
+    public GoogleProfileDto getProfile(String token) {
         RestClient restClient = RestClient.create();
         ResponseEntity<GoogleProfileDto> response = restClient.get()
                 .uri("https://www.googleapis.com/oauth2/v2/userinfo")
@@ -61,19 +60,11 @@ public class GoogleService implements OAuthService {
                 .toEntity(GoogleProfileDto.class);
 
         log.info("Google profile JSON: {}", response.getBody());
-
-        // 구글 프로필을 공통 프로필로 변환
-        GoogleProfileDto googleProfile = response.getBody();
-        return googleProfile != null ? googleProfile.toCommonProfile() : null;
+        return response.getBody();
     }
 
     @Override
     public String getProviderName() {
         return "google";
-    }
-
-    // 기존 메서드명과의 호환성을 위해 유지
-    public CommonProfileDto getGoogleProfile(String token) {
-        return getProfile(token);
     }
 }
