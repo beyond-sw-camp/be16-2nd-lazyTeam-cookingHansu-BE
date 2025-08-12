@@ -4,6 +4,8 @@ import io.lettuce.core.dynamic.annotation.Param;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -40,6 +42,19 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
           MAX(cm.createdAt) DESC
     """)
     List<ChatParticipant> findMyActiveParticipantsOrderByLastMessage(@Param("user") User user);
+
+    @Query("""
+        SELECT cp
+        FROM ChatParticipant cp
+        LEFT JOIN ChatMessage cm ON cm.chatRoom = cp.chatRoom
+        WHERE cp.user = :user
+          AND cp.isActive = 'Y'
+        GROUP BY cp.id, cp.chatRoom.id
+        ORDER BY
+          CASE WHEN MAX(cm.createdAt) IS NULL THEN 1 ELSE 0 END,
+          MAX(cm.createdAt) DESC
+    """)
+    Slice<ChatParticipant> findMyActiveParticipantsOrderByLastMessageSlice(@Param("user") User user, Pageable pageable);
 
     boolean existsByChatRoomAndUser(ChatRoom chatRoom, User user);
 

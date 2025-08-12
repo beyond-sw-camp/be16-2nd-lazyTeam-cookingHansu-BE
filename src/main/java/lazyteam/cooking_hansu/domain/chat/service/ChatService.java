@@ -164,13 +164,29 @@ public class ChatService {
 
     //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
-    public List<ChatRoomListDto> getMyChatRooms() {
+    public PaginatedResponseDto<ChatRoomListDto> getMyChatRooms(int size, String cursor) {
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessage(user);
-
-        return chatParticipants.stream().map(participant -> {
+        // 인덱스 기반 cursor pagination
+        int pageIndex = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            try {
+                pageIndex = Integer.parseInt(cursor);
+            } catch (NumberFormatException e) {
+                // cursor가 유효한 숫자가 아닌 경우 첫 페이지로
+                pageIndex = 0;
+            }
+        }
+        
+        // Pageable 생성
+        PageRequest pageRequest = PageRequest.of(pageIndex, size);
+        
+        // Slice로 채팅방 참여자 조회
+        Slice<ChatParticipant> chatParticipantsSlice = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessageSlice(user, pageRequest);
+        
+        // ChatParticipant를 ChatRoomListDto로 변환
+        List<ChatRoomListDto> result = chatParticipantsSlice.getContent().stream().map(participant -> {
             User otherUser = chatParticipantRepository.findByChatRoom(participant.getChatRoom()).stream()
                     .map(ChatParticipant::getUser)
                     .filter(u -> !u.getId().equals(user.getId()))
@@ -198,11 +214,18 @@ public class ChatService {
 
             return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount);
         }).collect(Collectors.toList());
+        
+        // 커스텀 응답 DTO 반환
+        return PaginatedResponseDto.<ChatRoomListDto>builder()
+                .data(result)
+                .hasNext(chatParticipantsSlice.hasNext())
+                .nextCursor(chatParticipantsSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
+                .build();
     }
 
     //    채팅방 상세 내역 조회 (Scroll Pagination)
     @Transactional(readOnly = true)
-    public Slice<ChatMessageResDto> getChatHistory(UUID roomId, int size, String cursor) {
+    public PaginatedResponseDto<ChatMessageResDto> getChatHistory(UUID roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
@@ -277,8 +300,12 @@ public class ChatService {
             result.add(chatMessageResDto);
         }
         
-        // Slice 결과 반환
-        return new SliceImpl<>(result, pageRequest, chatMessagesSlice.hasNext());
+        // 커스텀 응답 DTO 반환
+        return PaginatedResponseDto.<ChatMessageResDto>builder()
+                .data(result)
+                .hasNext(chatMessagesSlice.hasNext())
+                .nextCursor(chatMessagesSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
+                .build();
     }
 
     //    채팅방 생성 or 기존 채팅방 조회

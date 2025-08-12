@@ -25,8 +25,11 @@ public class ChatController {
 
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
-    public ResponseEntity<?> getMyChatRooms() {
-        List<ChatRoomListDto> myChatRooms = chatService.getMyChatRooms();
+    public ResponseEntity<?> getMyChatRooms(
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String cursor
+    ) {
+        PaginatedResponseDto<ChatRoomListDto> myChatRooms = chatService.getMyChatRooms(size, cursor);
         return new ResponseEntity<>(ResponseDto.ok(myChatRooms, HttpStatus.OK), HttpStatus.OK);
     }
 
@@ -37,16 +40,9 @@ public class ChatController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String cursor
     ) {
-        Slice<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId, size, cursor);
+        PaginatedResponseDto<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId, size, cursor);
         return new ResponseEntity<>(ResponseDto.ok(chatHistory, HttpStatus.OK), HttpStatus.OK);
     }
-
-//    //    채팅방 메시지 읽음 처리
-//    @PostMapping("/room/{roomId}/read")
-//    public ResponseEntity<?> messageRead(@PathVariable UUID roomId) {
-//        chatService.messageRead(roomId);
-//        return new ResponseEntity<>(ResponseDto.ok("메시지가 읽음 처리되었습니다.", HttpStatus.OK), HttpStatus.OK);
-//    }
 
     //    채팅방 생성
     @GetMapping("/room/create/{otherUserId}")
