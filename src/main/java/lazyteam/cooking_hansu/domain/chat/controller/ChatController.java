@@ -37,7 +37,7 @@ public class ChatController {
     @GetMapping("/room/{roomId}/history")
     public ResponseEntity<?> getChatHistory(
             @PathVariable UUID roomId,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "30") int size,
             @RequestParam(required = false) String cursor
     ) {
         PaginatedResponseDto<ChatMessageResDto> chatHistory = chatService.getChatHistory(roomId, size, cursor);
