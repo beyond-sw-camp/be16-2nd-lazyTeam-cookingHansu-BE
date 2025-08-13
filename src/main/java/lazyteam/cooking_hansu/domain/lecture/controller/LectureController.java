@@ -55,6 +55,11 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureID,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
+//    강의 조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
+
+
+//    강의 삭제
+
 
 
 }
