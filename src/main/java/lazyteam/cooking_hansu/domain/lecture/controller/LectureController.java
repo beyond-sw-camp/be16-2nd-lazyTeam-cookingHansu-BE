@@ -6,6 +6,8 @@ import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,11 +57,28 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureID,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-//    강의 조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
+//    강의 목록조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
+    @GetMapping("/list")
+    public ResponseEntity<?> lectureFindAll(@PageableDefault(size = 8, sort = "createdAt",
+            direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+        List<LectureResDto> lectureResDto = lectureService.lectureFindAll(pageable);
+        return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
+    }
+
+//    강의 상세조회
+    @GetMapping("/detail/{lectureId}")
+    public ResponseEntity<?> lectureFindDetail(@PathVariable UUID lectureId) {
+        LectureDetailDto detailDto = lectureService.lectureFindDetail(lectureId);
+        return new ResponseEntity<>(ResponseDto.ok(detailDto,HttpStatus.OK),HttpStatus.OK);
+    }
 
 
 //    강의 삭제
-
-
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @DeleteMapping("/delete/{lectureId}")
+    public ResponseEntity<?> lectureDelete(@PathVariable UUID lectureId) {
+        lectureService.lectureDelete(lectureId);
+        return new ResponseEntity<>(ResponseDto.ok("강의가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
+    }
 
 }

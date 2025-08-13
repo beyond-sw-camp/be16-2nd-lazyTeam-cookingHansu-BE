@@ -43,6 +43,9 @@ public class LectureQnaService {
 
             parentQna.setChild(childQna);
             parentQna.updateStatus(QnaStatus.ANSWERED);
+//        강의 qna 수 갱신 로직
+            lecture.setQnaCount(lecture.getQnaCount() + 1);
+
             return childQna.getId();
         }
 
@@ -93,6 +96,11 @@ public class LectureQnaService {
     // Q&A 삭제
     public void deleteQna(UUID qnaId) {
         LectureQna lectureQna = lectureQnaRepository.findById(qnaId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 Q&A입니다. qnaId: " + qnaId));
+
+//        강의 qna 수 갱신 로직
+        Lecture lecture = lectureQna.getLecture();
+        lecture.setQnaCount(Math.max(0, lecture.getQnaCount() - 1));
+
         lectureQnaRepository.delete(lectureQna);
     }
 }

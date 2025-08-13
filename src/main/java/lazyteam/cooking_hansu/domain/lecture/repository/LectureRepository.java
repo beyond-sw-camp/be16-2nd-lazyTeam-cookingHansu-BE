@@ -17,5 +17,7 @@ public interface LectureRepository extends JpaRepository<Lecture, UUID> {
 
     Long countAllByApprovalStatus(ApprovalStatus approvalStatus);
 
+    Page<Lecture> findAll(Pageable pageable);
+
 
 }

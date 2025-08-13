@@ -50,7 +50,7 @@ public class LectureReviewService {
         if(lectureReviewRepository.findByWriterId(user.getId())!=null) {
             throw new DataIntegrityViolationException("해당 리뷰가 이미 존재합니다.");
         }
-
+        lecture.setReviewCount(lecture.getReviewCount() + 1);
         lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
     }
 
@@ -93,7 +93,7 @@ public class LectureReviewService {
 
     }
 
-//    강의 삭제
+//    리뷰 삭제
     public void reviewDelete(UUID lectureId) {
         //        테스트용 유저 세팅
         UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -102,6 +102,9 @@ public class LectureReviewService {
         LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lectureId,user.getId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));
         lectureReviewRepository.delete(lectureReview);
+
+        Lecture lecture = lectureReview.getLecture();
+        lecture.setReviewCount(Math.max(0, lecture.getReviewCount() - 1));
     }
 
 
