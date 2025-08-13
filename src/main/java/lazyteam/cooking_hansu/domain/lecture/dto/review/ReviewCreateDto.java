@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.lecture.dto.review;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
@@ -19,7 +20,7 @@ import java.util.UUID;
 public class ReviewCreateDto extends BaseIdAndTimeEntity {
     @NotNull(message = "평점을 입력해주세요.")
     private Integer rating;
-    @NotNull(message = "내용을 작성해주세요.")
+    @NotBlank(message = "내용을 작성해주세요.")
     private String content;
     @NotNull(message = "강의 ID가 없습니다.")
     private UUID lectureId;
