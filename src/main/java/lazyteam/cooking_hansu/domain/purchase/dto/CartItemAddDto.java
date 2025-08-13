@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.purchase.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
