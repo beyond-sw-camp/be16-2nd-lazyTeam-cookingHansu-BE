@@ -13,6 +13,7 @@ import lazyteam.cooking_hansu.domain.lecture.repository.LectureReviewRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,10 @@ public class LectureReviewService {
 
         Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
+
+        if(lectureReviewRepository.findByWriterId(user.getId())!=null) {
+            throw new DataIntegrityViolationException("해당 리뷰가 이미 존재합니다.");
+        }
 
         lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
     }

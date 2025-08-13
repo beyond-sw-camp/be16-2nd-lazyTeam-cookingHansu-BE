@@ -15,4 +15,6 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, UU
 
     Optional<LectureReview> findByLectureIdAndWriterId(UUID lectureId, UUID userId);
 
+    LectureReview findByWriterId(UUID userId);
+
 }
