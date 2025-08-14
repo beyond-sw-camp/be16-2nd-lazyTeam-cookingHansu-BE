@@ -5,8 +5,10 @@ import lazyteam.cooking_hansu.domain.recipe.entity.*;
 import lazyteam.cooking_hansu.domain.recipe.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,17 +32,33 @@ public class RecipeService {
     private final RecipeStepRepository recipeStepRepository;
     private final IngredientsRepository ingredientsRepository;
     private final UserRepository userRepository;
+    private final S3Uploader s3Uploader;
 
-//    레시피 작성
-    public UUID createRecipe(RecipeCreateRequestDto requestDto) {
+//    레시피 작성 (썸네일 포함)
+    public UUID createRecipe(RecipeCreateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
+
+        // 썸네일 업로드 처리
+        String thumbnailUrl = null;
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "recipes/thumbnails/");
+                log.info("레시피 썸네일 업로드 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("레시피 썸네일 업로드 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            // JSON으로 전달된 URL 사용
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
 
         // 레시피 엔티티 생성
         Recipe recipe = Recipe.builder()
                 .user(currentUser)
                 .title(requestDto.getTitle())
                 .description(requestDto.getDescription())
-                .thumbnailUrl(requestDto.getThumbnailUrl())
+                .thumbnailUrl(thumbnailUrl)
                 .level(requestDto.getLevel())
                 .category(requestDto.getCategory())
                 .cookTime(requestDto.getCookTime())
@@ -56,6 +74,11 @@ public class RecipeService {
 
         log.info("레시피 작성 완료. 사용자: {}, 레시피 ID: {}", currentUser.getEmail(), savedRecipe.getId());
         return savedRecipe.getId();
+    }
+
+//    레시피 작성 (썸네일 없음)
+    public UUID createRecipe(RecipeCreateRequestDto requestDto) {
+        return createRecipe(requestDto, null);
     }
 
 //    상세 레시피 조회
@@ -102,17 +125,32 @@ public class RecipeService {
     }
 
     /**
-     * REQ017: 레시피 수정
+     * REQ017: 레시피 수정 (썸네일 포함)
      */
-    public void updateRecipe(UUID recipeId, RecipeUpdateRequestDto requestDto) {
+    public void updateRecipe(UUID recipeId, RecipeUpdateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
         Recipe recipe = getRecipeByIdAndUser(recipeId, currentUser);
+
+        // 썸네일 업로드 처리
+        String thumbnailUrl = recipe.getThumbnailUrl(); // 기존 URL 유지
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "recipes/thumbnails/");
+                log.info("레시피 썸네일 업데이트 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("레시피 썸네일 업데이트 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            // JSON으로 전달된 URL 사용
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
 
         // 레시피 기본 정보 수정
         recipe.updateRecipe(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
-                requestDto.getThumbnailUrl(),
+                thumbnailUrl,
                 requestDto.getLevel(),
                 requestDto.getCategory(),
                 requestDto.getCookTime()
@@ -131,6 +169,13 @@ public class RecipeService {
         }
 
         log.info("레시피 수정 완료. 사용자: {}, 레시피 ID: {}", currentUser.getEmail(), recipeId);
+    }
+
+    /**
+     * REQ017: 레시피 수정 (썸네일 없음)
+     */
+    public void updateRecipe(UUID recipeId, RecipeUpdateRequestDto requestDto) {
+        updateRecipe(recipeId, requestDto, null);
     }
 
     /**

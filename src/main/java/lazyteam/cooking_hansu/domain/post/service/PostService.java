@@ -2,12 +2,20 @@ package lazyteam.cooking_hansu.domain.post.service;
 
 import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
+import lazyteam.cooking_hansu.domain.post.dto.PostRecipeStepDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.recipe.repository.RecipeRepository;
+import lazyteam.cooking_hansu.domain.recipe.repository.RecipeStepRepository;
+import lazyteam.cooking_hansu.domain.recipe.repository.PostSequenceDescriptionRepository;
+import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
+import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,28 +37,73 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final RecipeRepository recipeRepository;
+    private final RecipeStepRepository recipeStepRepository;
+    private final PostSequenceDescriptionRepository postSequenceDescriptionRepository;
+    private final S3Uploader s3Uploader;
 
     /**
-     * 레시피 공유 게시글 생성
+     * 레시피 공유 게시글 생성 (이미지 포함) - 레시피 연결 지원
      */
     @Transactional
-    public UUID createRecipePost(PostCreateRequestDto requestDto) {
+    public UUID createRecipePost(PostCreateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
+
+        // 썸네일 업로드
+        String thumbnailUrl = null;
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
+                log.info("게시글 썸네일 업로드 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("게시글 썸네일 업로드 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            // JSON으로 전달된 URL 사용
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
+        
+        // 레시피 연결 시 레시피 썸네일 사용 옵션
+        if (requestDto.hasRecipe() && thumbnailUrl == null) {
+            Recipe recipe = recipeRepository.findById(requestDto.getRecipe())
+                    .orElseThrow(() -> new EntityNotFoundException("레시피를 찾을 수 없습니다."));
+            
+            // 레시피 소유자만 공유 가능
+            if (!recipe.isOwnedBy(currentUser)) {
+                throw new IllegalArgumentException("본인의 레시피만 공유할 수 있습니다.");
+            }
+            
+            thumbnailUrl = recipe.getThumbnailUrl(); // 레시피 썸네일 사용
+        }
 
         // 게시글 엔티티 생성
         Post post = Post.builder()
                 .user(currentUser)
                 .title(requestDto.getTitle())
                 .description(requestDto.getDescription())
-                .thumbnailUrl(requestDto.getThumbnailUrl())
+                .thumbnailUrl(thumbnailUrl)
                 .category(requestDto.getCategory())
                 .isOpen(requestDto.getIsOpen() != null ? requestDto.getIsOpen() : true)
                 .build();
 
         Post savedPost = postRepository.save(post);
+        
+        // 레시피 연결 처리
+        if (requestDto.hasRecipe()) {
+            linkRecipeToPost(savedPost, requestDto.getRecipe(), requestDto.getStepDescriptions());
+        }
 
-        log.info("레시피 공유 게시글 작성 완료. 사용자: {}, 게시글 ID: {}", currentUser.getEmail(), savedPost.getId());
+        log.info("레시피 공유 게시글 작성 완료. 사용자: {}, 게시글 ID: {}, 레시피 연결: {}", 
+                currentUser.getEmail(), savedPost.getId(), requestDto.hasRecipe());
         return savedPost.getId();
+    }
+
+    /**
+     * 레시피 공유 게시글 생성 (이미지 없음)
+     */
+    @Transactional
+    public UUID createRecipePost(PostCreateRequestDto requestDto) {
+        return createRecipePost(requestDto, null);
     }
 
     /**
@@ -103,7 +157,7 @@ public class PostService {
     }
 
     /**
-     * 레시피 공유 게시글 상세 조회
+     * 레시피 공유 게시글 상세 조회 (레시피 연결 정보 포함)
      */
     public PostResponseDto getRecipePost(UUID postId) {
         Post post = postRepository.findById(postId)
@@ -121,28 +175,59 @@ public class PostService {
 
         // 조회수 증가
         post.incrementViewCount();
+        
+        // 레시피 연결 정보 조회
+        List<PostSequenceDescription> descriptions = getPostRecipeDescriptions(postId);
+        Recipe connectedRecipe = getConnectedRecipe(postId);
 
-        return PostResponseDto.fromEntity(post);
+        if (connectedRecipe != null) {
+            return PostResponseDto.fromEntityWithRecipe(post, connectedRecipe, descriptions);
+        } else {
+            return PostResponseDto.fromEntity(post);
+        }
     }
 
     /**
-     * 레시피 공유 게시글 수정
+     * 레시피 공유 게시글 수정 (썸네일 포함)
      */
     @Transactional
-    public void updateRecipePost(UUID postId, PostCreateRequestDto requestDto) {
+    public void updateRecipePost(UUID postId, PostCreateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
         Post post = getPostByIdAndUser(postId, currentUser);
+
+        // 썸네일 업로드 처리
+        String thumbnailUrl = post.getThumbnailUrl(); // 기존 URL 유지
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
+                log.info("게시글 썸네일 업데이트 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("게시글 썸네일 업데이트 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            // JSON으로 전달된 URL 사용
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
 
         // 게시글 기본 정보 수정
         post.updatePost(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
-                requestDto.getThumbnailUrl(),
+                thumbnailUrl,
                 requestDto.getCategory(),
                 requestDto.getIsOpen()
         );
 
         log.info("레시피 공유 게시글 수정 완료. 사용자: {}, 게시글 ID: {}", currentUser.getEmail(), postId);
+    }
+
+    /**
+     * 레시피 공유 게시글 수정 (썸네일 없음)
+     */
+    @Transactional
+    public void updateRecipePost(UUID postId, PostCreateRequestDto requestDto) {
+        updateRecipePost(postId, requestDto, null);
     }
 
     /**
@@ -207,5 +292,81 @@ public class PostService {
         }
 
         return post;
+    }
+    
+    /**
+     * 게시글에 레시피 연결 (조리순서별 설명 포함)
+     */
+    private void linkRecipeToPost(Post post, UUID recipeId, List<PostRecipeStepDto> stepDescriptions) {
+        if (recipeId == null) {
+            return;
+        }
+        
+        // 레시피 존재 확인
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("레시피를 찾을 수 없습니다."));
+
+        // 각 조리순서별 설명 생성
+        if (stepDescriptions != null && !stepDescriptions.isEmpty()) {
+            for (PostRecipeStepDto stepDto : stepDescriptions) {
+                // RecipeStep 존재 여부 확인
+                RecipeStep recipeStep = recipeStepRepository.findById(stepDto.getStepId())
+                        .orElseThrow(() -> new EntityNotFoundException("조리순서를 찾을 수 없습니다."));
+
+                // 해당 단계가 실제로 이 레시피의 것인지 확인
+                if (!recipeStep.getRecipe().getId().equals(recipeId)) {
+                    throw new IllegalArgumentException("잘못된 조리순서입니다.");
+                }
+
+                // 중복 방지
+                if (postSequenceDescriptionRepository.existsByPostIdAndRecipeStepId(post.getId(), stepDto.getStepId())) {
+                    throw new IllegalArgumentException("동일한 조리순서에 대한 설명이 이미 존재합니다.");
+                }
+                
+                PostSequenceDescription description = PostSequenceDescription.builder()
+                        .post(post)
+                        .recipeStep(recipeStep)
+                        .content(stepDto.getContent())
+                        .build();
+                
+                postSequenceDescriptionRepository.save(description);
+            }
+            
+            log.info("레시피 연결 완료 - postId: {}, recipeId: {}, 설명 개수: {}", 
+                    post.getId(), recipeId, stepDescriptions.size());
+        }
+    }
+    
+    /**
+     * 게시글의 레시피 연결 정보 조회
+     */
+    @Transactional(readOnly = true)
+    public List<PostSequenceDescription> getPostRecipeDescriptions(UUID postId) {
+        return postSequenceDescriptionRepository.findByPostIdOrderByStepSequence(postId);
+    }
+    
+    /**
+     * 게시글에 연결된 레시피 조회
+     */
+    @Transactional(readOnly = true)
+    public Recipe getConnectedRecipe(UUID postId) {
+        List<PostSequenceDescription> descriptions = getPostRecipeDescriptions(postId);
+        if (descriptions.isEmpty()) {
+            return null;
+        }
+        return descriptions.get(0).getRecipeStep().getRecipe();
+    }
+    
+    /**
+     * 게시글의 레시피 연결 해제
+     */
+    @Transactional
+    public void unlinkRecipeFromPost(UUID postId) {
+        User currentUser = getCurrentUser();
+        Post post = getPostByIdAndUser(postId, currentUser);
+        
+        postSequenceDescriptionRepository.deleteByPostId(postId);
+        
+        log.info("레시피 연결 해제 완료 - postId: {}", postId);
     }
 }

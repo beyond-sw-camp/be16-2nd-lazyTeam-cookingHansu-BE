@@ -22,96 +22,30 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/my/recipes")
+@RequestMapping("/api/recipes")  // 경로 변경: 공개 레시피 관련만
 public class RecipeController {
 
     private final RecipeService recipeService;
     private final S3Uploader s3Uploader;
 
-//    레시피작성
-    @PostMapping
-    public ResponseEntity<?> createRecipe(@Valid @RequestBody RecipeCreateRequestDto requestDto) {
-        UUID recipeId = recipeService.createRecipe(requestDto);
-        
-        return new ResponseEntity<>(
-                ResponseDto.ok(recipeId, HttpStatus.CREATED),
-                HttpStatus.CREATED
-        );
-    }
-
-//    레시피 썸네일 업로드
-    @PostMapping("/thumbnail")
-    public ResponseEntity<?> uploadRecipeThumbnail(@RequestParam("file") MultipartFile file) {
-        try {
-            String thumbnailUrl = s3Uploader.upload(file, "recipes/thumbnails/");
-            log.info("레시피 썸네일 업로드 성공: {}", thumbnailUrl);
-            
-            return ResponseEntity.ok(ResponseDto.ok(thumbnailUrl, HttpStatus.OK));
-        } catch (Exception e) {
-            log.error("레시피 썸네일 업로드 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(ResponseDto.fail("파일 업로드에 실패했습니다: " + e.getMessage()));
-        }
-    }
-
-//    레시피 단계별 이미지 업로드
-    @PostMapping("/step-image")
-    public ResponseEntity<?> uploadRecipeStepImage(@RequestParam("file") MultipartFile file) {
-        try {
-            String imageUrl = s3Uploader.upload(file, "recipes/steps/");
-            log.info("레시피 단계 이미지 업로드 성공: {}", imageUrl);
-            
-            return ResponseEntity.ok(ResponseDto.ok(imageUrl, HttpStatus.OK));
-        } catch (Exception e) {
-            log.error("레시피 단계 이미지 업로드 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(ResponseDto.fail("파일 업로드에 실패했습니다: " + e.getMessage()));
-        }
-    }
-
-//    내 레시피 목록조회
+    // 공개 레시피 목록 조회 (전체 사용자용)
     @GetMapping
-    public ResponseEntity<?> getMyRecipes(
+    public ResponseEntity<?> getPublicRecipes(
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<RecipeResponseDto> recipes;
+        // TODO: 공개 레시피 조회 로직 구현 필요 (추후 구현)
+        log.info("공개 레시피 조회 API - 추후 구현 예정");
         
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            recipes = recipeService.searchMyRecipes(keyword.trim(), pageable);
-            log.info("내 레시피 검색 완료. 키워드: {}, 결과 수: {}", keyword, recipes.getTotalElements());
-        } else {
-            recipes = recipeService.getMyRecipes(pageable);
-            log.info("내 레시피 목록 조회 완료. 총 개수: {}", recipes.getTotalElements());
-        }
-        
-        return ResponseEntity.ok(ResponseDto.ok(recipes, HttpStatus.OK));
+        return ResponseEntity.ok(ResponseDto.ok("공개 레시피 조회 API - 추후 구현 예정", HttpStatus.OK));
     }
 
-//    레시피 상세조회
+    // 레시피 상세 조회 (공개용)
     @GetMapping("/{recipeId}")
-    public ResponseEntity<?> getRecipe(@PathVariable UUID recipeId) {
-        RecipeResponseDto recipe = recipeService.getRecipe(recipeId);
+    public ResponseEntity<?> getPublicRecipe(@PathVariable UUID recipeId) {
+        // TODO: 공개 레시피 상세 조회 로직 구현 필요 (추후 구현)
+        log.info("공개 레시피 상세 조회 API - 추후 구현 예정. recipeId: {}", recipeId);
         
-        return ResponseEntity.ok(ResponseDto.ok(recipe, HttpStatus.OK));
-    }
-
-//    레시피 수정
-    @PutMapping("/{recipeId}")
-    public ResponseEntity<?> updateRecipe(
-            @PathVariable UUID recipeId,
-            @Valid @RequestBody RecipeUpdateRequestDto requestDto
-    ) {
-        recipeService.updateRecipe(recipeId, requestDto);
-        
-        return ResponseEntity.ok(ResponseDto.ok(recipeId, HttpStatus.OK));
-    }
-
-//    레시피 삭제
-    @DeleteMapping("/{recipeId}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable UUID recipeId) {
-        recipeService.deleteRecipe(recipeId);
-        
-        return ResponseEntity.ok(ResponseDto.ok(recipeId, HttpStatus.OK));
+        return ResponseEntity.ok(ResponseDto.ok("공개 레시피 상세 조회 API - 추후 구현 예정", HttpStatus.OK));
     }
 }
