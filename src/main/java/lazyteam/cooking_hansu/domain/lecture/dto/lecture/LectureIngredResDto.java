@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class LectureIngredResDto {
-    private String IngredientsName;
+    private String ingredientsName;
     private String amount;
 
     public static LectureIngredResDto fromEntity(LectureIngredientsList lectureIngredientsList) {
         return LectureIngredResDto.builder()
-                .IngredientsName(lectureIngredientsList.getIngredientsName())
+                .ingredientsName(lectureIngredientsList.getIngredientsName())
                 .amount(lectureIngredientsList.getAmount())
                 .build();
     }

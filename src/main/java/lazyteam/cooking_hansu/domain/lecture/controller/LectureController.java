@@ -72,6 +72,15 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok(detailDto,HttpStatus.OK),HttpStatus.OK);
     }
 
+//    내 강의 목록 조회
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @GetMapping("/mylist")
+    public ResponseEntity<?> myLectureFindAll(@PageableDefault(size = 8, sort = "createdAt",
+            direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+        List<LectureResDto> lectureResDtos = lectureService.myLectureFindAll(pageable);
+        return new ResponseEntity<>(ResponseDto.ok(lectureResDtos,HttpStatus.OK),HttpStatus.OK);
+
+    }
 
 //    강의 삭제
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")

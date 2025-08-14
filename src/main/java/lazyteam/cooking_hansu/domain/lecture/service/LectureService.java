@@ -124,8 +124,7 @@ public class LectureService {
 
     }
 
-//    강의 수정
-
+// ====== 강의수정 ======
     public UUID update(LectureUpdateDto lectureUpdateDto,
                        UUID lectureId,
                        List<LectureIngredientsListDto> lectureIngredientsListDto,
@@ -192,7 +191,6 @@ public class LectureService {
         }
 
 
-
 //        강의영상  수정
 
         boolean hasNew =
@@ -232,6 +230,7 @@ public class LectureService {
 
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
+                log.info("dto: " + dto.toString());
                 MultipartFile file = lectureVideoFiles.get(i);
 
                 log.info(dto.getVideoUrl());
@@ -243,25 +242,22 @@ public class LectureService {
                 log.info(videoUrl);
                 int duration = 0;
                 try {
+                    log.info("파일길이 추출 시작");
                     duration = videoUtil.extractDuration(file);
                     log.info("파일길이추출완료");
                 } catch (IOException | InterruptedException e) {
-                    throw new IllegalArgumentException("강의 영상 수정 중 오류 발생", e);
+                    throw new IllegalArgumentException("파일길이 추출 중 오류 발생", e);
                 }
                 boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
 
                 LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
                 newVideos.add(video);
             }
-
 // DB 저장
             lectureVideoRepository.saveAll(newVideos);
         }
         return lectureId;
-
     }
-
-
 
 //    강의 목록 조회(승인 안된 강의 목록 조회)
     public Page<WaitingLectureDto> getWaitingLectureList(Pageable pageable){
@@ -297,20 +293,32 @@ public class LectureService {
         lecture.reject(rejectRequestDto.getReason());
 
     }
-    // ====== 강의 수정(레디스에 있는지 확인 후 있으면 수정?) ======
-
-//    상세조회에 캐싱처리(레디스에 데이터 있는지 그리고 없으면 rdb조회 후 레디스에 추가 레디스에 ttl..?), 목록조회 페이징 처리
 
 
-//    강의 조회
+// ====== 승인된 강의목록 조회 ======
     public List<LectureResDto> lectureFindAll(Pageable pageable) {
         return lectureRepository.findAll(pageable).stream()
                 .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .map(LectureResDto::fromEntity)
                 .toList();
     }
+
+
+
+// ====== 내 강의 목록 조회 ======
+    public List<LectureResDto> myLectureFindAll(Pageable pageable) {
+        //        테스트용 UUID 유저 세팅, 로그인 기능 구현 후 강사 ID를 넣어야 함
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+        return lectureRepository.findAllBySubmittedById(pageable, userId).stream()
+                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .map(LectureResDto::fromEntity)
+                .toList();
+    }
+
+
     
-//    강의 상세 조회
+// ====== 강의상세목록 조회 ======
     public LectureDetailDto lectureFindDetail(UUID lectureId) {
         //        테스트용 UUID 유저 세팅
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -321,10 +329,13 @@ public class LectureService {
 
         User submittedBy = lecture.getSubmittedBy();
         List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
+
         List<LectureQna> qnas = lecture.getQnas();
+
         List<LectureVideo> videos = lecture.getVideos();
+
         List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
-        log.info(ingredientsList.toString());
+
         List<LectureStep> lectureStepList = lecture.getLectureStepList();
 
         LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
@@ -335,7 +346,7 @@ public class LectureService {
 
 
 
-//    강의 삭제
+// ====== 강의삭제 ======
     public void lectureDelete(UUID lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));

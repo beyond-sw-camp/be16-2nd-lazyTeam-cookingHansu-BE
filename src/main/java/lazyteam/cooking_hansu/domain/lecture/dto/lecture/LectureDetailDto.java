@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,11 +65,21 @@ public class LectureDetailDto {
 
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
-                .lectureStepResDtoList(lectureStepList.stream().map(LectureStepResDto::fromEntity).toList())
+                .lectureStepResDtoList(
+                        lectureStepList.stream()
+                                .sorted(Comparator.comparingInt(LectureStep::getStepSequence))
+                                .map(LectureStepResDto::fromEntity)
+                                .toList()
+                )
 
                 .qnaList(qnas.stream().map(QnaResDto::fromEntity).toList())
 
-                .lectureVideoResDtoList(videos.stream().map(LectureVideoResDto::fromEntity).toList())
+                .lectureVideoResDtoList(
+                        videos.stream()
+                                .sorted(Comparator.comparingInt(v -> v.getSequence()))
+                                .map(LectureVideoResDto::fromEntity)
+                                .toList()
+                )
 
                 .lectureReviewResDtoList(reviews.stream().map(LectureReviewResDto::fromEntity).toList())
                 .build();
