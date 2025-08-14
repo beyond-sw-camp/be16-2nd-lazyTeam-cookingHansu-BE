@@ -60,7 +60,9 @@ public class SecurityConfig {
                         "/purchase/**",
                         "/connect/**", // WebSocket 연결 엔드포인트
                         "/topic/**", // WebSocket 토픽
-                        "/publish/**" // WebSocket 메시지 발행
+                        "/publish/**" ,// WebSocket 메시지 발행
+                        "/api/interactions/**",  // ← 이 줄 추가 필요
+                        "/api/posts/**"          // ← 이 줄도 추가 필요
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
