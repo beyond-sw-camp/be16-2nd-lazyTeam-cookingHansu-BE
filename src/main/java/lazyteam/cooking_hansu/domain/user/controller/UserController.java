@@ -237,9 +237,11 @@ public class UserController {
             // 새로운 Refresh Token을 Redis에 저장 (기존 토큰 갱신)
             refreshTokenService.updateRefreshToken(user.getId().toString(), newRefreshToken);
 
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("accessToken", newAccessToken);
             response.put("refreshToken", newRefreshToken);
+            response.put("user", user);
+            response.put("expiresIn", 3600);
 
             return ResponseDto.ok(response, HttpStatus.OK);
         } catch (Exception e) {
