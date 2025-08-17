@@ -4,15 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
-import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
 import lazyteam.cooking_hansu.domain.post.service.PostService;
 import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
 import lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
-import lazyteam.cooking_hansu.global.service.S3Uploader;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,7 +19,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +31,6 @@ import java.util.UUID;
 public class PostController {
 
     private final PostService postService;
-    private final S3Uploader s3Uploader;
     private final InteractionService interactionService;
 
     // ========== 공개 레시피 공유 게시글 API (전체 사용자용) ==========
@@ -61,7 +56,23 @@ public class PostController {
 
     // 레시피 공유게시글 상세 조회 (공개)
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getRecipePost(@PathVariable UUID postId) {
+    public ResponseEntity<?> getRecipePost(
+            @PathVariable UUID postId,
+            @RequestParam(required = false) UUID userId) {
+        
+        // 회원만 조회수 증가 (비회원은 조회수 증가하지 않음)
+        if (userId != null) {
+            boolean incremented = interactionService.incrementViewCountWithDuplicateCheck(postId, userId);
+            
+            if (incremented) {
+                log.info("조회수 증가됨: postId={}, userId={}", postId, userId);
+            } else {
+                log.debug("중복 조회 - 조회수 증가하지 않음: postId={}, userId={}", postId, userId);
+            }
+        } else {
+            log.debug("비회원 조회 - 조회수 증가하지 않음: postId={}", postId);
+        }
+        
         PostResponseDto post = postService.getRecipePost(postId);
         
         return ResponseEntity.ok(ResponseDto.ok(post, HttpStatus.OK));
@@ -91,35 +102,8 @@ public class PostController {
         return ResponseEntity.ok(ResponseDto.ok(posts, HttpStatus.OK));
     }
 
-    // ========== 상호작용 기능 ==========
-
-    // 좋아요 추가/취소
-    @PostMapping("/{postId}/likes")
-    public ResponseEntity<?> toggleLike(@PathVariable UUID postId, @RequestParam UUID userId) {
-        String result = interactionService.toggleLike(postId, userId);
-        return ResponseEntity.ok(ResponseDto.ok(result, HttpStatus.OK));
-    }
-
-    // 북마크 추가/취소
-    @PostMapping("/{postId}/bookmarks")
-    public ResponseEntity<?> toggleBookmark(@PathVariable UUID postId, @RequestParam UUID userId) {
-        String result = interactionService.toggleBookmark(postId, userId);
-        return ResponseEntity.ok(ResponseDto.ok(result, HttpStatus.OK));
-    }
-
-    // 좋아요 상태 확인
-    @GetMapping("/{postId}/likes/status")
-    public ResponseEntity<?> getLikeStatus(@PathVariable UUID postId, @RequestParam UUID userId) {
-        boolean isLiked = interactionService.isLiked(postId, userId);
-        return ResponseEntity.ok(ResponseDto.ok(isLiked, HttpStatus.OK));
-    }
-
-    // 북마크 상태 확인
-    @GetMapping("/{postId}/bookmarks/status")
-    public ResponseEntity<?> getBookmarkStatus(@PathVariable UUID postId, @RequestParam UUID userId) {
-        boolean isBookmarked = interactionService.isBookmarked(postId, userId);
-        return ResponseEntity.ok(ResponseDto.ok(isBookmarked, HttpStatus.OK));
-    }
+    // ========== 상호작용 기능은 /api/interactions 로 이동됨 ==========
+    // 좋아요/북마크 API는 InteractionController에서 통합 관리됩니다.
     
     // ========== 레시피 연결 관련 API ==========
     
