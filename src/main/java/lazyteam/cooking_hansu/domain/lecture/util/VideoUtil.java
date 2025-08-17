@@ -24,7 +24,7 @@ public class VideoUtil {
         // -of default=noprint_wrappers=1:nokey=1: 포맷을 숫자만 출력되게 설정
         // 마지막 인자는 분석할 파일 경로
         String[] command = {
-                "C:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffprobe.exe", // 여기에 절대 경로를 입력합니다. 추후에 yml에 경로 지정후 불러오는 식으로 디벨롭
+                "ffprobe", // 여기에 절대 경로를 입력합니다. 추후에 yml에 경로 지정후 불러오는 식으로 디벨롭
                 "-v", "error",
                 "-show_entries", "format=duration",
                 "-of", "default=noprint_wrappers=1:nokey=1",
