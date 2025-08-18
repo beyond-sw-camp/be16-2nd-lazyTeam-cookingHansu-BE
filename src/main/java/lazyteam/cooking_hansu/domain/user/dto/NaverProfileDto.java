@@ -24,7 +24,6 @@ public class NaverProfileDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Response {
         private String id; // 동일인 식별 정보 (고유 번호)
-        private String nickname; // 닉네임
         private String name; // 이름
         private String email; // 이메일
         private String profile_image; // 프로필 이미지 URL

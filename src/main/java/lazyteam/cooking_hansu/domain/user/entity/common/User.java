@@ -171,11 +171,6 @@ public class User extends BaseIdAndTimeEntity {
         }
     }
 
-    // OAuth 사용자의 완전한 회원가입 여부 확인 (DB 기반)
-    public boolean isCompleteProfile() {
-        return name != null && nickname != null;
-    }
-
     // 첫 회원 여부 확인 (닉네임이 없으면 첫 회원으로 간주)
     public boolean isNewUser() {
         return nickname == null || nickname.isEmpty();
@@ -200,5 +195,10 @@ public class User extends BaseIdAndTimeEntity {
     // Business 엔티티 설정
     public void setBusiness(Business business) {
         this.business = business;
+    }
+
+    // 회원 가입 완료 메서드
+    public void completeRegistration() {
+        this.loginStatus = LoginStatus.ACTIVE; // 회원가입 완료 후 상태를 ACTIVE로 변경
     }
 }

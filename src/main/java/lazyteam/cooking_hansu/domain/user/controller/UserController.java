@@ -85,7 +85,7 @@ public class UserController {
             if (originalUser == null) {
                 originalUser = userService.createKakaoOauth(
                         kakaoProfileDto.getId(),
-                        kakaoProfileDto.getKakao_account().getProfile().getName(),
+                        kakaoProfileDto.getKakao_account().getName(),
                         kakaoProfileDto.getKakao_account().getEmail(),
                         kakaoProfileDto.getKakao_account().getProfile().getProfile_image_url(),
                         OauthType.KAKAO
@@ -139,46 +139,20 @@ public class UserController {
         // JWT 토큰 발급
         String jwtAtToken = jwtTokenProvider.createAtToken(user);
         String jwtRtToken = jwtTokenProvider.createRtToken(user);
+        Long expiresIn = jwtTokenProvider.getRefreshTokenExpirationTime();
 
         // Refresh Token을 Redis에 저장
         refreshTokenService.saveRefreshToken(user.getId().toString(), jwtRtToken);
 
         // 프론트엔드 요구사항에 맞는 응답 데이터 생성 (isNewUser는 동적으로 계산됨)
-        UserLoginDto userLoginDto = UserLoginDto.fromEntity(user, jwtAtToken, jwtRtToken);
+        UserLoginDto userLoginDto = UserLoginDto.fromEntity(user, jwtAtToken, jwtRtToken, expiresIn);
 
         return ResponseDto.ok(userLoginDto, HttpStatus.OK);
     }
 
-    // 구글 리프레시 토큰 갱신
-    @PostMapping("/google/refresh")
-    public ResponseDto<?> googleRefresh(@RequestBody Map<String, String> request) {
-        return processTokenRefresh(request);
-    }
-
-    // 카카오 리프레시 토큰 갱신
-    @PostMapping("/kakao/refresh")
-    public ResponseDto<?> kakaoRefresh(@RequestBody Map<String, String> request) {
-        return processTokenRefresh(request);
-    }
-
-    // 네이버 리프레시 토큰 갱신
-    @PostMapping("/naver/refresh")
-    public ResponseDto<?> naverRefresh(@RequestBody Map<String, String> request) {
-        return processTokenRefresh(request);
-    }
-
-    // 공통 리프레시 토큰 갱신
+    // 리프레시 토큰 갱신
     @PostMapping("/refresh")
-    public ResponseDto<?> refresh(@RequestBody Map<String, String> request) {
-        return processTokenRefresh(request);
-    }
-
-    /**
-     * 토큰 갱신 공통 처리 메서드
-     * @param request 리프레시 토큰 요청
-     * @return 토큰 갱신 응답
-     */
-    private ResponseDto<?> processTokenRefresh(Map<String, String> request) {
+    public ResponseDto<?> updateRefreshToken(@RequestBody Map<String, String> request) {
         try {
             String refreshToken = request.get("refreshToken");
             if (refreshToken == null || refreshToken.isEmpty()) {
@@ -198,12 +172,14 @@ public class UserController {
             // 새로운 Refresh Token을 Redis에 저장 (기존 토큰 갱신)
             refreshTokenService.updateRefreshToken(user.getId().toString(), newRefreshToken);
 
+            // 프론트엔드 요구사항에 맞는 응답 구조
             Map<String, Object> response = new HashMap<>();
             response.put("accessToken", newAccessToken);
             response.put("refreshToken", newRefreshToken);
-            response.put("user", user);
-            response.put("expiresIn", 3600);
+            // expiresIn은 밀리초 단위로 제공 (프론트엔드에서 Date.now() + expiresIn 형태로 사용)
+            response.put("expiresIn", 3600 * 1000L); // 1시간을 밀리초로 변환
 
+            log.info("Token refresh successful for user: {}", user.getEmail());
             return ResponseDto.ok(response, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Token refresh failed", e);
@@ -215,6 +191,11 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseDto<?> getHeaderProfile(@RequestHeader("Authorization") String accessToken) {
         try {
+            // Authorization 헤더에서 토큰 추출 (Bearer 접두사 제거)
+            if (accessToken.startsWith("Bearer ")) {
+                accessToken = accessToken.substring(7);
+            }
+
             // access token에서 이메일 추출
             String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
             if (email == null || email.isEmpty()) {
@@ -230,6 +211,7 @@ public class UserController {
                     .nickname(user.getNickname())
                     .profileImageUrl(user.getPicture())
                     .build();
+            log.info("User profile found: {}", headerProfileDto);
             return ResponseDto.ok(headerProfileDto, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Get Header Profile failed: ", e);
@@ -237,21 +219,36 @@ public class UserController {
         }
     }
 
-    // 로그아웃 (Refresh Token 삭제)
+    // 로그아웃
     @PostMapping("/logout")
-    public ResponseDto<?> logout(@RequestBody Map<String, String> request) {
+    public ResponseDto<?> logout(@RequestHeader("Authorization") String accessTokenHeader) {
         try {
-            String refreshToken = request.get("refreshToken");
-            if (refreshToken == null || refreshToken.isEmpty()) {
-                return ResponseDto.fail(HttpStatus.BAD_REQUEST, "Refresh token is required");
+            // Authorization 헤더에서 토큰 추출 (Bearer 접두사 제거)
+            String accessToken = accessTokenHeader;
+            if (accessToken.startsWith("Bearer ")) {
+                accessToken = accessToken.substring(7);
             }
 
-            User user = refreshTokenService.getRefreshToken(refreshToken);
-            if (user != null) {
-                refreshTokenService.deleteRefreshToken(user.getId().toString());
+            // Access Token에서 이메일 추출
+            String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
+            if (email == null || email.isEmpty()) {
+                return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access Token입니다.");
             }
 
-            return ResponseDto.ok("로그아웃이 완료되었습니다.", HttpStatus.OK);
+            // 이메일로 사용자 조회
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return ResponseDto.fail(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
+            }
+
+            // Redis에서 해당 사용자의 Refresh Token 삭제
+            refreshTokenService.deleteRefreshToken(user.getId().toString());
+            log.info("User logged out successfully: {}", email);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "로그아웃이 성공적으로 처리되었습니다.");
+
+            return ResponseDto.ok(response, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Logout failed", e);
             return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "로그아웃 처리 중 오류가 발생했습니다.");

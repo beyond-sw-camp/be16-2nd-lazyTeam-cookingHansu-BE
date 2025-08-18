@@ -24,6 +24,7 @@ public class KakaoProfileDto {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KakaoAccount {
         private String email;
+        private String name;
         private Profile profile;
     }
 
@@ -32,8 +33,6 @@ public class KakaoProfileDto {
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Profile {
-        private String nickname;
         private String profile_image_url;
-        private String name;
     }
 }

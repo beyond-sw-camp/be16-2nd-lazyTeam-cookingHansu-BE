@@ -16,13 +16,15 @@ public class UserLoginDto {
     private UUID uuid;
     private String accessToken;
     private String refreshToken;
+    private Long expiresIn;
     private User user;
 
-    public static UserLoginDto fromEntity(User user, String accessToken, String refreshToken) {
+    public static UserLoginDto fromEntity(User user, String accessToken, String refreshToken, Long expiresIn) {
         return UserLoginDto.builder()
                 .uuid(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .expiresIn(expiresIn)
                 .user(user)
                 .build();
     }
