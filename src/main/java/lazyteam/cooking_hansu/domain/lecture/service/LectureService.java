@@ -24,11 +24,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.UUID;
 
 @Service
@@ -39,7 +37,6 @@ import java.util.UUID;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
-
     private final S3Client s3Client;
     private final UserRepository userRepository;
     private final LectureIngredientsListRepository lectureIngredientsListRepository;
@@ -296,7 +293,7 @@ public class LectureService {
 
 
 // ====== 승인된 강의목록 조회 ======
-    public List<LectureResDto> lectureFindAll(Pageable pageable) {
+    public List<LectureResDto> findAllLecture(Pageable pageable) {
         return lectureRepository.findAll(pageable).stream()
                 .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .map(LectureResDto::fromEntity)
@@ -306,7 +303,7 @@ public class LectureService {
 
 
 // ====== 내 강의 목록 조회 ======
-    public List<LectureResDto> myLectureFindAll(Pageable pageable) {
+    public List<LectureResDto> findAllMyLecture(Pageable pageable) {
         //        테스트용 UUID 유저 세팅, 로그인 기능 구현 후 강사 ID를 넣어야 함
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -319,7 +316,7 @@ public class LectureService {
 
     
 // ====== 강의상세목록 조회 ======
-    public LectureDetailDto lectureFindDetail(UUID lectureId) {
+    public LectureDetailDto findDetailLecture(UUID lectureId) {
         //        테스트용 UUID 유저 세팅
         UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
@@ -347,7 +344,7 @@ public class LectureService {
 
 
 // ====== 강의삭제 ======
-    public void lectureDelete(UUID lectureId) {
+    public void deleteLecture(UUID lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));
 

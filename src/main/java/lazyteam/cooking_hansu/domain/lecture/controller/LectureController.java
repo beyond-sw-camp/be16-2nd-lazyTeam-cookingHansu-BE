@@ -13,23 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("lecture")
 @RequiredArgsConstructor
-//Lecture, CopyOfLectureStep, LectureIngredientsList, LectureVideo 엔티티 서비스
 public class LectureController {
 
     private final LectureService lectureService;
-
-//    강의 등록, 강의 목록 조회, 강의 상세조회, 강의삭제?
-
-//    강의등록
-
-//    메모 : 강의ID > id로 통일시키기
 
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @PostMapping("/post")
@@ -45,7 +37,7 @@ public class LectureController {
     }
 
     @PatchMapping("/update/{lectureId}")
-    public ResponseEntity<?> lectureUpdate(@Valid @RequestPart LectureUpdateDto lectureUpdateDto,
+    public ResponseEntity<?> updateLecture(@Valid @RequestPart LectureUpdateDto lectureUpdateDto,
                                            @PathVariable UUID lectureId,
                                            @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
                                            @RequestPart List<LectureStepDto> lectureStepDto,
@@ -59,25 +51,25 @@ public class LectureController {
 
 //    강의 목록조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
     @GetMapping("/list")
-    public ResponseEntity<?> lectureFindAll(@PageableDefault(size = 8, sort = "createdAt",
+    public ResponseEntity<?> findAllLecture(@PageableDefault(size = 8, sort = "createdAt",
             direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
-        List<LectureResDto> lectureResDto = lectureService.lectureFindAll(pageable);
+        List<LectureResDto> lectureResDto = lectureService.findAllLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
     }
 
 //    강의 상세조회
     @GetMapping("/detail/{lectureId}")
-    public ResponseEntity<?> lectureFindDetail(@PathVariable UUID lectureId) {
-        LectureDetailDto detailDto = lectureService.lectureFindDetail(lectureId);
+    public ResponseEntity<?> findDetailLecture(@PathVariable UUID lectureId) {
+        LectureDetailDto detailDto = lectureService.findDetailLecture(lectureId);
         return new ResponseEntity<>(ResponseDto.ok(detailDto,HttpStatus.OK),HttpStatus.OK);
     }
 
 //    내 강의 목록 조회
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @GetMapping("/mylist")
-    public ResponseEntity<?> myLectureFindAll(@PageableDefault(size = 8, sort = "createdAt",
+    public ResponseEntity<?> findAllMyLecture(@PageableDefault(size = 8, sort = "createdAt",
             direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
-        List<LectureResDto> lectureResDtos = lectureService.myLectureFindAll(pageable);
+        List<LectureResDto> lectureResDtos = lectureService.findAllMyLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDtos,HttpStatus.OK),HttpStatus.OK);
 
     }
@@ -85,8 +77,8 @@ public class LectureController {
 //    강의 삭제
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @DeleteMapping("/delete/{lectureId}")
-    public ResponseEntity<?> lectureDelete(@PathVariable UUID lectureId) {
-        lectureService.lectureDelete(lectureId);
+    public ResponseEntity<?> deleteLecture(@PathVariable UUID lectureId) {
+        lectureService.deleteLecture(lectureId);
         return new ResponseEntity<>(ResponseDto.ok("강의가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
     }
 
