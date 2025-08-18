@@ -5,10 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
-import lazyteam.cooking_hansu.domain.lecture.repository.LectureIngredientsListRepository;
-import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
-import lazyteam.cooking_hansu.domain.lecture.repository.LectureStepRepository;
-import lazyteam.cooking_hansu.domain.lecture.repository.LectureVideoRepository;
+import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -27,11 +24,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.UUID;
 
 @Service
@@ -42,7 +37,6 @@ import java.util.UUID;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
-
     private final S3Client s3Client;
     private final UserRepository userRepository;
     private final LectureIngredientsListRepository lectureIngredientsListRepository;
@@ -50,6 +44,8 @@ public class LectureService {
     private final LectureVideoRepository lectureVideoRepository;
     private final VideoUtil videoUtil;
     private final S3Uploader s3Uploader;
+    private final LectureReviewRepository lectureReviewRepository;
+    private final LectureQnaRepository lectureQnaRepository;
 
 
     @Value("${cloud.aws.s3.bucket}")
@@ -125,8 +121,7 @@ public class LectureService {
 
     }
 
-//    강의 수정
-
+// ====== 강의수정 ======
     public UUID update(LectureUpdateDto lectureUpdateDto,
                        UUID lectureId,
                        List<LectureIngredientsListDto> lectureIngredientsListDto,
@@ -157,6 +152,7 @@ public class LectureService {
                     .toList();
             lectureIngredientsListRepository.saveAll(ingredientsList);
         }
+        log.info("재료리스트 수정됐습니다.");
 
 //        강의 재료순서 수정
         if(!lectureStepDto.isEmpty()) {
@@ -166,65 +162,99 @@ public class LectureService {
                     .toList();
             lectureStepRepository.saveAll(lectureStepList);
         }
+        log.info("재료순서 수정되었습니다.");
 
         // 썸네일 수정
-        if (multipartFile != null && !multipartFile.isEmpty()) {
-            if (lecture.getThumbUrl() != null) {
-                s3Uploader.delete(lecture.getThumbUrl());
+        try{
+            if (multipartFile != null && !multipartFile.isEmpty()) {
+                if (lecture.getThumbUrl() != null) {
+                    try {
+                        s3Uploader.delete(lecture.getThumbUrl());
+                    } catch (Exception e) {
+                        log.warn("기존 썸네일 삭제 실패(무시): {}", e.getMessage());
+                    }
+                }
+
+                String thumbnailFileName = "lecture-" + lecture.getId() + "-thumbnail.png";
+                String thumbnailUrl = s3Uploader.upload(multipartFile, thumbnailFileName);
+
+                lecture.updateImageUrl(thumbnailUrl);
+                log.info("썸네일 수정되었습니다. url={}", thumbnailUrl); // ← 성공시에만
+            } else {
+                log.info("썸네일 변경 없음(파일 미전달)");
             }
-
-            String thumbnailFileName = "lecture-" + lecture.getId() + "-thumbnail.png";
-            String thumbnailUrl = s3Uploader.upload(multipartFile, thumbnailFileName);
-
-            lecture.updateImageUrl(thumbnailUrl);
+        } catch (IllegalArgumentException e) {
+            log.info("썸네일 처리 중 예외(무시): {}", e.getMessage());
         }
+
 
 //        강의영상  수정
 
-        if (lectureVideoDto.size() != lectureVideoFiles.size()) {
-            throw new IllegalArgumentException("영상 정보와 파일 수가 일치하지 않습니다.");
+        boolean hasNew =
+                (lectureVideoFiles != null && !lectureVideoFiles.isEmpty()) || !lectureVideoDto.isEmpty();
+
+        if (hasNew) {
+            if (lectureVideoFiles == null || lectureVideoDto.size() != lectureVideoFiles.size()) {
+                throw new IllegalArgumentException("영상 정보와 파일 수가 일치하지 않습니다.");
+            }
         }
 
         if(!lectureVideoDto.isEmpty()) {
             // 기존 영상 제거
             List<LectureVideo> oldVideos = lectureVideoRepository.findByLecture(lecture);
+
+            if (oldVideos.isEmpty()) {
+                log.info("기존 강의영상 없음 → 삭제 스킵");
+            } else {
+                for (LectureVideo video : oldVideos) {
+                    try {
+                        s3Uploader.delete(video.getVideoUrl());
+                    } catch (Exception e) {
+                        log.warn("기존 강의영상 삭제 실패(무시): url={}, msg={}", video.getVideoUrl(), e.getMessage());
+                    }
+                }
+                lectureVideoRepository.deleteAll(oldVideos);
+                log.info("기존 강의영상 제거했습니다.");
+            }
             for (LectureVideo video : oldVideos) {
                 s3Uploader.delete(video.getVideoUrl());
             }
             lectureVideoRepository.deleteAll(oldVideos);
+            log.info("기존 강의영상 제거했습니다.");
 
 // 새 영상 등록
             List<LectureVideo> newVideos = new ArrayList<>();
 
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
+                log.info("dto: " + dto.toString());
                 MultipartFile file = lectureVideoFiles.get(i);
 
-                String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
-                String videoUrl = s3Uploader.upload(file, fileName);
+                log.info(dto.getVideoUrl());
+                log.info(file.getOriginalFilename());
 
+                String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + ".mp4";
+                log.info(fileName);
+                String videoUrl = s3Uploader.upload(file, fileName);
+                log.info(videoUrl);
                 int duration = 0;
                 try {
+                    log.info("파일길이 추출 시작");
                     duration = videoUtil.extractDuration(file);
+                    log.info("파일길이추출완료");
                 } catch (IOException | InterruptedException e) {
-                    throw new IllegalArgumentException("강의 영상 수정 중 오류 발생", e);
+                    throw new IllegalArgumentException("파일길이 추출 중 오류 발생", e);
                 }
                 boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
 
                 LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
                 newVideos.add(video);
             }
-
 // DB 저장
             lectureVideoRepository.saveAll(newVideos);
         }
         return lectureId;
-
     }
-
-
-
-
 
 //    강의 목록 조회(승인 안된 강의 목록 조회)
     public Page<WaitingLectureDto> getWaitingLectureList(Pageable pageable){
@@ -260,9 +290,65 @@ public class LectureService {
         lecture.reject(rejectRequestDto.getReason());
 
     }
-    // ====== 강의 수정(레디스에 있는지 확인 후 있으면 수정?) ======
 
-//    상세조회에 캐싱처리(레디스에 데이터 있는지 그리고 없으면 rdb조회 후 레디스에 추가 레디스에 ttl..?), 목록조회 페이징 처리
 
+// ====== 승인된 강의목록 조회 ======
+    public List<LectureResDto> findAllLecture(Pageable pageable) {
+        return lectureRepository.findAll(pageable).stream()
+                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .map(LectureResDto::fromEntity)
+                .toList();
+    }
+
+
+
+// ====== 내 강의 목록 조회 ======
+    public List<LectureResDto> findAllMyLecture(Pageable pageable) {
+        //        테스트용 UUID 유저 세팅, 로그인 기능 구현 후 강사 ID를 넣어야 함
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+        return lectureRepository.findAllBySubmittedById(pageable, userId).stream()
+                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .map(LectureResDto::fromEntity)
+                .toList();
+    }
+
+
+    
+// ====== 강의상세목록 조회 ======
+    public LectureDetailDto findDetailLecture(UUID lectureId) {
+        //        테스트용 UUID 유저 세팅
+        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
+
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
+
+        User submittedBy = lecture.getSubmittedBy();
+        List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
+
+        List<LectureQna> qnas = lecture.getQnas();
+
+        List<LectureVideo> videos = lecture.getVideos();
+
+        List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
+
+        List<LectureStep> lectureStepList = lecture.getLectureStepList();
+
+        LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
+                ,videos,ingredientsList,lectureStepList);
+
+        return lectureDetailDto;
+    }
+
+
+
+// ====== 강의삭제 ======
+    public void deleteLecture(UUID lectureId) {
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));
+
+        lecture.lectureDelete();
+    }
 
 }
