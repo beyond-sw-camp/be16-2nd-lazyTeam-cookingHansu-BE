@@ -28,21 +28,24 @@ public class QnaResDto {
     private LocalDateTime answerUpdatedAt;
 
     public static QnaResDto fromEntity(LectureQna lectureQna) {
-        LectureQna parent = lectureQna.getParent();
+
+        LectureQna parent = (lectureQna.getParent() != null)
+                ? lectureQna.getParent()
+                : lectureQna;
         LectureQna answer = lectureQna.getChild();
 
         return QnaResDto.builder()
-                .parentName(parent.getUser().getName())
+                .parentName(parent.getUser() != null ? parent.getUser().getName() : null)
                 .parentStatus(lectureQna.getStatus())
                 .parentContent(lectureQna.getContent())
                 .parentCreatedAt(parent.getCreatedAt())
                 .questionUpdatedAt(parent.getUpdatedAt())
 
                 // 답변
-                .answerName(answer.getUser().getName())
-                .answerContent(lectureQna.getChild().getContent())
-                .answerCreatedAt(lectureQna.getChild().getCreatedAt())
-                .answerUpdatedAt(lectureQna.getUpdatedAt())
+                .answerName(answer != null && answer.getUser() != null ? answer.getUser().getName() : null)
+                .answerContent(answer != null ? answer.getContent() : null)
+                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null)
+                .answerUpdatedAt(answer != null ? answer.getUpdatedAt() : null)
                 .build();
     }
 
