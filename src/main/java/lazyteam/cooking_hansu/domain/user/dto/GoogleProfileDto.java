@@ -22,21 +22,4 @@ public class GoogleProfileDto {
     private String given_name;
     private String family_name;
     private String locale;
-
-    // CommonProfileDto와 동일한 인터페이스 제공을 위한 메서드들
-    public String getSub() {
-        return sub;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPicture() {
-        return picture;
-    }
 }

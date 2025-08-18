@@ -36,23 +36,4 @@ public class KakaoProfileDto {
         private String profile_image_url;
         private String name;
     }
-
-    // CommonProfileDto와 동일한 인터페이스 제공을 위한 메서드들
-    public String getSub() {
-        return id;
-    }
-
-    public String getName() {
-        return kakao_account != null && kakao_account.getProfile() != null
-            ? kakao_account.getProfile().getNickname() : null;
-    }
-
-    public String getEmail() {
-        return kakao_account != null ? kakao_account.getEmail() : null;
-    }
-
-    public String getPicture() {
-        return kakao_account != null && kakao_account.getProfile() != null
-            ? kakao_account.getProfile().getProfile_image_url() : null;
-    }
 }

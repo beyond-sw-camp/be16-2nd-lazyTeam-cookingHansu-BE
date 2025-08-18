@@ -29,21 +29,4 @@ public class NaverProfileDto {
         private String email; // 이메일
         private String profile_image; // 프로필 이미지 URL
     }
-
-    // 네이버 프로필을 공통 프로필로 변환 (CommonProfileDto와 동일한 구조)
-    public String getId() {
-        return response != null ? response.getId() : null;
-    }
-
-    public String getName() {
-        return response != null ? response.getName() : null;
-    }
-
-    public String getEmail() {
-        return response != null ? response.getEmail() : null;
-    }
-
-    public String getPicture() {
-        return response != null ? response.getProfile_image() : null;
-    }
 }

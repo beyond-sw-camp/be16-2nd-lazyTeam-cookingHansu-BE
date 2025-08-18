@@ -47,7 +47,7 @@ public class UserController {
             // 사용자 정보 얻기
             GoogleProfileDto googleProfileDto = googleService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회 (DB 기반으로 신규 사용자 여부 판단)
+            // 기존 사용자 조회
             User originalUser = userService.getUserBySocialId(googleProfileDto.getSub());
 
             // 회원 가입이 되어 있지 않다면 회원가입
@@ -78,16 +78,16 @@ public class UserController {
             // 사용자 정보 얻기
             KakaoProfileDto kakaoProfileDto = kakaoService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회 (DB 기반으로 신규 사용자 여부 판단)
-            User originalUser = userService.getUserBySocialId(kakaoProfileDto.getSub());
+            // 기존 사용자 조회
+            User originalUser = userService.getUserBySocialId(kakaoProfileDto.getId());
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
                 originalUser = userService.createKakaoOauth(
-                        kakaoProfileDto.getSub(),
-                        kakaoProfileDto.getName(),
-                        kakaoProfileDto.getEmail(),
-                        kakaoProfileDto.getPicture(),
+                        kakaoProfileDto.getId(),
+                        kakaoProfileDto.getKakao_account().getProfile().getName(),
+                        kakaoProfileDto.getKakao_account().getEmail(),
+                        kakaoProfileDto.getKakao_account().getProfile().getProfile_image_url(),
                         OauthType.KAKAO
                 );
             }
@@ -109,16 +109,16 @@ public class UserController {
             // 사용자 정보 얻기
             NaverProfileDto naverProfileDto = naverService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회 (DB 기반으로 신규 사용자 여부 판단)
-            User originalUser = userService.getUserBySocialId(naverProfileDto.getId());
+            // 기존 사용자 조회
+            User originalUser = userService.getUserBySocialId(naverProfileDto.getResponse().getId());
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
                 originalUser = userService.createNaverOauth(
-                        naverProfileDto.getId(),
-                        naverProfileDto.getName(),
-                        naverProfileDto.getEmail(),
-                        naverProfileDto.getPicture(),
+                        naverProfileDto.getResponse().getId(),
+                        naverProfileDto.getResponse().getName(),
+                        naverProfileDto.getResponse().getEmail(),
+                        naverProfileDto.getResponse().getProfile_image(),
                         OauthType.NAVER
                 );
             }
