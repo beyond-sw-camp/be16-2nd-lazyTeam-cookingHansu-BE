@@ -44,8 +44,10 @@ public class MyLectureService {
                     Lecture lecture = purchase.getLecture();
 
                     // 평균 평점 계산
-                    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lecture.getId());
-                    double avgRating = reviews.isEmpty() ? 0.0 :
+                    Page<LectureReview> reviewsPages = lectureReviewRepository.findAllByLectureId(lecture.getId(),  Pageable.unpaged());
+                    // 리뷰조회 시 page 타입으로 리턴이 필요해서 변환처리
+                    List<LectureReview> reviews = reviewsPages.getContent();
+            double avgRating = reviews.isEmpty() ? 0.0 :
                             reviews.stream().mapToInt(LectureReview::getRating).average().orElse(0.0);
 
                     // 수강생 수 계산

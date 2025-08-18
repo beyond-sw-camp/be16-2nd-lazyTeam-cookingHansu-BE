@@ -3,7 +3,7 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lazyteam.cooking_hansu.domain.lecture.dto.*;
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureIngredientsListRepository;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
@@ -20,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.WaitingLectureDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import org.springframework.data.domain.Page;
