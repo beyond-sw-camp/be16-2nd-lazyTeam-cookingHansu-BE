@@ -9,6 +9,9 @@ import lazyteam.cooking_hansu.domain.lecture.repository.LectureQnaRepository;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
+import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,7 @@ public class LectureQnaService {
     private final LectureQnaRepository lectureQnaRepository;
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // Q&A 등록
     public UUID createQna(UUID lectureId, LectureQnaCreateDto lectureQnaCreateDto) {
@@ -46,8 +50,26 @@ public class LectureQnaService {
 
             parentQna.setChild(childQna);
             parentQna.updateStatus(QnaStatus.ANSWERED);
+
 //        강의 qna 수 갱신 로직
             lecture.setQnaCount(lecture.getQnaCount() + 1);
+
+
+            // QNA 답변 알림 발송 (질문자에게)
+            String notificationContent = String.format("Q&A에 답변이 달렸습니다: \"%s\"", 
+                    parentQna.getContent().length() > 30 
+                            ? parentQna.getContent().substring(0, 30) + "..." 
+                            : parentQna.getContent());
+            
+            SseMessageDto sseMessageDto = SseMessageDto.builder()
+                    .recipientId(parentQna.getUser().getId())
+                    .targetType(TargetType.QNACOMMENT)
+                    .targetId(parentQna.getId())
+                    .content(notificationContent)
+                    .build();
+            
+            notificationService.createAndDispatch(sseMessageDto);
+
 
             return childQna.getId();
         }
