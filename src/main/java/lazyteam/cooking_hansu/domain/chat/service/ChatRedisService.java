@@ -124,8 +124,8 @@ public class ChatRedisService implements MessageListener {
             participantMap = new HashMap<>();
 
             for (ChatParticipant chatParticipant : mariaDBChatParticipantList) {
-                UUID lastReadChatMessageId = chatParticipant.getLastReadMessage() == null ? UUID.fromString(String.valueOf(0)) : chatParticipant.getLastReadMessage().getId();
-                participantMap.put(chatParticipant.getUser().getEmail(), String.valueOf(lastReadChatMessageId));
+                UUID lastReadChatMessageId = chatParticipant.getLastReadMessage() == null ? UUID.fromString("12345678-0000-0000-0000-000000000000") : chatParticipant.getLastReadMessage().getId();
+                participantMap.put(String.valueOf(chatParticipant.getUser().getId()), String.valueOf(lastReadChatMessageId));
             }
         }
         return participantMap;
@@ -191,7 +191,7 @@ public class ChatRedisService implements MessageListener {
         try {
             if (dest.endsWith(SUFFIX_CHAT_MESSAGE)) {
                 ChatMessageResDto dto = objectMapper.readValue(body, ChatMessageResDto.class);
-                messageTemplate.convertAndSend(TOPIC_PREFIX+dest, dto);
+                messageTemplate.convertAndSend(dest, dto);
             } else if (dest.endsWith(SUFFIX_ONLINE_PARTICIPANT)) {
                 List<ChatParticipantStatReq> onlineParticipants = new ArrayList<>();
                 JsonNode jsonNode = objectMapper.readTree(body);
@@ -199,7 +199,7 @@ public class ChatRedisService implements MessageListener {
                     ChatParticipantStatReq participant = objectMapper.treeToValue(node, ChatParticipantStatReq.class);
                     onlineParticipants.add(participant);
                 }
-                messageTemplate.convertAndSend(TOPIC_PREFIX+dest, onlineParticipants);
+                messageTemplate.convertAndSend(dest, onlineParticipants);
             } else if (dest.endsWith(SUFFIX_CHAT_PARTICIPANTS)) {
                 List<ChatParticipantRes> chatParticipants = new ArrayList<>();
                 JsonNode jsonNode = objectMapper.readTree(body);
@@ -208,7 +208,7 @@ public class ChatRedisService implements MessageListener {
                     chatParticipants.add(participant);
                 }
                 // Set<String>를 JSON 문자열로 전달 (클라에서 그대로 파싱)
-                messageTemplate.convertAndSend(TOPIC_PREFIX+dest, chatParticipants);
+                messageTemplate.convertAndSend(dest, chatParticipants);
             } else {
                 log.warn("Unknown channel: {}", channel);
             }
