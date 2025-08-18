@@ -21,7 +21,6 @@ import java.util.UUID;
 public class ChatController {
 
     private final ChatService chatService;
-    private final ChatRedisService redisPubSubService;
 
     //    내 채팅방 목록 조회
     @GetMapping("/my/rooms")
@@ -70,6 +69,12 @@ public class ChatController {
     public ResponseEntity<?> uploadFiles(@PathVariable UUID roomId, @ModelAttribute ChatFileUploadReqDto requestDto) {
         ChatFileUploadResDto result = chatService.uploadFiles(roomId, requestDto);
         return new ResponseEntity<>(ResponseDto.ok(result, HttpStatus.OK), HttpStatus.OK);
+    }
+
+    @PostMapping("/room/{roomId}/read")
+    public ResponseEntity<?> readMessages(@PathVariable UUID roomId, @RequestBody ChatParticipantStatReq req) {
+        chatService.readMessages(roomId, req.getUserId());
+        return new ResponseEntity<>(ResponseDto.ok("메시지를 읽었습니다.", HttpStatus.OK), HttpStatus.OK);
     }
 }
 

@@ -10,11 +10,13 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.Map;
 
 @Configuration
 public class RedisConfig {
@@ -64,7 +66,6 @@ public class RedisConfig {
         // 채팅 메시지와 읽음 상태 이벤트 모두 구독
         container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/chat-message"));
         container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/online-participant"));
-
         return container;
     }
 
@@ -85,9 +86,22 @@ public class RedisConfig {
         return new LettuceConnectionFactory(configuration);
     }
 
+    @Bean
+    @Qualifier("chatParticipants")
+    public RedisTemplate<String, Map<String, String>> chatParticipantsRedisTemplate(
+            @Qualifier("chatFactory") RedisConnectionFactory chatRedisConnectionFactory) {
+        RedisTemplate<String, Map<String, String>> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(chatRedisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Map.class));
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+        return redisTemplate;
+    }
 
     @Bean
-    @Qualifier("chatParticipant")
+    @Qualifier("chatOnlineParticipants")
     public RedisTemplate<String, String> chatOnlineParticipantRedisTemplate(
             @Qualifier("chatFactory") RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();

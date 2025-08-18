@@ -6,7 +6,6 @@ import lazyteam.cooking_hansu.domain.chat.entity.*;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatRoomRepository;
-import lazyteam.cooking_hansu.domain.chat.util.ChatMessageFormatter;
 import lazyteam.cooking_hansu.domain.chat.util.ChatFileValidator;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -36,10 +35,8 @@ public class ChatService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    //    private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final S3Uploader s3Uploader;
-
 
     //    메세지 전송
     public ChatMessageResDto saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
@@ -223,7 +220,7 @@ public class ChatService {
                 .build();
     }
 
-    //    채팅방 상세 내역 조회 (Scroll Pagination)
+    //    채팅방 상세 내역 조회
     @Transactional(readOnly = true)
     public PaginatedResponseDto<ChatMessageResDto> getChatHistory(UUID roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
@@ -243,6 +240,9 @@ public class ChatService {
                 .findByChatRoomAndUser(chatRoom, user)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
 
+        LocalDateTime lastMessageTime = participant.getLastReadMessage() != null ?
+                participant.getLastReadMessage().getCreatedAt() : participant.getCreatedAt();
+
         // 인덱스 기반 cursor pagination
         int pageIndex = 0;
         if (cursor != null && !cursor.isEmpty()) {
@@ -253,8 +253,7 @@ public class ChatService {
                 pageIndex = 0;
             }
         }
-        
-        // Pageable 생성 (정확한 size로 조회)
+
         PageRequest pageRequest = PageRequest.of(pageIndex, size);
         
         Slice<ChatMessage> chatMessagesSlice;
@@ -299,12 +298,15 @@ public class ChatService {
                     .build();
             result.add(chatMessageResDto);
         }
+
+
         
         // 커스텀 응답 DTO 반환
         return PaginatedResponseDto.<ChatMessageResDto>builder()
                 .data(result)
                 .hasNext(chatMessagesSlice.hasNext())
                 .nextCursor(chatMessagesSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
+                .lastMessageTimestamp(lastMessageTime)
                 .build();
     }
 
@@ -394,6 +396,5 @@ public class ChatService {
         ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("participant not found"));
 
         chatParticipant.read(chatRoom.getMessages().get(chatRoom.getMessages().size() - 1));
-
     }
 }

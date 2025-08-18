@@ -32,8 +32,6 @@ public class StompController {
 
     @MessageMapping("/chat-rooms/{roomId}/offline")
     public void offline(@DestinationVariable UUID roomId, ChatParticipantStatReq req) {
-        // 오프라인 처리 시 읽음 반영이 필요하면 유지
-        chatService.readMessages(roomId, req.getUserId());
         chatRedisService.publishChatOfflineToRedis(roomId, req);
     }
 }
