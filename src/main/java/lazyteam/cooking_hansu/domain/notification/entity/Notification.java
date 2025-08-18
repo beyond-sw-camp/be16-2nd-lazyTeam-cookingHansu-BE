@@ -18,17 +18,8 @@ public class Notification extends BaseIdAndTimeEntity {
 
     // 알림 수신자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipient_id", nullable = false)
+    @JoinColumn(name = "recipient_id", nullable = true)
     private User recipient;
-
-    // 알림 발신자
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sender_type", nullable = false)
-    private SenderType senderType;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -41,9 +32,19 @@ public class Notification extends BaseIdAndTimeEntity {
     private UUID targetId;
 
     @Column(name = "is_read", nullable = false)
-    private Boolean isRead;
+    @Builder.Default
+    private Boolean isRead = false;
 
     @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted;
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    public void markRead() {
+        this.isRead = true;
+    }
+    
+    public void markDeleted() {
+        this.isDeleted = true;
+    }
 
 }
