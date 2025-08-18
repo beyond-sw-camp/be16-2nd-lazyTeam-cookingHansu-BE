@@ -17,5 +17,17 @@ public class UserLoginDto {
     private String accessToken;
     private String refreshToken;
     private User user;
-    private boolean isNewUser;
+
+    public static UserLoginDto fromEntity(User user, String accessToken, String refreshToken) {
+        return UserLoginDto.builder()
+                .uuid(user.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(user)
+                .build();
+    }
+
+    public boolean isNewUser() {
+        return user != null ? user.isNewUser() : false;
+    }
 }

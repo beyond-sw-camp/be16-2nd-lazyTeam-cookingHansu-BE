@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.user.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.UserCreateDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingChefListDto;
@@ -38,9 +39,6 @@ public class UserService {
     private final ChefRepository chefRepository;
     private final BusinessRepository businessRepository;
     private final S3Uploader s3Uploader;
-
-    // TODO: 회원 서비스 메서드 구현 예정
-
 
 //    요리업종 승인 대기 목록 조회
     public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
@@ -159,14 +157,10 @@ public class UserService {
             }
         }
 
-        User user = User.builder()
-                .email(email)
-                .name(name)
-                .oauthType(oauthType)
-                .socialId(sub)
-                .picture(uploadedPictureUrl)
-                .build();
+        // 사용자 엔티티 저장
+        User user = UserCreateDto.toEntity(sub, name, email, uploadedPictureUrl, oauthType);
         userRepository.save(user);
+
         return user;
     }
 
