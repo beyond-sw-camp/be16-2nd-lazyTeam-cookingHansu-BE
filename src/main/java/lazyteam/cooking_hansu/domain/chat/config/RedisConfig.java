@@ -66,6 +66,7 @@ public class RedisConfig {
         // 채팅 메시지와 읽음 상태 이벤트 모두 구독
         container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/chat-message"));
         container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/online-participant"));
+        container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/chat-participants"));
         return container;
     }
 
