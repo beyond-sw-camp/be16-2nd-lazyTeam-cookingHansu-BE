@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("lecture")
@@ -52,7 +53,7 @@ public class LectureController {
 //    강의 목록조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
     @GetMapping("/list")
     public ResponseEntity<?> findAllLecture(@PageableDefault(size = 8, sort = "createdAt",
-            direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
+            direction = Sort.Direction.DESC) Pageable pageable) {
         List<LectureResDto> lectureResDto = lectureService.findAllLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
     }
