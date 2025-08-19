@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.dto.response;
 
-import lazyteam.cooking_hansu.domain.user.dto.NaverProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.oauth.NaverProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

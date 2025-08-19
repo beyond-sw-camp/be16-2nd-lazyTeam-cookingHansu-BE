@@ -2,9 +2,9 @@ package lazyteam.cooking_hansu.domain.user.controller;
 
 import lazyteam.cooking_hansu.domain.user.dto.HeaderProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserLoginDto;
-import lazyteam.cooking_hansu.domain.user.dto.GoogleProfileDto;
-import lazyteam.cooking_hansu.domain.user.dto.KakaoProfileDto;
-import lazyteam.cooking_hansu.domain.user.dto.NaverProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.oauth.GoogleProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.oauth.KakaoProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.oauth.NaverProfileDto;
 import lazyteam.cooking_hansu.global.auth.dto.CommonTokenDto;
 import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
 import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;

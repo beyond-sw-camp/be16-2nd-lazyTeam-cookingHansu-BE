@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.user.dto;
+package lazyteam.cooking_hansu.domain.user.dto.oauth;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

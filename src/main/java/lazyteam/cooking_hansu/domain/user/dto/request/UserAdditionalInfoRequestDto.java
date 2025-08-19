@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 회원 추가 정보 입력 통합 요청 DTO
@@ -32,11 +33,11 @@ public class UserAdditionalInfoRequestDto {
     // 요식업 종사자 정보
     private String licenseNumber;
     private CuisineType cuisineType;
-    private String licenseUrl;
+    private MultipartFile licenseFile; // 자격증 파일
 
     // 요식업 자영업자 정보
     private String businessNumber;
-    private String businessUrl;
+    private MultipartFile businessFile; // 사업자등록증 파일
     private String businessName;
     private String businessAddress;
     private String shopCategory;

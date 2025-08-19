@@ -22,7 +22,7 @@ public class JwtAuthenticationHandler implements AuthenticationEntryPoint {
         log.error("Error: " + authException.getMessage());
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
+        response.setContentType("multipart/form-data");
         response.setCharacterEncoding("UTF-8");
 
         CommonErrorDto dto = new CommonErrorDto(401, "token이 없거나, 유효하지 않습니다.");

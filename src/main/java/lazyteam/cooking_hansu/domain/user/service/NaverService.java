@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
-import lazyteam.cooking_hansu.domain.user.dto.NaverProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.oauth.NaverProfileDto;
 import lazyteam.cooking_hansu.global.auth.dto.CommonTokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,19 +1,25 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import lazyteam.cooking_hansu.domain.user.dto.BusinessDto;
+import lazyteam.cooking_hansu.domain.user.dto.ChefDto;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResponseDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserRegistrationStatusResDto;
-import lazyteam.cooking_hansu.domain.user.entity.business.Business;
-import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 회원 추가 정보 입력 서비스
@@ -26,6 +32,8 @@ public class UserAdditionalInfoService {
     private final UserRepository userRepository;
     private final ChefRepository chefRepository;
     private final BusinessRepository businessRepository;
+    private final S3Uploader s3Uploader;
+    private final Validator validator;
 
     /**
      * 회원 추가 정보 입력 (통합)
@@ -44,31 +52,50 @@ public class UserAdditionalInfoService {
                     throw new RuntimeException("일반 회원 유형 선택은 필수입니다.");
                 }
                 user.updateGeneralType(requestDto.getGeneralType());
+                user.completeRegistration();
                 break;
 
             case CHEF:
-                validateChefData(requestDto);
-                Chef chef = Chef.builder()
+                // 자격증 파일이 있는 경우에만 업로드
+                String licenseUrl = null;
+                if (requestDto.getLicenseFile() != null && !requestDto.getLicenseFile().isEmpty()) {
+                    licenseUrl = uploadFile(requestDto.getLicenseFile(), "chef/licenses/");
+                } else {
+                    // 파일이 없는 경우 임시 URL 또는 기본값 설정
+                    licenseUrl = "pending_upload"; // 추후 파일 업로드 대기 상태
+                }
+
+                ChefDto chefDto = ChefDto.builder()
                         .user(user)
                         .licenseNumber(requestDto.getLicenseNumber())
                         .cuisineType(requestDto.getCuisineType())
-                        .licenseUrl(requestDto.getLicenseUrl())
+                        .licenseUrl(licenseUrl)
                         .build();
-                user.setChef(chef);
+                validateDto(chefDto);
+                chefRepository.save(chefDto.toEntity());
                 user.completeRegistration();
                 break;
 
             case OWNER:
-                validateBusinessData(requestDto);
-                Business business = Business.builder()
+                // 사업자등록증 파일이 있는 경우에만 업로드
+                String businessUrl = null;
+                if (requestDto.getBusinessFile() != null && !requestDto.getBusinessFile().isEmpty()) {
+                    businessUrl = uploadFile(requestDto.getBusinessFile(), "business/certificates/");
+                } else {
+                    // 파일이 없는 경우 임시 URL 또는 기본값 설정
+                    businessUrl = "pending_upload"; // 추후 파일 업로드 대기 상태
+                }
+
+                BusinessDto businessDto = BusinessDto.builder()
                         .user(user)
                         .businessNumber(requestDto.getBusinessNumber())
-                        .businessUrl(requestDto.getBusinessUrl())
+                        .businessUrl(businessUrl)
                         .businessName(requestDto.getBusinessName())
                         .businessAddress(requestDto.getBusinessAddress())
                         .shopCategory(requestDto.getShopCategory())
                         .build();
-                user.setBusiness(business);
+                validateDto(businessDto);
+                businessRepository.save(businessDto.toEntity());
                 user.completeRegistration();
                 break;
 
@@ -87,38 +114,57 @@ public class UserAdditionalInfoService {
     }
 
     /**
-     * Chef 데이터 유효성 검증
+     * 파일을 S3에 업로드하는 메서드
      */
-    private void validateChefData(UserAdditionalInfoRequestDto requestDto) {
-        if (requestDto.getLicenseNumber() == null || requestDto.getLicenseNumber().trim().isEmpty()) {
-            throw new RuntimeException("자격 번호는 필수입니다.");
-        }
-        if (requestDto.getCuisineType() == null) {
-            throw new RuntimeException("자격 업종 선택은 필수입니다.");
-        }
-        if (requestDto.getLicenseUrl() == null || requestDto.getLicenseUrl().trim().isEmpty()) {
-            throw new RuntimeException("자격증 이미지 URL은 필수입니다.");
+    private String uploadFile(MultipartFile file, String dirName) {
+        try {
+            // 파일 검증
+            validateFile(file);
+
+            // S3에 파일 업로드
+            return s3Uploader.upload(file, dirName);
+        } catch (Exception e) {
+            throw new RuntimeException("파일 업로드에 실패했습니다: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Business 데이터 유효성 검증
+     * 파일 유효성 검증
      */
-    private void validateBusinessData(UserAdditionalInfoRequestDto requestDto) {
-        if (requestDto.getBusinessNumber() == null || requestDto.getBusinessNumber().trim().isEmpty()) {
-            throw new RuntimeException("사업자 등록 번호는 필수입니다.");
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("파일이 비어있습니다.");
         }
-        if (requestDto.getBusinessUrl() == null || requestDto.getBusinessUrl().trim().isEmpty()) {
-            throw new RuntimeException("사업자 등록증 파일 URL은 필수입니다.");
+
+        // 파일 크기 검증 (20MB 제한)
+        long maxFileSize = 20 * 1024 * 1024; // 20MB
+        if (file.getSize() > maxFileSize) {
+            throw new RuntimeException("파일 크기는 20MB를 초과할 수 없습니다.");
         }
-        if (requestDto.getBusinessName() == null || requestDto.getBusinessName().trim().isEmpty()) {
-            throw new RuntimeException("상호명은 필수입니다.");
+
+        // 파일 확장자 검증
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.isEmpty()) {
+            throw new RuntimeException("파일명이 유효하지 않습니다.");
         }
-        if (requestDto.getBusinessAddress() == null || requestDto.getBusinessAddress().trim().isEmpty()) {
-            throw new RuntimeException("사업지 주소는 필수입니다.");
+
+        String fileExtension = fileName.toLowerCase();
+        if (!fileExtension.endsWith(".jpg") && !fileExtension.endsWith(".jpeg") &&
+            !fileExtension.endsWith(".png") && !fileExtension.endsWith(".pdf")) {
+            throw new RuntimeException("지원하지 않는 파일 형식입니다. (jpg, jpeg, png, pdf만 허용)");
         }
-        if (requestDto.getShopCategory() == null || requestDto.getShopCategory().trim().isEmpty()) {
-            throw new RuntimeException("사업 업종은 필수입니다.");
+    }
+
+    /**
+     * DTO 유효성 검증
+     */
+    private void validateDto(Object dto) {
+        Set<ConstraintViolation<Object>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            String errorMessages = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining(", "));
+            throw new RuntimeException(errorMessages);
         }
     }
 

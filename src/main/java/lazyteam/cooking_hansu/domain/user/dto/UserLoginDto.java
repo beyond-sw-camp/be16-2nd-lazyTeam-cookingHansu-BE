@@ -29,7 +29,4 @@ public class UserLoginDto {
                 .build();
     }
 
-    public boolean isNewUser() {
-        return user != null ? user.isNewUser() : false;
-    }
 }
