@@ -1,239 +1,176 @@
 package lazyteam.cooking_hansu.domain.interaction.service;
 
-import lazyteam.cooking_hansu.domain.interaction.dto.InteractionCountDto;
+import lazyteam.cooking_hansu.domain.interaction.dto.LectureLikeInfoDto;
 import lazyteam.cooking_hansu.domain.interaction.entity.Bookmark;
+import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
 import lazyteam.cooking_hansu.domain.interaction.repository.BookmarkRepository;
+import lazyteam.cooking_hansu.domain.interaction.repository.LectureLikesRepository;
 import lazyteam.cooking_hansu.domain.interaction.repository.LikesRepository;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
+import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
+@Transactional
 public class InteractionService {
 
     private final LikesRepository likesRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final LectureLikesRepository lectureLikesRepository;
     private final PostRepository postRepository;
+    private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
-    private final ViewCountCacheService viewCountCacheService;
 
-    /**
-     * 좋아요 추가/취소 토글 (Redis + DB 동기화)
-     */
-    public String toggleLike(UUID postId, UUID userId) {
-        User user = findUserById(userId);
-        Post post = findPostById(postId);
+    // 중복 방지를 위한 메모리 캐시
+    private final Set<String> viewedPosts = new HashSet<>();
 
-        Optional<Likes> existingLike = likesRepository.findByUserAndPost(user, post);
+    // ========== 게시글 좋아요 ==========
 
-        if (existingLike.isPresent()) {
+    public String togglePostLike(UUID postId, UUID userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + postId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
+
+        Likes existingLike = likesRepository.findByUserIdAndPostId(userId, postId);
+
+        if (existingLike != null) {
             // 좋아요 취소
-            likesRepository.delete(existingLike.get());
+            likesRepository.delete(existingLike);
             post.decrementLikeCount();
-            
-            // Redis 캐시 업데이트
-            updateLikeCacheAsync(postId, userId, false);
-            
-            log.info("좋아요 취소: 사용자 ID {}, 게시글 ID {}", userId, postId);
-            return "좋아요가 취소되었습니다.";
+            postRepository.save(post);
+            return "좋아요를 취소했습니다.";
         } else {
             // 좋아요 추가
-            Likes like = Likes.builder()
+            Likes newLike = Likes.builder()
                     .user(user)
                     .post(post)
                     .build();
-            likesRepository.save(like);
+            likesRepository.save(newLike);
             post.incrementLikeCount();
-            
-            // Redis 캐시 업데이트
-            updateLikeCacheAsync(postId, userId, true);
-            
-            log.info("좋아요 추가: 사용자 ID {}, 게시글 ID {}", userId, postId);
-            return "좋아요가 추가되었습니다.";
+            postRepository.save(post);
+            return "좋아요를 추가했습니다.";
         }
     }
 
-    /**
-     * 북마크 추가/취소 토글 (Redis + DB 동기화)
-     */
+    @Transactional(readOnly = true)
+    public boolean isPostLiked(UUID postId, UUID userId) {
+        return likesRepository.findByUserIdAndPostId(userId, postId) != null;
+    }
+
+    // ========== 게시글 북마크 ==========
+
     public String toggleBookmark(UUID postId, UUID userId) {
-        User user = findUserById(userId);
-        Post post = findPostById(postId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + postId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
 
-        Optional<Bookmark> existingBookmark = bookmarkRepository.findByUserAndPost(user, post);
+        Bookmark existingBookmark = bookmarkRepository.findByUserIdAndPostId(userId, postId);
 
-        if (existingBookmark.isPresent()) {
+        if (existingBookmark != null) {
             // 북마크 취소
-            bookmarkRepository.delete(existingBookmark.get());
+            bookmarkRepository.delete(existingBookmark);
             post.decrementBookmarkCount();
-            
-            // Redis 캐시 업데이트
-            updateBookmarkCacheAsync(postId, userId, false);
-            
-            log.info("북마크 취소: 사용자 ID {}, 게시글 ID {}", userId, postId);
-            return "북마크가 취소되었습니다.";
+            postRepository.save(post);
+            return "북마크를 취소했습니다.";
         } else {
             // 북마크 추가
-            Bookmark bookmark = Bookmark.builder()
+            Bookmark newBookmark = Bookmark.builder()
                     .user(user)
                     .post(post)
                     .build();
-            bookmarkRepository.save(bookmark);
+            bookmarkRepository.save(newBookmark);
             post.incrementBookmarkCount();
-            
-            // Redis 캐시 업데이트
-            updateBookmarkCacheAsync(postId, userId, true);
-            
-            log.info("북마크 추가: 사용자 ID {}, 게시글 ID {}", userId, postId);
-            return "북마크가 추가되었습니다.";
+            postRepository.save(post);
+            return "북마크를 추가했습니다.";
         }
     }
 
-    /**
-     * 좋아요 상태 확인 (DB 조회)
-     */
-    @Transactional(readOnly = true)
-    public boolean isLiked(UUID postId, UUID userId) {
-        User user = findUserById(userId);
-        Post post = findPostById(postId);
-        
-        return likesRepository.existsByUserAndPost(user, post);
-    }
-
-    /**
-     * 북마크 상태 확인 (DB 조회)
-     */
     @Transactional(readOnly = true)
     public boolean isBookmarked(UUID postId, UUID userId) {
-        User user = findUserById(userId);
-        Post post = findPostById(postId);
-        
-        return bookmarkRepository.existsByUserAndPost(user, post);
+        return bookmarkRepository.findByUserIdAndPostId(userId, postId) != null;
     }
 
-    /**
-     * 게시글의 상호작용 카운트 조회 (Redis 우선, DB 백업)
-     */
+    // ========== 강의 좋아요 ==========
+
+    public String toggleLectureLike(UUID lectureId, UUID userId) {
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(() -> new RuntimeException("강의를 찾을 수 없습니다. ID: " + lectureId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId));
+
+        LectureLikes existingLike = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId);
+
+        if (existingLike != null) {
+            // 좋아요 취소
+            lectureLikesRepository.delete(existingLike);
+            return "강의 좋아요를 취소했습니다.";
+        } else {
+            // 좋아요 추가
+            LectureLikes newLike = LectureLikes.builder()
+                    .user(user)
+                    .lecture(lecture)
+                    .build();
+            lectureLikesRepository.save(newLike);
+            return "강의 좋아요를 추가했습니다.";
+        }
+    }
+
     @Transactional(readOnly = true)
-    public InteractionCountDto getInteractionCounts(UUID postId) {
-        Post post = findPostById(postId);
-        
-        // Redis에서 캐시된 카운트 조회 (Redis 우선)
-        int likeCount = viewCountCacheService.getLikeCountFromCache(postId);
-        int bookmarkCount = viewCountCacheService.getBookmarkCountFromCache(postId);
-        int redisViewCount = viewCountCacheService.getViewCountFromCache(postId);
-        
-        // Redis에 데이터가 없으면 DB 값 사용
-        if (likeCount == 0) {
-            likeCount = post.getLikeCount();
-        }
-        if (bookmarkCount == 0) {
-            bookmarkCount = post.getBookmarkCount();
-        }
-        int viewCount = redisViewCount > 0 ? redisViewCount : post.getViewCount();
-        
-        log.debug("카운트 조회 - Redis: like={}, bookmark={}, view={} | DB: like={}, bookmark={}, view={}", 
-                viewCountCacheService.getLikeCountFromCache(postId),
-                viewCountCacheService.getBookmarkCountFromCache(postId), 
-                redisViewCount,
-                post.getLikeCount(), 
-                post.getBookmarkCount(), 
-                post.getViewCount());
-        
-        return InteractionCountDto.builder()
+    public boolean isLectureLiked(UUID lectureId, UUID userId) {
+        return lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId) != null;
+    }
+
+    @Transactional(readOnly = true)
+    public LectureLikeInfoDto getLectureLikeInfo(UUID lectureId, UUID userId) {
+        long likeCount = lectureLikesRepository.countByLectureId(lectureId);
+        boolean isLiked = userId != null && isLectureLiked(lectureId, userId);
+
+        return LectureLikeInfoDto.builder()
+                .lectureId(lectureId)
                 .likeCount(likeCount)
-                .bookmarkCount(bookmarkCount)
-                .viewCount(viewCount)
+                .isLiked(isLiked)
                 .build();
     }
 
-    /**
-     * 조회수 증가 (기본)
-     */
+    // ========== 조회수 ==========
+
     public void incrementViewCount(UUID postId) {
-        Post post = findPostById(postId);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + postId));
+        
         post.incrementViewCount();
-        log.info("조회수 증가: 게시글 ID {}, 현재 조회수: {}", postId, post.getViewCount());
+        postRepository.save(post);
     }
-    
-    /**
-     * 조회수 증가 (사용자 UUID 기반 중복 방지)
-     */
-    public boolean incrementViewCountWithDuplicateCheck(UUID postId, UUID userId) {
-        // Redis에서 중복 체크 및 조회수 증가 (UUID만 사용)
-        boolean incremented = viewCountCacheService.incrementViewCountInCache(postId, userId);
+
+    public boolean incrementViewCountWithCheck(UUID postId, UUID userId) {
+        String viewKey = postId + ":" + userId;
         
-        if (incremented) {
-            // 비동기로 DB 업데이트
-            updateViewCountAsync(postId);
-            log.info("조회수 증가: 게시글 ID {}, 사용자 ID {}", postId, userId);
+        if (viewedPosts.contains(viewKey)) {
+            return false; // 이미 조회한 경우
         }
         
-        return incremented;
-    }
-    
-    /**
-     * 비동기로 DB 조회수 업데이트
-     */
-    @Async
-    public void updateViewCountAsync(UUID postId) {
-        try {
-            Post post = findPostById(postId);
-            post.incrementViewCount();
-            log.debug("DB 조회수 업데이트: 게시글 ID {}, 현재 조회수: {}", postId, post.getViewCount());
-        } catch (Exception e) {
-            log.error("DB 조회수 업데이트 실패: 게시글 ID {}", postId, e);
-        }
-    }
-    
-    /**
-     * 비동기로 좋아요 캐시 업데이트
-     */
-    @Async
-    public void updateLikeCacheAsync(UUID postId, UUID userId, boolean isLiked) {
-        try {
-            viewCountCacheService.updateLikeCache(postId, userId, isLiked);
-            log.debug("Redis 좋아요 캐시 업데이트: postId={}, userId={}, isLiked={}", postId, userId, isLiked);
-        } catch (Exception e) {
-            log.error("Redis 좋아요 캐시 업데이트 실패: postId={}, userId={}", postId, userId, e);
-        }
-    }
-    
-    /**
-     * 비동기로 북마크 캐시 업데이트
-     */
-    @Async
-    public void updateBookmarkCacheAsync(UUID postId, UUID userId, boolean isBookmarked) {
-        try {
-            viewCountCacheService.updateBookmarkCache(postId, userId, isBookmarked);
-            log.debug("Redis 북마크 캐시 업데이트: postId={}, userId={}, isBookmarked={}", postId, userId, isBookmarked);
-        } catch (Exception e) {
-            log.error("Redis 북마크 캐시 업데이트 실패: postId={}, userId={}", postId, userId, e);
-        }
-    }
-
-    // ========== 헬퍼 메서드 ==========
-
-    private User findUserById(UUID userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("사용자를 찾을 수 없습니다."));
-    }
-
-    private Post findPostById(UUID postId) {
-        return postRepository.findById(postId)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        // 조회 기록 추가
+        viewedPosts.add(viewKey);
+        
+        // 조회수 증가
+        incrementViewCount(postId);
+        
+        return true; // 조회수 증가됨
     }
 }

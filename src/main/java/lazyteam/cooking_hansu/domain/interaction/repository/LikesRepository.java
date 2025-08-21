@@ -4,6 +4,8 @@ import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +19,11 @@ public interface LikesRepository extends JpaRepository<Likes, UUID> {
     boolean existsByUserAndPost(User user, Post post);
     
     long countByPost(Post post);
+    
+    // UUID로 직접 조회하는 메서드 추가
+    @Query("SELECT l FROM Likes l WHERE l.user.id = :userId AND l.post.id = :postId")
+    Likes findByUserIdAndPostId(@Param("userId") UUID userId, @Param("postId") UUID postId);
+    
+    @Query("SELECT COUNT(l) FROM Likes l WHERE l.post.id = :postId")
+    long countByPostId(@Param("postId") UUID postId);
 }

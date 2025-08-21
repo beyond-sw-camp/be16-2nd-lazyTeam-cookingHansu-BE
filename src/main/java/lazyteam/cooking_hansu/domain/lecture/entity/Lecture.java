@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
+import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
@@ -98,6 +99,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
+
+    // 강의 좋아요 관계 추가
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LectureLikes> lectureLikes;
 
 
     public void updateImageUrl(String url) {
