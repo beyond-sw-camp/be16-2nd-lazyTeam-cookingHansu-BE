@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -46,12 +47,16 @@ public class LectureReviewService {
 
         Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
-
-        if(lectureReviewRepository.findByWriterId(user.getId())!=null) {
+        Optional<LectureReview> lectureReview = lectureReviewRepository
+                .findByLectureIdAndWriterId(reviewCreateDto.getLectureId(),user.getId());
+        System.out.println(lectureReview);
+        if(lectureReview.isPresent()) {
             throw new DataIntegrityViolationException("해당 리뷰가 이미 존재합니다.");
+        } else {
+            lecture.setReviewCount(lecture.getReviewCount() + 1);
+            lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
         }
-        lecture.setReviewCount(lecture.getReviewCount() + 1);
-        lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
+
     }
 
 //    강의 리뷰 조회
