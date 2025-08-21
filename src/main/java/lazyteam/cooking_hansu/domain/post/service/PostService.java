@@ -12,6 +12,7 @@ import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
 import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
 import lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
@@ -368,5 +369,13 @@ public class PostService {
         postSequenceDescriptionRepository.deleteByPostId(postId);
         
         log.info("레시피 연결 해제 완료 - postId: {}", postId);
+    }
+
+    /**
+     * 유저 역할별 레시피 공유 게시글 조회 (Enum 검증 자동)
+     */
+    public Page<PostResponseDto> getRecipePostsByUserRole(Role role, Pageable pageable) {
+        Page<Post> posts = postRepository.findByUserRoleAndIsOpenTrueAndDeletedAtIsNull(role, pageable);
+        return posts.map(PostResponseDto::fromEntity);
     }
 }

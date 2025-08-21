@@ -117,13 +117,28 @@ public class PostResponseDto {
         private UUID id;
         private String nickname;
         private String profileImageUrl;
+        private String role; // 유저 역할 정보 추가
 
         public static UserInfoDto fromEntity(lazyteam.cooking_hansu.domain.user.entity.common.User user) {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
                     .profileImageUrl(user.getProfileImageUrl())
+                    .role(user.getRole() != null ? user.getRole().name() : "GENERAL")
                     .build();
+        }
+        
+        /**
+         * 역할을 한국어로 변환
+         */
+        public String getRoleKorean() {
+            if (role == null) return "일반 사용자";
+            return switch (role) {
+                case "GENERAL" -> "일반 사용자";
+                case "CHEF" -> "셰프";
+                case "OWNER" -> "자영업자";
+                default -> "일반 사용자";
+            };
         }
     }
 
@@ -142,6 +157,8 @@ public class PostResponseDto {
         private Integer cookTime;
         private String level;
         private String category;
+        // ========== 인분 정보: 숫자만 저장 ==========
+        private Integer servings;        // 몇 인분 (숫자만)
 
         public static RecipeInfoDto fromEntity(lazyteam.cooking_hansu.domain.recipe.entity.Recipe recipe) {
             return RecipeInfoDto.builder()
@@ -151,7 +168,16 @@ public class PostResponseDto {
                     .cookTime(recipe.getCookTime())
                     .level(recipe.getLevel().name())
                     .category(recipe.getCategory().name())
+                    .servings(recipe.getServings())                    // ← 숫자만 저장
                     .build();
+        }
+        
+        /**
+         * 인분을 텍스트로 변환하는 헬퍼 메서드 (프론트엔드에서 사용)
+         * null인 경우 null 반환
+         */
+        public String getServingsText() {
+            return this.servings != null ? this.servings + "인분" : null;
         }
     }
 

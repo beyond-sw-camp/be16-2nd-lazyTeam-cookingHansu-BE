@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.post.service.PostService;
 import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
 import lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +36,11 @@ public class PostController {
 
     // ========== 공개 레시피 공유 게시글 API (전체 사용자용) ==========
 
-    // 레시피 공유게시글 목록 조회 (공개)
+    // 레시피 공유게시글 목록 조회 (공개) - 유저타입 필터링 추가
     @GetMapping
     public ResponseEntity<?> getRecipePosts(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Role userType, // String -> Role enum으로 변경
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<PostResponseDto> posts;
@@ -46,6 +48,10 @@ public class PostController {
         if (keyword != null && !keyword.trim().isEmpty()) {
             posts = postService.searchRecipePosts(keyword.trim(), pageable);
             log.info("레시피 게시글 검색 완료. 키워드: {}, 결과 수: {}", keyword, posts.getTotalElements());
+        } else if (userType != null) {
+            // 유저타입 필터링 (Enum이므로 자동 검증됨)
+            posts = postService.getRecipePostsByUserRole(userType, pageable);
+            log.info("유저타입별 레시피 게시글 조회 완료. 타입: {}, 결과 수: {}", userType, posts.getTotalElements());
         } else {
             posts = postService.getRecipePosts(pageable);
             log.info("레시피 게시글 목록 조회 완료. 총 개수: {}", posts.getTotalElements());
@@ -62,7 +68,7 @@ public class PostController {
         
         // 회원만 조회수 증가 (비회원은 조회수 증가하지 않음)
         if (userId != null) {
-            boolean incremented = interactionService.incrementViewCountWithDuplicateCheck(postId, userId);
+            boolean incremented = interactionService.incrementViewCountWithCheck(postId, userId);
             
             if (incremented) {
                 log.info("조회수 증가됨: postId={}, userId={}", postId, userId);
