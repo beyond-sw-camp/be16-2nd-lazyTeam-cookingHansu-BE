@@ -34,6 +34,15 @@ public class RecipeUpdateRequestDto {
     @Min(value = 1, message = "조리 시간은 1분 이상이어야 합니다")
     private Integer cookTime;
 
+    // ========== 새로 추가: 인분 수 필드 ==========
+    /**
+     * 몇 인분인지 나타내는 필드 (1인분, 2인분, 4인분 등)
+     * 선택사항 - 양념, 소스류 등은 인분을 명시하지 않을 수 있음
+     */
+    @Min(value = 1, message = "인분 수는 1 이상이어야 합니다")
+    @Max(value = 20, message = "인분 수는 20 이하여야 합니다")
+    private Integer servings;
+
     @Valid
     private List<IngredientUpdateDto> ingredients;
 

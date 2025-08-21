@@ -25,6 +25,8 @@ public class RecipeResponseDto {
     private LevelType level;
     private CategoryType category;
     private Integer cookTime;
+    // ========== 인분 정보: 숫자만 저장 ==========
+    private Integer servings;        // 몇 인분 (숫자만)
     private String userNickname;
     private LocalDateTime createdAt;      // 생성일시 추가
     private LocalDateTime updatedAt;      // 수정일시 추가
@@ -43,6 +45,7 @@ public class RecipeResponseDto {
                 .level(recipe.getLevel())
                 .category(recipe.getCategory())
                 .cookTime(recipe.getCookTime())
+                .servings(recipe.getServings())                    // ← 숫자만 저장
                 .userNickname(recipe.getUser().getNickname())
                 .createdAt(recipe.getCreatedAt())
                 .updatedAt(recipe.getUpdatedAt())
@@ -53,6 +56,14 @@ public class RecipeResponseDto {
                         .map(RecipeStepResponseDto::fromEntity)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    /**
+     * 인분을 텍스트로 변환하는 헬퍼 메서드 (프론트엔드에서 사용)
+     * null인 경우 null 반환
+     */
+    public String getServingsText() {
+        return this.servings != null ? this.servings + "인분" : null;
     }
 
     /**

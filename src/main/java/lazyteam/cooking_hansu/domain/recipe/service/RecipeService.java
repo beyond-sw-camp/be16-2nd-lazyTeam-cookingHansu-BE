@@ -53,7 +53,7 @@ public class RecipeService {
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
 
-        // 레시피 엔티티 생성
+        // 레시피 엔티티 생성 (servings 포함)
         Recipe recipe = Recipe.builder()
                 .user(currentUser)
                 .title(requestDto.getTitle())
@@ -62,6 +62,7 @@ public class RecipeService {
                 .level(requestDto.getLevel())
                 .category(requestDto.getCategory())
                 .cookTime(requestDto.getCookTime())
+                .servings(requestDto.getServings())  // ← 새로 추가: 인분 수
                 .build();
 
         Recipe savedRecipe = recipeRepository.save(recipe);
@@ -72,7 +73,9 @@ public class RecipeService {
         // 조리순서 저장
         saveRecipeSteps(savedRecipe, requestDto.getSteps());
 
-        log.info("레시피 작성 완료. 사용자: {}, 레시피 ID: {}", currentUser.getEmail(), savedRecipe.getId());
+        log.info("레시피 작성 완료. 사용자: {}, 레시피 ID: {}, 인분: {}", 
+                currentUser.getEmail(), savedRecipe.getId(), 
+                savedRecipe.getServings() != null ? savedRecipe.getServings() + "인분" : "미표시");
         return savedRecipe.getId();
     }
 
@@ -146,14 +149,15 @@ public class RecipeService {
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
 
-        // 레시피 기본 정보 수정
+        // 레시피 기본 정보 수정 (servings 포함)
         recipe.updateRecipe(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
                 thumbnailUrl,
                 requestDto.getLevel(),
                 requestDto.getCategory(),
-                requestDto.getCookTime()
+                requestDto.getCookTime(),
+                requestDto.getServings()  // ← 새로 추가: 인분 수
         );
 
         // 재료 정보 갱신
@@ -168,7 +172,9 @@ public class RecipeService {
             saveRecipeStepsForUpdate(recipe, requestDto.getSteps());
         }
 
-        log.info("레시피 수정 완료. 사용자: {}, 레시피 ID: {}", currentUser.getEmail(), recipeId);
+        log.info("레시피 수정 완료. 사용자: {}, 레시피 ID: {}, 인분: {}", 
+                currentUser.getEmail(), recipeId, 
+                recipe.getServings() != null ? recipe.getServings() + "인분" : "미표시");
     }
 
     /**
