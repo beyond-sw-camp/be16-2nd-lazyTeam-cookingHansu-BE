@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.dto;
 
-import lazyteam.cooking_hansu.domain.user.entity.business.Business;
+import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,17 +24,17 @@ public class WaitingBusinessListDto {
     private String ownerName; // 사업자 소유자 이름
     private LocalDateTime createdAt; // 생성일시
 
-    public static WaitingBusinessListDto fromEntity(Business business) {
+    public static WaitingBusinessListDto fromEntity(Owner owner) {
         return WaitingBusinessListDto.builder()
-                .id(business.getId())
-                .nickname(business.getUser().getNickname())
-                .businessName(business.getBusinessName())
-                .businessNumber(business.getBusinessNumber())
-                .businessImageUrl(business.getBusinessUrl())
-                .businessAddress(business.getBusinessAddress())
-                .businessType(business.getShopCategory())
-                .ownerName(business.getUser().getName())
-                .createdAt(business.getCreatedAt())
+                .id(owner.getId())
+                .nickname(owner.getUser().getNickname())
+                .businessName(owner.getBusinessName())
+                .businessNumber(owner.getBusinessNumber())
+                .businessImageUrl(owner.getBusinessUrl())
+                .businessAddress(owner.getBusinessAddress())
+                .businessType(owner.getShopCategory())
+                .ownerName(owner.getUser().getName())
+                .createdAt(owner.getCreatedAt())
                 .build();
     }
 }

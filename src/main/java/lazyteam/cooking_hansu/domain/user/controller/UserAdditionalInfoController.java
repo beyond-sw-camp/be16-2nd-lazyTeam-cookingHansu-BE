@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
-import lazyteam.cooking_hansu.domain.user.dto.response.UserRegistrationStatusResDto;
 import lazyteam.cooking_hansu.domain.user.service.UserAdditionalInfoService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -166,30 +165,6 @@ public class UserAdditionalInfoController {
         } catch (Exception e) {
             log.error("기존 엔드포인트 회원 추가 정보 입력 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
             return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 정보 저장 중 오류가 발생했습니다.");
-        }
-    }
-
-    /**
-     * 사용자 회원가입 상태 확인
-     * GET /user/add-info/status
-     */
-    @GetMapping("/status")
-    public ResponseDto<UserRegistrationStatusResDto> getUserRegistrationStatus(
-            @RequestParam UUID userId) {
-
-        try {
-            log.info("회원가입 상태 조회 요청 - userId: {}", userId);
-
-            UserRegistrationStatusResDto response = userAdditionalInfoService.getUserRegistrationStatus(userId);
-
-            log.info("회원가입 상태 조회 성공 - userId: {}", userId);
-            return ResponseDto.ok(response, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("회원가입 상태 조회 실패 - 잘못된 요청: userId: {}, error: {}", userId, e.getMessage());
-            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            log.error("회원가입 상태 조회 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
-            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원가입 상태 조회 중 오류가 발생했습니다.");
         }
     }
 }

@@ -1,14 +1,17 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lazyteam.cooking_hansu.domain.user.dto.response.BusinessDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.ChefDto;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
-import lazyteam.cooking_hansu.domain.user.dto.response.UserRegistrationStatusResDto;
+import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
+import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
+import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
@@ -33,7 +36,7 @@ public class UserAdditionalInfoService {
 
     private final UserRepository userRepository;
     private final ChefRepository chefRepository;
-    private final BusinessRepository businessRepository;
+    private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
     private final Validator validator;
 
@@ -62,12 +65,13 @@ public class UserAdditionalInfoService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.error("사용자를 찾을 수 없습니다 - userId: {}", userId);
-                    return new RuntimeException("사용자를 찾을 수 없습니다.");
+                    return new EntityNotFoundException("사용자를 찾을 수 없습니다.");
                 });
 
         log.info("사용자 조회 성공 - userId: {}, 현재 role: {}", userId, user.getRole());
 
         // 기본 정보 업데이트 (닉네임, 역할)
+        // Chef와 Owner도 바로 해당 역할로 설정 (승인 상태는 별도 관리)
         user.updateStep1Info(requestDto.getNickname(), requestDto.getRole());
         userRepository.save(user);
 
@@ -80,7 +84,7 @@ public class UserAdditionalInfoService {
                 case GENERAL:
                     if (requestDto.getGeneralType() == null) {
                         log.error("일반 회원 유형이 null입니다 - userId: {}", userId);
-                        throw new RuntimeException("일반 회원 유형 선택은 필수입니다.");
+                        throw new IllegalArgumentException("일반 회원 유형 선택은 필수입니다.");
                     }
                     user.updateGeneralType(requestDto.getGeneralType());
                     user.completeRegistration();
@@ -104,10 +108,15 @@ public class UserAdditionalInfoService {
                             .licenseUrl(licenseUrl)
                             .build();
                     validateDto(chefDto);
-                    chefRepository.save(chefDto.toEntity());
+                    Chef chef = chefDto.toEntity();
+                    Chef savedChef = chefRepository.save(chef);
+
+                    // 승인 상태를 PENDING으로 설정
+                    savedChef.setPending();
+
                     user.completeRegistration();
-                    log.info("셰프 정보 저장 완료 - userId: {}, licenseNumber: {}, cuisineType: {}, licenseFile: {}",
-                            userId, requestDto.getLicenseNumber(), requestDto.getCuisineType(), requestDto.getLicenseFile());
+                    log.info("셰프 정보 저장 완료 (승인 대기) - userId: {}, licenseNumber: {}, cuisineType: {}, 승인상태: PENDING",
+                            userId, requestDto.getLicenseNumber(), requestDto.getCuisineType());
                     break;
 
                 case OWNER:
@@ -129,9 +138,14 @@ public class UserAdditionalInfoService {
                             .shopCategory(requestDto.getShopCategory())
                             .build();
                     validateDto(businessDto);
-                    businessRepository.save(businessDto.toEntity());
+                    Owner owner = businessDto.toEntity();
+                    Owner savedOwner = ownerRepository.save(owner);
+
+                    // 승인 상태를 PENDING으로 설정
+                    savedOwner.setPending();
+
                     user.completeRegistration();
-                    log.info("사업자 정보 저장 완료 - userId: {}, businessNumber: {}, businessName: {}",
+                    log.info("사업자 정보 저장 완료 (승인 대기) - userId: {}, businessNumber: {}, businessName: {}, 승인상태: PENDING",
                             userId, requestDto.getBusinessNumber(), requestDto.getBusinessName());
                     break;
 
@@ -147,10 +161,20 @@ public class UserAdditionalInfoService {
 
         userRepository.save(user);
 
+        // 응답 메시지 설정 (Chef, Owner의 경우 승인 대기 안내)
+        String responseMessage;
+        if (requestDto.getRole() == Role.CHEF) {
+            responseMessage = "요식업 종사자 정보가 저장되었습니다. 관리자 승인 후 요식업 종사자 권한이 부여됩니다.";
+        } else if (requestDto.getRole() == Role.OWNER) {
+            responseMessage = "요식업 자영업자 정보가 저장되었습니다. 관리자 승인 후 요식업 자영업자 권한이 부여됩니다.";
+        } else {
+            responseMessage = "회원 정보가 성공적으로 저장되었습니다.";
+        }
+
         return UserAdditionalInfoResDto.builder()
-                .message("회원 정보가 성공적으로 저장되었습니다.")
+                .message(responseMessage)
                 .nickname(user.getNickname())
-                .role(user.getRole())
+                .role(user.getRole()) // 요청한 역할(CHEF, OWNER, GENERAL)이 그대로 설정됨
                 .isRegistrationCompleted(!user.isNewUser())
                 .build();
     }
@@ -166,7 +190,7 @@ public class UserAdditionalInfoService {
             // S3에 파일 업로드
             return s3Uploader.upload(file, dirName);
         } catch (Exception e) {
-            throw new RuntimeException("파일 업로드에 실패했습니다: " + e.getMessage(), e);
+            throw new IllegalArgumentException("파일 업로드에 실패했습니다: " + e.getMessage(), e);
         }
     }
 
@@ -175,25 +199,25 @@ public class UserAdditionalInfoService {
      */
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("파일이 비어있습니다.");
+            throw new EntityNotFoundException("파일이 비어있습니다.");
         }
 
         // 파일 크기 검증 (20MB 제한)
         long maxFileSize = 20 * 1024 * 1024; // 20MB
         if (file.getSize() > maxFileSize) {
-            throw new RuntimeException("파일 크기는 20MB를 초과할 수 없습니다.");
+            throw new IllegalArgumentException("파일 크기는 20MB를 초과할 수 없습니다.");
         }
 
         // 파일 확장자 검증
         String fileName = file.getOriginalFilename();
         if (fileName == null || fileName.isEmpty()) {
-            throw new RuntimeException("파일명이 유효하지 않습니다.");
+            throw new IllegalArgumentException("파일명이 유효하지 않습니다.");
         }
 
         String fileExtension = fileName.toLowerCase();
         if (!fileExtension.endsWith(".jpg") && !fileExtension.endsWith(".jpeg") &&
             !fileExtension.endsWith(".png") && !fileExtension.endsWith(".pdf")) {
-            throw new RuntimeException("지원하지 않는 파일 형식입니다. (jpg, jpeg, png, pdf만 허용)");
+            throw new IllegalArgumentException("지원하지 않는 파일 형식입니다. (jpg, jpeg, png, pdf만 허용)");
         }
     }
 
@@ -208,45 +232,5 @@ public class UserAdditionalInfoService {
                     .collect(Collectors.joining(", "));
             throw new RuntimeException(errorMessages);
         }
-    }
-
-    /**
-     * 사용자 회원가입 상태 확인
-     */
-    @Transactional(readOnly = true)
-    public UserRegistrationStatusResDto getUserRegistrationStatus(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        boolean isStep1Completed = user.getNickname() != null && user.getRole() != null;
-        boolean isStep2Completed = !user.isNewUser();
-
-        String nextStepMessage = "";
-        if (!isStep1Completed) {
-            nextStepMessage = "닉네임과 역할을 선택해주세요.";
-        } else if (!isStep2Completed) {
-            switch (user.getRole()) {
-                case GENERAL:
-                    nextStepMessage = "일반 회원 추가 정보를 입력해주세요.";
-                    break;
-                case CHEF:
-                    nextStepMessage = "요식업 종사자 자격증 정보를 입력해주세요.";
-                    break;
-                case OWNER:
-                    nextStepMessage = "사업자 등록 정보를 입력해주세요.";
-                    break;
-            }
-        } else {
-            nextStepMessage = "회원가입이 완료되었습니다.";
-        }
-
-        return UserRegistrationStatusResDto.builder()
-                .isNewUser(user.isNewUser())
-                .isStep1Completed(isStep1Completed)
-                .isStep2Completed(isStep2Completed)
-                .currentRole(user.getRole())
-                .nickname(user.getNickname())
-                .nextStepMessage(nextStepMessage)
-                .build();
     }
 }

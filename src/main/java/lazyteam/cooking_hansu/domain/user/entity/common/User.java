@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
-import lazyteam.cooking_hansu.domain.user.entity.business.Business;
+import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
 
@@ -69,7 +69,7 @@ public class User extends BaseIdAndTimeEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Business business; // 요식업 자영업자 1:1 관계
+    private Owner owner; // 요식업 자영업자 1:1 관계
 
     // 관리자(Administrator) 테이블에 FK admin_id로 1:1 연관 관계 (단방향)
     /*@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

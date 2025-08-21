@@ -43,7 +43,7 @@ public class CommonUserDto {
                 .role(user.getRole())
                 .generalType(user.getGeneralType())
                 .chef(user.getChef() != null ? ChefDto.fromEntity(user.getChef()) : null)
-                .business(user.getBusiness() != null ? BusinessDto.fromEntity(user.getBusiness()) : null)
+                .business(user.getOwner() != null ? BusinessDto.fromEntity(user.getOwner()) : null)
                 .build();
     }
 }
