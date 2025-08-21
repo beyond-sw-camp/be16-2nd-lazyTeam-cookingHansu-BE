@@ -56,6 +56,11 @@ public class User extends BaseIdAndTimeEntity {
     @Column(length = 200)
     private String info; // 자기소개
 
+    @Column(name = "is_deleted", nullable = false)
+    private String isDeleted = "N";
+
+    public void deleteUser() { this.isDeleted = "Y"; }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
