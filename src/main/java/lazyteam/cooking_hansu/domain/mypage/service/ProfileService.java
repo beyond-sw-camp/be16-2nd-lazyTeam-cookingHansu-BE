@@ -115,4 +115,18 @@ public class ProfileService {
                 return "사용자";
         }
     }
+
+
+    public void deleteUser() {
+        User currentUser = getCurrentUser();
+
+        // 프로필 이미지가 S3에 있으면 같이 삭제
+        if (currentUser.getProfileImageUrl() != null) {
+            try {
+                s3Uploader.delete(currentUser.getProfileImageUrl());
+            } catch (Exception ignore) { }
+        }
+
+        currentUser.deleteUser();
+    }
 }
