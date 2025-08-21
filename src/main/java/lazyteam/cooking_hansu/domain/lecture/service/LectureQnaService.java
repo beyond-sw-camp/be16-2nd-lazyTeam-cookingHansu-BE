@@ -52,8 +52,9 @@ public class LectureQnaService {
             parentQna.updateStatus(QnaStatus.ANSWERED);
 
 //        강의 qna 수 갱신 로직
-            lecture.setQnaCount(lecture.getQnaCount() + 1);
-
+            lecture.setQnaCount(
+                    (lecture.getQnaCount() == null ? 0 : lecture.getQnaCount()) + 1
+            );
 
             // QNA 답변 알림 발송 (질문자에게)
             String notificationContent = String.format("Q&A에 답변이 달렸습니다: \"%s\"", 
@@ -81,7 +82,9 @@ public class LectureQnaService {
                 .build();
 
 //        강의 qna 수 갱신 로직
-        lecture.setQnaCount(lecture.getQnaCount() + 1);
+        lecture.setQnaCount(
+                (lecture.getQnaCount() == null ? 0 : lecture.getQnaCount()) + 1
+        );
 
         lectureQnaRepository.save(qna);
         return qna.getId();
@@ -127,7 +130,9 @@ public class LectureQnaService {
 
 //        강의 qna 수 갱신 로직
         Lecture lecture = lectureQna.getLecture();
-        lecture.setQnaCount(Math.max(0, lecture.getQnaCount() - 1));
+        lecture.setQnaCount(
+                Math.max(0, (lecture.getQnaCount() == null ? 0 : lecture.getQnaCount()) - 1)
+        );
 
         lectureQnaRepository.delete(lectureQna);
     }

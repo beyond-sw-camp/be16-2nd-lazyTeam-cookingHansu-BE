@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +30,10 @@ public class LectureDetailDto {
     private LevelEnum level;
     private CategoryEnum category;
     private Integer price;
-    private long reviewCount = 0L;
-    private long qnaCount = 0L;
+    private Integer reviewCount;
+    private Integer qnaCount;
+    private Integer purchaseCount;
+    private BigDecimal reviewAvg;
 
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
@@ -51,6 +55,15 @@ public class LectureDetailDto {
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
             ,List<LectureStep> lectureStepList) {
 
+        int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
+        int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
+
+//        Decimal 타입의 나눗셈 수행, 0 나눗셈 방지
+        BigDecimal avg = (cnt == 0)
+                ? BigDecimal.ZERO.setScale(1)
+                : BigDecimal.valueOf(sum)
+                .divide(BigDecimal.valueOf(cnt), 1, RoundingMode.HALF_UP);
+
         return LectureDetailDto.builder()
                 .lectureId(lecture.getId())
                 .nickname(submittedBy.getNickname()) // 강의제출자
@@ -62,7 +75,8 @@ public class LectureDetailDto {
                 .price(lecture.getPrice())
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
-
+                .purchaseCount(lecture.getPurchaseCount())
+                .reviewAvg(avg)
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
                 .lectureStepResDtoList(
@@ -72,7 +86,12 @@ public class LectureDetailDto {
                                 .toList()
                 )
 
-                .qnaList(qnas.stream().map(QnaResDto::fromEntity).toList())
+                .qnaList(
+                        qnas.stream()
+                                .filter(q -> q.getParent() == null)  //부모만
+                                .map(QnaResDto::fromEntity)
+                                .toList()
+                )
 
                 .lectureVideoResDtoList(
                         videos.stream()
