@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.user.entity.common;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
@@ -48,6 +49,9 @@ public class User extends BaseIdAndTimeEntity {
     @Builder.Default
     private Role role = Role.GENERAL; // 회원 역활 (GENERAL, CHEF, OWNER, BOTH, ADMIN)
 
+    /*@Size(max = 500, message = "한 줄 소개는 500자 이하여야 합니다.")
+    private String briefIntroduction; // 한 줄 소개 (추가)*/
+
     // 비밀번호 컬럼 제거
 
     @Enumerated(EnumType.STRING)
@@ -60,9 +64,11 @@ public class User extends BaseIdAndTimeEntity {
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Chef chef; // 요식업 종사자 1:1 관계
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Business business; // 요식업 자영업자 1:1 관계
 
     // 관리자(Administrator) 테이블에 FK admin_id로 1:1 연관 관계 (단방향)

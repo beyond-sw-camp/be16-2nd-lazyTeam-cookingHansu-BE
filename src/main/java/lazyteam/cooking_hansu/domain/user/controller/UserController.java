@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
-import lazyteam.cooking_hansu.domain.user.dto.HeaderProfileDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.CommonUserDto;
+import lazyteam.cooking_hansu.domain.user.dto.response.HeaderProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserLoginDto;
 import lazyteam.cooking_hansu.domain.user.dto.oauth.GoogleProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.oauth.KakaoProfileDto;
@@ -293,6 +294,40 @@ public class UserController {
         } catch (Exception e) {
             log.error("프로필 이미지 업데이트 실패", e);
             return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "프로필 이미지 업데이트 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 로그인한 사용자 정보 조회
+     */
+    @GetMapping("/me")
+    public ResponseDto<?> getCurrentUser(@RequestHeader("Authorization") String accessToken) {
+        try {
+            // Authorization 헤더에서 토큰 추출 ("Bearer " 제거)
+            if (accessToken.startsWith("Bearer ")) {
+                accessToken = accessToken.substring(7);
+            }
+
+            // Access Token에서 이메일 추출
+            String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
+            if (email == null || email.isEmpty()) {
+                return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access Token 입니다.");
+            }
+
+            // 이메일로 사용자 조회
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return ResponseDto.fail(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
+            }
+
+            // 사용자 정보 조회
+            CommonUserDto userDto = CommonUserDto.fromEntity(user);
+            log.info("Current user info retrieved: {}", userDto);
+
+            return ResponseDto.ok(userDto, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Get current user failed : ", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "Get current user failed.");
         }
     }
 }

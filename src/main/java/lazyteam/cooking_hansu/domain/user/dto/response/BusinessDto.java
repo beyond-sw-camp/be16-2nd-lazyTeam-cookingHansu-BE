@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.user.dto;
+package lazyteam.cooking_hansu.domain.user.dto.response;
 
 import jakarta.validation.constraints.NotBlank;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
@@ -35,6 +35,17 @@ public class BusinessDto {
                 .businessName(this.businessName)
                 .businessAddress(this.businessAddress)
                 .shopCategory(this.shopCategory)
+                .build();
+    }
+
+    public static BusinessDto fromEntity(Business business) {
+        return BusinessDto.builder()
+                .user(business.getUser())
+                .businessNumber(business.getBusinessNumber())
+                .businessUrl(business.getBusinessUrl())
+                .businessName(business.getBusinessName())
+                .businessAddress(business.getBusinessAddress())
+                .shopCategory(business.getShopCategory())
                 .build();
     }
 }

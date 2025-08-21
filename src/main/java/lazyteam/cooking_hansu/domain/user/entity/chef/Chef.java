@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
+    @JsonBackReference
     private User user;
 
     @Column(nullable = false)

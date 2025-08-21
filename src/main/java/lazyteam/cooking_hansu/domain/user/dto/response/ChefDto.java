@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.user.dto;
+package lazyteam.cooking_hansu.domain.user.dto.response;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +32,15 @@ public class ChefDto {
                 .licenseNumber(this.getLicenseNumber())
                 .cuisineType(this.getCuisineType())
                 .licenseUrl(this.getLicenseUrl())
+                .build();
+    }
+
+    public static ChefDto fromEntity(Chef chef) {
+        return ChefDto.builder()
+                .user(chef.getUser())
+                .licenseNumber(chef.getLicenseNumber())
+                .cuisineType(chef.getCuisineType())
+                .licenseUrl(chef.getLicenseUrl())
                 .build();
     }
 }
