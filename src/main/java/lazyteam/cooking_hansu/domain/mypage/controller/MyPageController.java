@@ -9,6 +9,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,7 +23,34 @@ public class MyPageController {
     private final MyLectureService myLectureService;
     private final MyBookmarkService myBookmarkService;
     private final MyLikeService myLikeService;
+    private final ProfileService profileService;
 
+    // 프로필 조회
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(profileService.getProfile(), HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
+
+    // 프로필 수정
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileUpdateRequestDto requestDto) {
+        return new ResponseEntity<>(
+                ResponseDto.ok(profileService.updateProfile(requestDto), HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
+
+    // 프로필 이미지 업로드
+    @PostMapping("/profile/image")
+    public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image) {
+        return new ResponseEntity<>(
+                ResponseDto.ok(profileService.uploadProfileImage(image), HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
 
     @GetMapping("/recipes")
     public ResponseEntity<?> myRecipeList() {
