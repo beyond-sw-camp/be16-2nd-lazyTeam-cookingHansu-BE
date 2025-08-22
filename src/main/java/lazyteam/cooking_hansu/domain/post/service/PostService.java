@@ -16,6 +16,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -41,6 +42,9 @@ public class PostService {
     private final RecipeStepRepository recipeStepRepository;
     private final PostSequenceDescriptionRepository postSequenceDescriptionRepository;
     private final S3Uploader s3Uploader;
+
+    @Value("${my.test.user-id}")
+    private String testUserIdStr;
 
     /**
      * 레시피 공유 게시글 생성 (이미지 포함) - 레시피 연결 지원
@@ -248,26 +252,18 @@ public class PostService {
     // ========== 유틸리티 메서드 ==========
 
     /**
-     * 현재 로그인한 사용자 조회 (테스트용 임시 구현)
+     * 현재 로그인한 사용자 조회 (테스트용 고정 UUID 사용)
      */
     private User getCurrentUser() {
-        // TODO: 실제 JWT 인증 구현 후 주석 해제
-        /*
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
-        */
+        UUID testUserId = UUID.fromString(testUserIdStr);
         
-        // 임시 테스트용 사용자 조회 (이메일: test@test.com)
-        return userRepository.findByEmail("test@test.com")
+        return userRepository.findById(testUserId)
                 .orElseGet(() -> {
-                    // 테스트 사용자가 없으면 생성
+                    // 기본 테스트 사용자가 없으면 생성
                     User testUser = User.builder()
-                            .name("테스트사용자")
-                            .email("test@test.com")
-                            .nickname("테스터")
+                            .name("기본사용자")
+                            .email("default@test.com")
+                            .nickname("기본사용자")
                             .password("password123")
                             .profileImageUrl("https://via.placeholder.com/150")
                             .build();
