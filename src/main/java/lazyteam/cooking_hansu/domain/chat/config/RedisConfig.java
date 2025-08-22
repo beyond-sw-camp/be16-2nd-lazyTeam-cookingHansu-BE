@@ -116,7 +116,6 @@ public class RedisConfig {
 
     // 기본 redisTemplate 빈 추가 (필수)
     @Bean
-    @Primary
     public RedisTemplate<String, Object> redisTemplate(
             @Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
