@@ -7,6 +7,7 @@ import lazyteam.cooking_hansu.domain.user.entity.chef.CuisineType;
 import lazyteam.cooking_hansu.domain.user.entity.common.GeneralType;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserAdditionalInfoRequestDto {
 
     // 1단계 공통 정보

@@ -1,7 +1,8 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
 import lazyteam.cooking_hansu.domain.user.service.UserAdditionalInfoService;
@@ -29,92 +30,15 @@ public class UserAdditionalInfoController {
     private final UserAdditionalInfoService userAdditionalInfoService;
 
     /**
-     * 회원 추가 정보 입력 (JSON 방식) - 파일 없이 기본 정보만
-     * POST /user/add-info/json
-     */
-    @PostMapping(value = "/json", consumes = "application/json")
-    public ResponseDto<UserAdditionalInfoResDto> updateAdditionalInfoJson(
-            @Valid @RequestBody UserAdditionalInfoRequestDto requestDto,
-            @RequestParam UUID userId) {
-
-        try {
-            log.info("JSON 방식 회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}",
-                    userId, requestDto.getRole(), requestDto.getNickname());
-
-            UserAdditionalInfoResDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
-
-            log.info("JSON 방식 회원 추가 정보 입력 성공 - userId: {}", userId);
-            return ResponseDto.ok(response, HttpStatus.OK);
-
-        } catch (IllegalArgumentException e) {
-            log.error("JSON 방식 회원 추가 정보 입력 실패 - 잘못된 요청: userId: {}, error: {}", userId, e.getMessage());
-            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("JSON 방식 회원 추가 정보 입력 실패 - 비즈니스 로직 오류: userId: {}, error: {}", userId, e.getMessage());
-            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            log.error("JSON 방식 회원 추가 정보 입력 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
-            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 정보 저장 중 오류가 발생했습니다.");
-        }
-    }
-
-    /**
-     * 회원 추가 정보 입력 (Multipart 방식) - 파일 업로드 지원
-     * POST /user/add-info/multipart
-     */
-    @PostMapping(value = "/multipart", consumes = "multipart/form-data")
-    public ResponseDto<UserAdditionalInfoResDto> updateAdditionalInfoMultipart(
-            @RequestParam UUID userId,
-            @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) Role role,
-            @RequestParam(required = false) GeneralType generalType,
-            @RequestParam(required = false) String licenseNumber,
-            @RequestParam(required = false) CuisineType cuisineType,
-            @RequestPart(required = false) MultipartFile licenseFile,
-            @RequestParam(required = false) String businessNumber,
-            @RequestPart(required = false) MultipartFile businessFile,
-            @RequestParam(required = false) String businessName,
-            @RequestParam(required = false) String businessAddress,
-            @RequestParam(required = false) String shopCategory) {
-
-        try {
-            log.info("Multipart 방식 회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}",
-                    userId, role, nickname);
-
-            // RequestDto 생성
-            UserAdditionalInfoRequestDto requestDto = new UserAdditionalInfoRequestDto(
-                    nickname, role, generalType, licenseNumber, cuisineType, licenseFile,
-                    businessNumber, businessFile, businessName, businessAddress, shopCategory
-            );
-
-            UserAdditionalInfoResDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
-
-            log.info("Multipart 방식 회원 추가 정보 입력 성공 - userId: {}", userId);
-            return ResponseDto.ok(response, HttpStatus.OK);
-
-        } catch (IllegalArgumentException e) {
-            log.error("Multipart 방식 회원 추가 정보 입력 실패 - 잘못된 요청: userId: {}, error: {}", userId, e.getMessage());
-            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (RuntimeException e) {
-            log.error("Multipart 방식 회원 추가 정보 입력 실패 - 비즈니스 로직 오류: userId: {}, error: {}", userId, e.getMessage());
-            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            log.error("Multipart 방식 회원 추가 정보 입력 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
-            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 정보 저장 중 오류가 발생했습니다.");
-        }
-    }
-
-    /**
-     * 기존 엔드포인트 (하위 호환성) - JSON과 multipart 모두 지원
+     * 회원 추가 정보 입력 (통합 엔드포인트)
      * POST /user/add-info
      */
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseDto<UserAdditionalInfoResDto> updateAdditionalInfo(
-            HttpServletRequest request,
-            @RequestParam UUID userId,
-            @RequestBody(required = false) UserAdditionalInfoRequestDto jsonRequestDto,
-            @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) Role role,
+            @RequestParam @NotNull(message = "사용자 ID는 필수입니다") UUID userId,
+            @RequestParam @NotBlank(message = "닉네임은 필수입니다")
+            @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다") String nickname,
+            @RequestParam @NotNull(message = "역할 선택은 필수입니다") Role role,
             @RequestParam(required = false) GeneralType generalType,
             @RequestParam(required = false) String licenseNumber,
             @RequestParam(required = false) CuisineType cuisineType,
@@ -126,44 +50,36 @@ public class UserAdditionalInfoController {
             @RequestParam(required = false) String shopCategory) {
 
         try {
-            String contentType = request.getContentType();
-            log.info("기존 엔드포인트 회원 추가 정보 입력 요청 - userId: {}, Content-Type: {}", userId, contentType);
+            log.info("회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}", userId, role, nickname);
 
-            UserAdditionalInfoRequestDto requestDto;
-
-            // Content-Type에 따라 처리 방식 결정
-            if (contentType != null && contentType.contains("application/json")) {
-                // JSON 방식
-                if (jsonRequestDto == null) {
-                    log.error("JSON 요청이지만 요청 데이터가 null입니다 - userId: {}", userId);
-                    return ResponseDto.fail(HttpStatus.BAD_REQUEST, "요청 데이터가 없습니다.");
-                }
-                log.info("JSON 형태 요청 데이터 처리 - userId: {}, role: {}, nickname: {}",
-                        userId, jsonRequestDto.getRole(), jsonRequestDto.getNickname());
-                requestDto = jsonRequestDto;
-            } else {
-                // Multipart 방식
-                log.info("Multipart 형태 요청 데이터 처리 - userId: {}, role: {}, nickname: {}",
-                        userId, role, nickname);
-                requestDto = new UserAdditionalInfoRequestDto(
-                        nickname, role, generalType, licenseNumber, cuisineType, licenseFile,
-                        businessNumber, businessFile, businessName, businessAddress, shopCategory
-                );
-            }
+            // RequestDto 생성
+            UserAdditionalInfoRequestDto requestDto = UserAdditionalInfoRequestDto.builder()
+                    .nickname(nickname)
+                    .role(role)
+                    .generalType(generalType)
+                    .licenseNumber(licenseNumber)
+                    .cuisineType(cuisineType)
+                    .licenseFile(licenseFile)
+                    .businessNumber(businessNumber)
+                    .businessFile(businessFile)
+                    .businessName(businessName)
+                    .businessAddress(businessAddress)
+                    .shopCategory(shopCategory)
+                    .build();
 
             UserAdditionalInfoResDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
 
-            log.info("기존 엔드포인트 회원 추가 정보 입력 성공 - userId: {}", userId);
+            log.info("회원 추가 정보 입력 성공 - userId: {}", userId);
             return ResponseDto.ok(response, HttpStatus.OK);
 
         } catch (IllegalArgumentException e) {
-            log.error("기존 엔드포인트 회원 추가 정보 입력 실패 - 잘못된 요청: userId: {}, error: {}", userId, e.getMessage());
+            log.error("회원 추가 정보 입력 실패 - 잘못된 요청: userId: {}, error: {}", userId, e.getMessage());
             return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
-            log.error("기존 엔드포인트 회원 추가 정보 입력 실패 - 비즈니스 로직 오류: userId: {}, error: {}", userId, e.getMessage());
+            log.error("회원 추가 정보 입력 실패 - 비즈니스 로직 오류: userId: {}, error: {}", userId, e.getMessage());
             return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
-            log.error("기존 엔드포인트 회원 추가 정보 입력 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
+            log.error("회원 추가 정보 입력 실패 - 시스템 오류: userId: {}, error: {}", userId, e.getMessage(), e);
             return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 정보 저장 중 오류가 발생했습니다.");
         }
     }

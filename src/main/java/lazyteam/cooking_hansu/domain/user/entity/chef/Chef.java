@@ -21,6 +21,8 @@ public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
+    // 양방향 관계에서 직렬화 방향 설정 => 순환 참조 해결
+    // 직렬화 되지 않도록 수행
     @JsonBackReference
     private User user;
 

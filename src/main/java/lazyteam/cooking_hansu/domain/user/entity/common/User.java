@@ -64,6 +64,8 @@ public class User extends BaseIdAndTimeEntity {
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    // 양방향 관계에서 직렬화 방향 설정 => 순환 참조 해결
+    // 정상적으로 직렬화 수행
     @JsonManagedReference
     private Chef chef; // 요식업 종사자 1:1 관계
 

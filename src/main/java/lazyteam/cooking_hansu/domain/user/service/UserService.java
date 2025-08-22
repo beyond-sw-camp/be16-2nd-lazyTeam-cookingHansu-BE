@@ -157,7 +157,7 @@ public class UserService {
         // 소셜 로그인에서 받은 프로필 이미지를 S3에 업로드
         if (picture != null && !picture.isEmpty()) {
             try {
-                String fileName = "profile-" + sub;
+                String fileName = sub; // 소셜 ID를 파일명으로 사용
                 uploadedPictureUrl = s3Uploader.uploadFromUrl(
                     picture,
                     "profiles/",
@@ -200,7 +200,7 @@ public class UserService {
             }
 
             // 새 이미지 S3 업로드
-            String fileName = "profile-" + user.getSocialId();
+            String fileName = user.getSocialId(); // 소셜 ID를 파일명으로 사용
             String uploadedUrl = s3Uploader.uploadFromUrl(
                 newPictureUrl,
                 "profiles/",
