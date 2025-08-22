@@ -23,6 +23,16 @@ public class ResponseDto<T> {
                 .build();
     }
 
+    // 단일 인수용 ok 메서드 (기본 200 OK)
+    public static <T> ResponseDto<T> ok(T data) {
+        return ResponseDto.<T>builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .data(data)
+                .message("요청이 성공적으로 처리되었습니다.")
+                .build();
+    }
+
     public static <T> ResponseDto<T> fail(HttpStatus status, String message) {
         return ResponseDto.<T>builder()
                 .success(false)
