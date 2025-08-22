@@ -48,6 +48,7 @@ public class MyPageService {
     // ===== 프로필 관련 메서드 =====
 
     // 프로필 조회
+    @Transactional(readOnly = true)
     public ProfileResponseDto getProfile() {
         User user = getCurrentUser();
 
