@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class ChatRoomListDto {
-    private UUID roomId; // 채팅방 ID
+    private Long roomId; // 채팅방 ID
     private String customRoomName; // 커스텀 채팅방 이름
     private String otherUserName; // 상대방 이름
     private String otherUserNickname; // 상대방 닉네임

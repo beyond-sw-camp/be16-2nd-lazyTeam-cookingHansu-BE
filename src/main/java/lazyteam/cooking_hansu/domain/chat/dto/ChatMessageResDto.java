@@ -15,8 +15,8 @@ import java.util.UUID;
 @Data
 @Builder
 public class ChatMessageResDto {
-    private UUID id; // 메시지 ID
-    private UUID roomId; // 채팅방 ID
+    private Long id; // 메시지 ID
+    private Long roomId; // 채팅방 ID
     private UUID senderId; // 발신자 ID
     @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
     private String message; // 메시지 내용

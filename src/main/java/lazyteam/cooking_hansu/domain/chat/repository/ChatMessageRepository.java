@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> {
+public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
     List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
 

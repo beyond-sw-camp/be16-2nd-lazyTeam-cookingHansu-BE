@@ -39,7 +39,7 @@ public class ChatService {
     private final S3Uploader s3Uploader;
 
     //    메세지 전송
-    public ChatMessageResDto saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
+    public ChatMessageResDto saveMessage(Long roomId, ChatMessageReqDto chatMessageReqDto) {
         ChatFileValidator.validateMessageAndFile(chatMessageReqDto);
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -118,7 +118,7 @@ public class ChatService {
     }
 
     //    채팅메시지 파일 업로드
-    public ChatFileUploadResDto uploadFiles(UUID roomId, ChatFileUploadReqDto requestDto) {
+    public ChatFileUploadResDto uploadFiles(Long roomId, ChatFileUploadReqDto requestDto) {
         // 채팅방 존재 확인
         chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
@@ -157,6 +157,15 @@ public class ChatService {
         return ChatFileUploadResDto.builder()
                 .files(uploadedFiles)
                 .build();
+    }
+
+    //   채팅방 참여자 목록 조회
+    @Transactional(readOnly = true)
+    public List<ChatParticipantRes> getChatRoomParticipants(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        return chatRoom.getParticipants().stream()
+                .map(ChatParticipantRes::fromEntity)
+                .collect(Collectors.toList());
     }
 
     //    내 채팅방 목록 조회
@@ -222,7 +231,7 @@ public class ChatService {
 
     //    채팅방 상세 내역 조회
     @Transactional(readOnly = true)
-    public PaginatedResponseDto<ChatMessageResDto> getChatHistory(UUID roomId, int size, String cursor) {
+    public PaginatedResponseDto<ChatMessageResDto> getChatHistory(Long roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
@@ -240,8 +249,7 @@ public class ChatService {
                 .findByChatRoomAndUser(chatRoom, user)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
 
-        LocalDateTime lastMessageTime = participant.getLastReadMessage() != null ?
-                participant.getLastReadMessage().getCreatedAt() : participant.getCreatedAt();
+        Long lastMessageId = participant.getLastReadMessage() == null ? 0 : participant.getLastReadMessage().getId();
 
         // 인덱스 기반 cursor pagination
         int pageIndex = 0;
@@ -306,15 +314,13 @@ public class ChatService {
                 .data(result)
                 .hasNext(chatMessagesSlice.hasNext())
                 .nextCursor(chatMessagesSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
-                .lastMessageTimestamp(lastMessageTime)
                 .build();
     }
 
     //    채팅방 생성 or 기존 채팅방 조회
-    public UUID getOrCreateChatRoom(UUID otherUserId) {
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        User otherUser = userRepository.findById(otherUserId).orElseThrow(() -> new EntityNotFoundException("상대 사용자를 찾을 수 없습니다."));
+    public Long getOrCreateChatRoom(ChatInviteReqDto dto) {
+        User user = userRepository.findById(dto.getMyId()).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User otherUser = userRepository.findById(dto.getInviteeId()).orElseThrow(() -> new EntityNotFoundException("상대 사용자를 찾을 수 없습니다."));
 
         // 채팅방이 이미 존재하는지 확인
         Optional<ChatRoom> existingChatRoom = chatParticipantRepository.findExistingChatRoom(user.getId(), otherUser.getId());
@@ -348,7 +354,7 @@ public class ChatService {
 
     //    방 참여자인지 확인
 // 기존: 리스트 조회 후 루프
-    public boolean isRoomParticipant(UUID userId, UUID roomId) {
+    public boolean isRoomParticipant(UUID userId, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         User user = userRepository.findById(userId)
@@ -358,7 +364,7 @@ public class ChatService {
     }
 
     //    채팅방 나가기
-    public void leaveChatRoom(UUID roomId) {
+    public void leaveChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
@@ -373,7 +379,7 @@ public class ChatService {
     }
 
     //    채팅방 이름 변경(상대방 이름 변경)
-    public void updateChatRoomName(UUID roomId, ChatRoomUpdateDto updateDto) {
+    public void updateChatRoomName(Long roomId, ChatRoomUpdateDto updateDto) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
         // 현재 사용자가 채팅방 참여자인지 확인
@@ -390,11 +396,31 @@ public class ChatService {
     }
 
     //    메시지 읽음 처리
-    public void readMessages(UUID roomId, UUID userId) {
+    public void readMessages(Long roomId, UUID userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("participant not found"));
 
         chatParticipant.read(chatRoom.getMessages().get(chatRoom.getMessages().size() - 1));
+    }
+
+    public List<UUID> getReactivatedParticipants(Long roomId, UUID senderId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+
+        List<UUID> reactivatedUsers = new ArrayList<>();
+
+        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+        for (ChatParticipant p : participants) {
+            if (!p.getUser().getId().equals(senderId) && "Y".equals(p.getIsActive())) {
+                // 최근에 활성화된 참여자인지 확인 (예: 1초 이내)
+                if (p.getUpdatedAt() != null &&
+                        p.getUpdatedAt().isAfter(LocalDateTime.now().minusSeconds(1))) {
+                    reactivatedUsers.add(p.getUser().getId());
+                }
+            }
+        }
+
+        return reactivatedUsers;
     }
 }

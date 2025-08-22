@@ -16,5 +16,4 @@ public class PaginatedResponseDto<T> {
     private List<T> data;           // 실제 데이터 배열
     private boolean hasNext;        // 다음 페이지 존재 여부
     private String nextCursor;      // 다음 페이지 요청용 cursor
-    private LocalDateTime lastMessageTimestamp; // 마지막 메시지의 타임스탬프
 }

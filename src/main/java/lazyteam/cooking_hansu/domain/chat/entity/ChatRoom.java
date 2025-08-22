@@ -7,7 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +19,19 @@ import java.util.List;
 @Getter
 @Entity
 @Builder
-public class ChatRoom extends BaseIdAndTimeEntity {
+public class ChatRoom {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 채팅방 ID
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt; // 채팅방 생성 시간
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt; // 채팅방 수정 시간
 
 //    TODO: 채팅방 이름은 프론트에서 사용하지않지만 확장성을 대비하여 살려둠.
     @NotBlank(message = "채팅방 이름은 필수입니다")

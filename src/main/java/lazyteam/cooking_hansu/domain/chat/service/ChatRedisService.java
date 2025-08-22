@@ -3,11 +3,7 @@ package lazyteam.cooking_hansu.domain.chat.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatParticipantAddRes;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatParticipantRes;
-import lazyteam.cooking_hansu.domain.chat.dto.ChatParticipantStatReq;
+import lazyteam.cooking_hansu.domain.chat.dto.*;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -49,19 +45,19 @@ public class ChatRedisService implements MessageListener {
             @Qualifier("chatParticipants") RedisTemplate<String, Map<String, String>> chatParticipantsRedisTemplate,
             @Qualifier("chatOnlineParticipants") RedisTemplate<String, String> chatOnlineParticipantRedisTemplate,
             SimpMessageSendingOperations messageTemplate,
-            ChatParticipantRepository chatParticipantRepository
-    ) {
+            ChatParticipantRepository chatParticipantRepository,
+            ObjectMapper objectMapper) {
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatPubsubRedisTemplate = chatPubsubRedisTemplate;
         this.messageTemplate = messageTemplate;
-        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        this.objectMapper = objectMapper;
         this.chatParticipantsRedisTemplate = chatParticipantsRedisTemplate;
         this.chatOnlineParticipantRedisTemplate = chatOnlineParticipantRedisTemplate;
     }
 
     /* ----------------------------- Publish (to Redis) ----------------------------- */
 
-    public void publishChatMessageToRedis(UUID roomId, ChatMessageResDto chatMessage) {
+    public void publishChatMessageToRedis(Long roomId, ChatMessageResDto chatMessage) {
         Set<String> onlineParticipants = chatOnlineParticipantRedisTemplate.opsForSet().members(ONLINE_KEY_PREFIX + roomId);
         Map<String, String> chatParticipants = getOrLoadParticipantMap(roomId);
 
@@ -84,18 +80,18 @@ public class ChatRedisService implements MessageListener {
     }
 
     // 온라인 진입 브로드캐스트(전체 온라인 목록 전송)
-    public void publishChatOnlineToRedis(UUID roomId, ChatParticipantStatReq req) {
+    public void publishChatOnlineToRedis(Long roomId, ChatParticipantStatReq req) {
         chatOnlineParticipantRedisTemplate.opsForSet().add(onlineKey(roomId), String.valueOf(req.getUserId()));
         broadcastOnlineSet(roomId);
     }
 
     // 오프라인 브로드캐스트(전체 온라인 목록 전송)
-    public void publishChatOfflineToRedis(UUID roomId, ChatParticipantStatReq req) {
+    public void publishChatOfflineToRedis(Long roomId, ChatParticipantStatReq req) {
         chatOnlineParticipantRedisTemplate.opsForSet().remove(onlineKey(roomId), String.valueOf(req.getUserId()));
         broadcastOnlineSet(roomId);
     }
 
-    private void broadcastOnlineSet(UUID roomId) {
+    private void broadcastOnlineSet(Long roomId) {
         Set<String> online = chatOnlineParticipantRedisTemplate.opsForSet().members(onlineKey(roomId));
 
         List<ChatParticipantStatReq> list = new ArrayList<>();
@@ -114,7 +110,7 @@ public class ChatRedisService implements MessageListener {
         }
     }
 
-    public Map<String, String> getOrLoadParticipantMap(UUID roomId) {
+    public Map<String, String> getOrLoadParticipantMap(Long roomId) {
         Map<String, String> participantMap = chatParticipantsRedisTemplate.opsForValue().get(PARTICIPANTS_KEY_PREFIX + roomId);
 
         if (participantMap == null || participantMap.isEmpty()) {
@@ -124,16 +120,37 @@ public class ChatRedisService implements MessageListener {
             participantMap = new HashMap<>();
 
             for (ChatParticipant chatParticipant : mariaDBChatParticipantList) {
-                UUID lastReadChatMessageId = chatParticipant.getLastReadMessage() == null ? UUID.fromString("12345678-0000-0000-0000-000000000000") : chatParticipant.getLastReadMessage().getId();
+                Long lastReadChatMessageId = chatParticipant.getLastReadMessage() == null ? 0 : chatParticipant.getLastReadMessage().getId();
                 participantMap.put(String.valueOf(chatParticipant.getUser().getId()), String.valueOf(lastReadChatMessageId));
             }
         }
         return participantMap;
     }
 
+    public void addUserToRoom(Long roomId, UUID userId) {
+        Map<String, String> redisChatParticipantMap = getOrLoadParticipantMap(roomId);
+
+        // 사용자가 이미 Redis에 있는지 확인
+        if (!redisChatParticipantMap.containsKey(String.valueOf(userId))) {
+            // Redis에 사용자 추가 (마지막 읽은 메시지 ID는 0으로 초기화)
+            redisChatParticipantMap.put(String.valueOf(userId), "0");
+
+            // 업데이트된 참여자 맵을 Redis에 저장
+            chatParticipantsRedisTemplate.opsForValue().set(PARTICIPANTS_KEY_PREFIX + roomId, redisChatParticipantMap);
+
+            // 변경사항을 STOMP 클라이언트에게 브로드캐스트
+            chatPubsubRedisTemplate.convertAndSend(
+                    topic(roomId, SUFFIX_CHAT_PARTICIPANTS),
+                    toJson(roomId, redisChatParticipantMap)
+            );
+
+            log.info("User {} added to room {} in Redis", userId, roomId);
+        }
+    }
+
     // TODO: 확장성을 위해 추가한 메소드
     // redis의 참여자 목록에서 제거하고 publish
-    public void publishLeftUserToRedis(UUID roomId) {
+    public void publishLeftUserToRedis(Long roomId) {
         Map<String, String> redisChatParticipantMap = getOrLoadParticipantMap(roomId);
 
         redisChatParticipantMap.remove(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -144,19 +161,18 @@ public class ChatRedisService implements MessageListener {
 
     // TODO: 확장성을 위해 추가한 메소드
     // redis의 참여자 목록에 추가하고 publish
-    public void publishInvitedUsersToRedis(UUID roomId, List<ChatParticipantAddRes> chatParticipantAddResList) {
+    public void publishInvitedUsersToRedis(Long roomId, ChatInviteReqDto dto) {
         Map<String, String> redisChatParticipantMap = getOrLoadParticipantMap(roomId);
 
-        for (ChatParticipantAddRes chatParticipantAddRes : chatParticipantAddResList) {
-            redisChatParticipantMap.put(String.valueOf(chatParticipantAddRes.getId()), "0");
-        }
+        redisChatParticipantMap.putIfAbsent(String.valueOf(dto.getMyId()), "0");
+        redisChatParticipantMap.putIfAbsent(String.valueOf(dto.getInviteeId()), "0");
 
         chatParticipantsRedisTemplate.opsForValue().set(PARTICIPANTS_KEY_PREFIX + roomId, redisChatParticipantMap);
         chatPubsubRedisTemplate.convertAndSend(TOPIC_PREFIX + roomId + SUFFIX_CHAT_PARTICIPANTS, toJson(roomId, redisChatParticipantMap));
     }
 
     // TODO: 확장성을 위해 추가한 메소드
-    private String toJson(UUID roomId, Map<String, String> chatParticipantsMap) {
+    private String toJson(Long roomId, Map<String, String> chatParticipantsMap) {
         List<ChatParticipantRes> chatParticipantResList = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : chatParticipantsMap.entrySet()) {
@@ -164,12 +180,11 @@ public class ChatRedisService implements MessageListener {
                     ChatParticipantRes.builder()
                             .id(UUID.fromString(entry.getKey()))
                             .roomId(roomId)
-                            .lastMessageId(UUID.fromString(entry.getValue()))
+                            .lastMessageId(Long.valueOf(entry.getValue()))
                             .build()
             );
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String data = null;
         try {
             data = objectMapper.writeValueAsString(chatParticipantResList);
@@ -225,11 +240,11 @@ public class ChatRedisService implements MessageListener {
         return (len > 1 && ch.charAt(len - 1) == '/') ? ch.substring(0, len - 1) : ch;
     }
 
-    private static String topic(UUID roomId, String suffix) {
+    private static String topic(Long roomId, String suffix) {
         return TOPIC_PREFIX + roomId + suffix; // 끝 슬래시 없음
     }
 
-    private static String onlineKey(UUID roomId) {
+    private static String onlineKey(Long roomId) {
         return ONLINE_KEY_PREFIX + roomId;
     }
 }

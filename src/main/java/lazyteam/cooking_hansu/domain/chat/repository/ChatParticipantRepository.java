@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.chat.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
@@ -15,12 +15,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, UUID> {
+public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
 
     @Query("""
     SELECT cp.chatRoom
     FROM ChatParticipant cp
-    WHERE cp.user.id IN (:userId1, :userId2)
+    WHERE cp.user.id IN (:userId, :otherUserId)
     GROUP BY cp.chatRoom
     HAVING COUNT(DISTINCT cp.user.id) = 2
     """)
@@ -60,5 +60,5 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
 
     long countByChatRoomAndIsActive(ChatRoom chatRoom, String isActive);
 
-    List<ChatParticipant> findAllByChatRoomId(UUID chatRoomId);
+    List<ChatParticipant> findAllByChatRoomId(Long chatRoomId);
 }
