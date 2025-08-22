@@ -154,7 +154,7 @@ public class PostResponseDto {
         private UUID id;
         private String title;
         private String thumbnailUrl;
-        private Integer cookTime;
+        private int cookTime;
         private String level;
         private String category;
         // ========== 인분 정보: 숫자만 저장 ==========
