@@ -22,6 +22,7 @@ public class CartItemListDto {
     private UUID userId;
     private Integer price;
     private String writerNickName;
+    private String thumbnailUrl;
 
     public static CartItemListDto fromEntity(CartItem cartItem) {
         return CartItemListDto.builder()
@@ -30,6 +31,7 @@ public class CartItemListDto {
                 .userId(cartItem.getUser().getId())
                 .price(cartItem.getLecture().getPrice())
                 .writerNickName(cartItem.getLecture().getSubmittedBy().getNickname())
+                .thumbnailUrl(cartItem.getLecture().getThumbUrl())
                 .build();
 
     }

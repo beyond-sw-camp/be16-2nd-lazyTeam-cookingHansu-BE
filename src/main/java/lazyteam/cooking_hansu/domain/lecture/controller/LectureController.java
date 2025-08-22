@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,17 +38,21 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("강의등록번호 : " + lectureId,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/update/{lectureId}")
-    public ResponseEntity<?> updateLecture(@Valid @RequestPart LectureUpdateDto lectureUpdateDto,
-                                           @PathVariable UUID lectureId,
-                                           @RequestPart List<LectureIngredientsListDto> lectureIngredientsListDto,
-                                           @RequestPart List<LectureStepDto> lectureStepDto,
-                                           @RequestPart List<LectureVideoDto> lectureVideoDto,
-                                           @RequestPart List<MultipartFile> lectureVideoFiles,
-                                           @RequestPart MultipartFile multipartFile) {
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @PatchMapping(value = "/update/{lectureId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateLecture(
+            @PathVariable UUID lectureId,
+            @RequestPart("lectureUpdateDto") LectureUpdateDto lectureUpdateDto,
+            @RequestPart("lectureIngredientsListDto") List<LectureIngredientsListDto> lectureIngredientsListDto,
+            @RequestPart("lectureStepDto") List<LectureStepDto> lectureStepDto,
+            @RequestPart("lectureVideoDto") List<LectureVideoDto> lectureVideoDto,
+            @RequestPart(value = "lectureVideoFiles", required = false) List<MultipartFile> lectureVideoFiles, // 파일 선택
+            @RequestPart(value = "multipartFile",    required = false) MultipartFile multipartFile             // 썸네일 선택
+    ) {
         UUID lectureID = lectureService.update( lectureUpdateDto, lectureId, lectureIngredientsListDto,lectureStepDto,lectureVideoDto,lectureVideoFiles, multipartFile);
 
-        return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureID,HttpStatus.CREATED), HttpStatus.CREATED);
+        return new ResponseEntity<>(ResponseDto.ok("수정된 강의번호 : " + lectureID,HttpStatus.OK), HttpStatus.OK);
     }
 
 //    강의 목록조회(delyn 적용, 강의 영상과 재료, 순서까지 일괄 조회되게끔)
