@@ -69,10 +69,13 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Builder.Default
     private Boolean isDelete = false;
 
+    @Builder.Default
     private Integer reviewCount = 0;
 
+    @Builder.Default
     private Integer qnaCount = 0;
 
+    @Builder.Default
     private Integer purchaseCount = 0;
 
 //    평점 평균값을 위해 BigDecimal 타입 사용
