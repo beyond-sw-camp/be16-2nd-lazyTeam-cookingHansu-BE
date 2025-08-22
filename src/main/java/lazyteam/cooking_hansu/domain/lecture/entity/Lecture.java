@@ -6,26 +6,22 @@ import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
-import lazyteam.cooking_hansu.domain.lecture.dto.LectureUpdateDto;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureReview;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
-import lazyteam.cooking_hansu.domain.lecture.entity.LectureIngredientsList;
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
+import org.hibernate.annotations.DialectOverride;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@ToString
+@Data
 @Builder
-
-
+@SQLRestriction("is_delete = false")
 public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -72,6 +68,13 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Column(columnDefinition = "TEXT")
     private String videoUrl;
 
+    @Builder.Default
+    private Boolean isDelete = false;
+
+    private long reviewCount = 0L;
+
+    private long qnaCount = 0L;
+
 
     // 역방향 관계설정(조회용)
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
@@ -86,6 +89,9 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<LectureIngredientsList> ingredientsList;
+
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
+    private List<LectureStep> lectureStepList;
 
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<PurchasedLecture> purchases;
@@ -105,5 +111,9 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
         if (dto.getCategory() != null) this.level = dto.getLevel();
         if (dto.getPrice() != null) this.price = dto.getPrice();
 
+    }
+
+    public void lectureDelete() {
+        this.isDelete = true;
     }
 }
