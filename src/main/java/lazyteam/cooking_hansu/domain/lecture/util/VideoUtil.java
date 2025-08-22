@@ -180,7 +180,7 @@ public class VideoUtil {
         };
         Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
         String out;
-        try (var br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
+        try (var br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
             out = br.readLine();
         }
         int exit = p.waitFor();
