@@ -14,12 +14,19 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /**
@@ -33,6 +40,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final ChefRepository chefRepository;
     private final BusinessRepository businessRepository;
+    private final S3Uploader s3Uploader;
+
+    @Value("${my.test.user-id}")
+    private String testUserIdStr;
 
     // TODO: 회원 서비스 메서드 구현 예정
 
@@ -113,5 +124,27 @@ public class UserService {
             throw new IllegalArgumentException("이미 비활성화된 사용자입니다. userId: " + userId);
         }
         user.updateStatus(LoginStatus.INACTIVE);
+    }
+
+
+    // 로그인 전 테스트 요
+    private User getCurrentUser() {
+        UUID testUserId = UUID.fromString(testUserIdStr);
+        return userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+
+    // 회원탈퇴
+    public void deleteUser() {
+        User currentUser = getCurrentUser();
+
+        // 프로필 이미지가 S3에 있으면 같이 삭제
+        if (currentUser.getProfileImageUrl() != null) {
+            try {
+                s3Uploader.delete(currentUser.getProfileImageUrl());
+            } catch (Exception ignore) { }
+        }
+
+        currentUser.deleteUser();
     }
 }
