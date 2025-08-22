@@ -57,6 +57,7 @@ public class User extends BaseIdAndTimeEntity {
     private String info; // 자기소개
 
     @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
     private String isDeleted = "N";
 
     public void deleteUser() { this.isDeleted = "Y"; }
