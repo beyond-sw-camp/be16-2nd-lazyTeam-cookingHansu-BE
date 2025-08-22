@@ -10,7 +10,11 @@ import java.util.UUID;
 
 @Getter
 @MappedSuperclass
-public class BaseIdAndTimeEntity extends BaseIdEntity { // BaseIdEntity 상속받음으로써 중복된 id 필드 처리
+public class BaseIdAndTimeEntity{
+    @Id
+    @GeneratedValue
+    @Column(name = "id" , updatable = false, nullable = false)
+    private UUID id; // UUID 타입의 고유 식별자
     @CreationTimestamp
     private LocalDateTime createdAt; // 생성 시간
 
