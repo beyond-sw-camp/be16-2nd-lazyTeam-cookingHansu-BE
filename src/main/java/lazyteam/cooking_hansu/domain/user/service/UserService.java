@@ -18,6 +18,7 @@ import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,12 @@ public class UserService {
     private final ChefRepository chefRepository;
     private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
+
+    @Value("${my.test.user-id}")
+    private String testUserIdStr;
+
+    // TODO: 회원 서비스 메서드 구현 예정
+
 
 //    요리업종 승인 대기 목록 조회
     public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
@@ -222,5 +229,27 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
+    }
+
+
+    // 로그인 전 테스트 요
+    private User getCurrentUser() {
+        UUID testUserId = UUID.fromString(testUserIdStr);
+        return userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+
+    // 회원탈퇴
+    public void deleteUser() {
+        User currentUser = getCurrentUser();
+
+        // 프로필 이미지가 S3에 있으면 같이 삭제
+        if (currentUser.getProfileImageUrl() != null) {
+            try {
+                s3Uploader.delete(currentUser.getProfileImageUrl());
+            } catch (Exception ignore) { }
+        }
+
+        currentUser.deleteUser();
     }
 }

@@ -4,6 +4,7 @@ import lazyteam.cooking_hansu.domain.user.dto.response.CommonUserDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.HeaderProfileDto;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.service.UserService;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lazyteam.cooking_hansu.global.auth.JwtTokenProvider;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lazyteam.cooking_hansu.global.service.RefreshTokenService;
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,6 +67,17 @@ public class UserController {
         }
     }
 
+    // TODO: 회원 관련 API 메서드 구현 예정
+
+    // 회원 탈퇴
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser() {
+        userService.deleteUser();
+        return new ResponseEntity<>(
+                ResponseDto.ok("회원 탈퇴가 완료되었습니다.", HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
     // 프론트엔드 헤더에 표시될 프로필 정보
     @GetMapping("/profile")
     public ResponseDto<?> getHeaderProfile(@RequestHeader("Authorization") String accessToken) {

@@ -1,5 +1,7 @@
 package lazyteam.cooking_hansu.global.config;
 
+
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +22,14 @@ public class AwsS3Config {
     private String region;
 
     @Bean
-    public S3Client client(){
+
+    public S3Client s3Client() {
+
         AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(accessKey,secretKey);
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials))
                 .build();
     }
+
 }

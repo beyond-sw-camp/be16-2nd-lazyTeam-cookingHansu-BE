@@ -6,8 +6,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 공통 회원 엔티티
@@ -44,15 +48,35 @@ public class User extends BaseIdAndTimeEntity {
     @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
     private String nickname; // 닉네임
 
+    @NotBlank(message = "이메일은 필수입니다")
+    @Email(message = "유효한 이메일 형식이 아닙니다")
+    @Column(nullable = false)
+    private String email; // 이메일
+
+    @NotBlank(message = "비밀번호는 필수입니다")
+    @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
+    @Column(nullable = false)
+    private String password; // 비밀번호
+
+    @NotBlank(message = "프로필 이미지 URL은 필수입니다")
+    @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
+    @Column(length = 512, nullable = false)
+    private String profileImageUrl; // 프로필 이미지 URL
+
+    @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
+    @Column(length = 200)
+    private String info; // 자기소개
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private String isDeleted = "N";
+
+    public void deleteUser() { this.isDeleted = "Y"; }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private Role role = Role.GENERAL; // 회원 역활 (GENERAL, CHEF, OWNER, BOTH, ADMIN)
-
-    /*@Size(max = 500, message = "한 줄 소개는 500자 이하여야 합니다.")
-    private String briefIntroduction; // 한 줄 소개 (추가)*/
-
-    // 비밀번호 컬럼 제거
 
     @Enumerated(EnumType.STRING)
     private GeneralType generalType; // 일반 회원 유형 (STUDENT, HOUSEWIFE, LIVINGALONE, ETC)
@@ -101,10 +125,10 @@ public class User extends BaseIdAndTimeEntity {
 //    @Builder.Default
 //    private List<ChatParticipant> chatParticipantList = new ArrayList<>();
 //
-//    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<Lecture> lectureList = new ArrayList<>();
+    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
+    @OneToMany(mappedBy = "submittedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Lecture> lectureList = new ArrayList<>();
 //
 //    // 강의 리뷰(LectureReview> 테이블에 FK writer_id(작성자 ID)로 1:n 연관 관계
 //    @OneToMany(mappedBy = "writerId", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -168,6 +192,19 @@ public class User extends BaseIdAndTimeEntity {
 
     public void updateStatus(LoginStatus loginStatus) {
         this.loginStatus = loginStatus;
+    }
+
+    // 프로필 업데이트 메서드 추가
+    public void updateProfile(String nickname, String info, String profileImageUrl) {
+        this.nickname = nickname;
+        this.info = info;
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     // 추가 정보 업데이트 메서드
