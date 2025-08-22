@@ -214,7 +214,7 @@ public class ChatService {
                             .customRoomName(participant.getCustomRoomName())
                             .otherUserName(otherUser.getName())
                             .otherUserNickname(otherUser.getNickname())
-                            .otherUserProfileImage(otherUser.getProfileImageUrl())
+                            .otherUserProfileImage(otherUser.getPicture())
                             .lastMessage(lastMessage)
                             .lastMessageTime(lastMessageTime)
                             .unreadCount(unreadCount)

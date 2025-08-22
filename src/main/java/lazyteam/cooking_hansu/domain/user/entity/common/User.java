@@ -48,20 +48,10 @@ public class User extends BaseIdAndTimeEntity {
     @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
     private String nickname; // 닉네임
 
-    @NotBlank(message = "이메일은 필수입니다")
-    @Email(message = "유효한 이메일 형식이 아닙니다")
-    @Column(nullable = false)
-    private String email; // 이메일
-
-    @NotBlank(message = "비밀번호는 필수입니다")
+    /*@NotBlank(message = "비밀번호는 필수입니다")
     @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
     @Column(nullable = false)
-    private String password; // 비밀번호
-
-    @NotBlank(message = "프로필 이미지 URL은 필수입니다")
-    @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
-    @Column(length = 512, nullable = false)
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String password; // 비밀번호*/
 
     @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
     @Column(length = 200)
@@ -195,16 +185,16 @@ public class User extends BaseIdAndTimeEntity {
     }
 
     // 프로필 업데이트 메서드 추가
-    public void updateProfile(String nickname, String info, String profileImageUrl) {
+    public void updateProfile(String nickname, String info, String picture) {
         this.nickname = nickname;
         this.info = info;
-        if (profileImageUrl != null) {
-            this.profileImageUrl = profileImageUrl;
+        if (picture != null) {
+            this.picture = picture;
         }
     }
 
-    public void updateProfileImage(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
+    public void updateProfileImage(String picture) {
+        this.picture = picture;
     }
 
     // 추가 정보 업데이트 메서드

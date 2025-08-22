@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Builder
 @SQLRestriction("is_delete = false")
 public class Lecture extends BaseIdAndTimeAndApprovalEntity {
@@ -71,8 +72,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Builder.Default
     private Boolean isDelete = false;
 
+    @Builder.Default
     private long reviewCount = 0L;
 
+    @Builder.Default
     private long qnaCount = 0L;
 
 

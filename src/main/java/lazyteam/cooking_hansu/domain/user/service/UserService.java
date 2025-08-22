@@ -244,9 +244,9 @@ public class UserService {
         User currentUser = getCurrentUser();
 
         // 프로필 이미지가 S3에 있으면 같이 삭제
-        if (currentUser.getProfileImageUrl() != null) {
+        if (currentUser.getPicture() != null) {
             try {
-                s3Uploader.delete(currentUser.getProfileImageUrl());
+                s3Uploader.delete(currentUser.getPicture());
             } catch (Exception ignore) { }
         }
 

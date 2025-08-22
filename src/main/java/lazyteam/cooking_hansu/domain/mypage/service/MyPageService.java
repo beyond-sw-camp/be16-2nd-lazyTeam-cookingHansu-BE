@@ -55,8 +55,8 @@ public class MyPageService {
         return ProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .info(user.getInfo())
-                .profileImageUrl(user.getProfileImageUrl())
+//                .info(user.getInfo())
+                .profileImageUrl(user.getPicture())
                 .userType(getUserTypeDisplayName(user.getRole()))
                 .build();
     }
@@ -90,9 +90,9 @@ public class MyPageService {
         User user = getCurrentUser();
 
         // 기존 이미지가 있다면 S3에서 삭제
-        if (user.getProfileImageUrl() != null) {
+        if (user.getPicture() != null) {
             try {
-                s3Uploader.delete(user.getProfileImageUrl());
+                s3Uploader.delete(user.getPicture());
                 System.out.println("기존 이미지 삭제 완료");
             } catch (Exception e) {
                 System.out.println("기존 이미지 삭제 실패: " + e.getMessage());

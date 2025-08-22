@@ -28,7 +28,9 @@ public class LectureDetailDto {
     private LevelEnum level;
     private CategoryEnum category;
     private Integer price;
+    @Builder.Default
     private long reviewCount = 0L;
+    @Builder.Default
     private long qnaCount = 0L;
 
 //    재료 목록
