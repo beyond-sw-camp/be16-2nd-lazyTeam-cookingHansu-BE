@@ -43,9 +43,7 @@ public class ReportService {
 
     public Page<ReportDetailDto> findAll(Pageable pageable){
         Page<Report> reportLists = reportRepository.findAllByStatus(pageable, Status.PENDING);
-        //        TODO:나중에 실제 사용자의 ID로 변경 필요
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        return reportLists.map(r -> ReportDetailDto.fromEntity(r, userId));
+        return reportLists.map(ReportDetailDto::fromEntity);
     }
 
     public void approveReport(UUID id) {

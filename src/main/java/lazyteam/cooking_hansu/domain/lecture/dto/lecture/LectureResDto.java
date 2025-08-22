@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -23,10 +25,22 @@ public class LectureResDto {
     private ApprovalStatus status; // 강의 상태 (필터링 용도)
     private Integer price; // 강의 가격
     private String thumbUrl;
-    private Long reviewCount;
-    private Long qnaCount;
+    private Integer reviewCount;
+    private Integer qnaCount;
+    private Integer purchaseCount;
+    private BigDecimal reviewAvg;
 
     public static LectureResDto fromEntity(Lecture lecture) {
+
+        int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
+        int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
+
+//        Decimal 타입의 나눗셈 수행, 0 나눗셈 방지
+        BigDecimal avg = (cnt == 0)
+                ? BigDecimal.ZERO.setScale(1)
+                : BigDecimal.valueOf(sum)
+                .divide(BigDecimal.valueOf(cnt), 1, RoundingMode.HALF_UP);
+
         return LectureResDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
@@ -37,6 +51,8 @@ public class LectureResDto {
                 .thumbUrl(lecture.getThumbUrl())
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
+                .purchaseCount(lecture.getPurchaseCount())
+                .reviewAvg(avg)
                 .build();
     }
 
