@@ -23,9 +23,9 @@ public class PostResponseDto {
     private String description;
     private CategoryEnum category;
     private String thumbnailUrl;
-    private Integer likeCount;
-    private Integer viewCount;
-    private Integer bookmarkCount;
+    private Long likeCount;
+    private Long viewCount;
+    private Long bookmarkCount;
     private Boolean isOpen;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

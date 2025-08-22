@@ -42,18 +42,18 @@ public class Post extends BaseIdAndTimeEntity {
 
     @Builder.Default
     @Min(value = 0, message = "좋아요 수는 0 이상이어야 합니다")
-    @Column(name = "like_count", nullable = false,columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private Integer likeCount = 0;
+    @Column(name = "like_count", nullable = false)
+    private Long likeCount = 0L;
 
     @Builder.Default
     @Min(value = 0, message = "조회수는 0 이상이어야 합니다")
-    @Column(name = "view_count", nullable = false,columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private Integer viewCount = 0;
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
 
     @Builder.Default
     @Min(value = 0, message = "북마크 수는 0 이상이어야 합니다")
-    @Column(name = "bookmark_count", nullable = false,columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private Integer bookmarkCount = 0;
+    @Column(name = "bookmark_count", nullable = false)
+    private Long bookmarkCount = 0L;
 
     @Builder.Default
     @NotNull(message = "공개 여부는 필수입니다")
