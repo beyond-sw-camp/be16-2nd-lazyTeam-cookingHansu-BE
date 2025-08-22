@@ -52,15 +52,6 @@ public class MyPageController {
         );
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser() {
-        profileService.deleteUser();
-        return new ResponseEntity<>(
-                ResponseDto.ok("회원 탈퇴가 완료되었습니다.", HttpStatus.OK),
-                HttpStatus.OK
-        );
-    }
-
 
     @GetMapping("/recipes")
     public ResponseEntity<?> myRecipeList() {
