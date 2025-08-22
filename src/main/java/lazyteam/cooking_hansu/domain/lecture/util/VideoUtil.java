@@ -6,8 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component // 스프링이 자동으로 Bean으로 등록해서 DI 주입 가능하게 함
 public class VideoUtil {
@@ -76,9 +80,9 @@ public class VideoUtil {
 
         //  move(transferTo) 대신 copy: 원본 임시파일을 건드리지 않음
         try (InputStream in = multipartFile.getInputStream()) {
-            java.nio.file.Files.copy(
+            Files.copy(
                     in, convFile.toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                    StandardCopyOption.REPLACE_EXISTING
             );
         }
         return convFile;
@@ -97,7 +101,7 @@ public class VideoUtil {
             Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
 
             String output;
-            try (var br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
+            try (var br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 output = br.readLine();
             }
             int exit = p.waitFor();
@@ -110,14 +114,14 @@ public class VideoUtil {
             // 핵심 로그: 여기 찍히면 ffprobe 감지는 됨
             log.info("[FFPROBE] filename={}, format_name={}", multipartFile.getOriginalFilename(), output);
 
-            var names = java.util.Arrays.stream(output.toLowerCase().split(","))
+            var names = Arrays.stream(output.toLowerCase().split(","))
                     .map(String::trim).filter(s -> !s.isBlank())
-                    .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+                    .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
 
             if (names.contains("avi")) return "avi";
             boolean isMp4 = names.stream().anyMatch(mp4Family::contains);
             if (isMp4) {
-                String ori = java.util.Optional.ofNullable(multipartFile.getOriginalFilename()).orElse("").toLowerCase();
+                String ori = Optional.ofNullable(multipartFile.getOriginalFilename()).orElse("").toLowerCase();
                 return ori.endsWith(".mov") ? "mov" : "mp4";
             }
             throw new IllegalArgumentException("허용되지 않은 영상 포맷: " + output); // 이 메시지 보이면 ffprobe 검증이 원인
@@ -141,10 +145,17 @@ public class VideoUtil {
 
             // jpg/jpeg 정규화는 codec 기준으로 처리
             switch (codec) { //fix
-                case "png": return "png"; //fix
-                case "mjpeg": // ffmpeg의 jpeg 계열 이름 //fix
-                case "jpeg": return "jpg"; //fix
-                case "bmp": return "bmp"; //fix
+                case "png":
+                    return "png"; //fix
+                case "bmp":
+                    return "bmp"; //fix
+
+                case "mjpeg": // ffmpeg에서 JPEG 코덱명 //fix
+                case "jpeg":
+                case "jpg":
+                    return "jpg"; //fix
+                case "webp":  return "webp";
+
                 default:
                     throw new IllegalArgumentException("허용되지 않은 이미지 포맷: " + codec); //fix
             }
@@ -158,9 +169,9 @@ public class VideoUtil {
 
     // ======================= 아래는 추가된 헬퍼들 =======================
 
-    private static final java.util.Set<String> MP4_ALIASES = java.util.Set.of("mp4","mov","m4a","3gp","3g2","mj2"); //fix
+    private static final Set<String> MP4_ALIASES = java.util.Set.of("mp4","mov","m4a","3gp","3g2","mj2"); //fix
 
-    private java.util.Set<String> probeFormatNames(File file) throws IOException, InterruptedException { //fix
+    private Set<String> probeFormatNames(File file) throws IOException, InterruptedException { //fix
         String[] cmd = {
                 "ffprobe","-v","error",
                 "-show_entries","format=format_name",
