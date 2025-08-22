@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,7 +36,7 @@ public class LectureReviewService {
     public void create(ReviewCreateDto reviewCreateDto) {
 
         //        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         User user = userRepository.findById(testUserId)
                 .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
 
@@ -46,12 +47,23 @@ public class LectureReviewService {
 
         Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
-
-        if(lectureReviewRepository.findByWriterId(user.getId())!=null) {
+        Optional<LectureReview> lectureReview = lectureReviewRepository
+                .findByLectureIdAndWriterId(reviewCreateDto.getLectureId(),user.getId());
+        System.out.println(lectureReview);
+        if(lectureReview.isPresent()) {
             throw new DataIntegrityViolationException("해당 리뷰가 이미 존재합니다.");
+        } else {
+            lecture.setReviewCount(
+                    (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount()) + 1
+            );
+//            리뷰평점 평균을 위한 합 캐싱처리
+            int score = reviewCreateDto.getRating();
+            lecture.setReviewSum(
+                    (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum()) + score
+            );
+            lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
         }
-        lecture.setReviewCount(lecture.getReviewCount() + 1);
-        lectureReviewRepository.save(reviewCreateDto.toEntity(lecture,user));
+
     }
 
 //    강의 리뷰 조회
@@ -89,6 +101,12 @@ public class LectureReviewService {
         LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lecture.getId(),user.getId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));
 
+        //            리뷰평점 평균을 위한 합 캐싱처리
+        int oldScore = lectureReview.getRating();
+        int newScore = reviewModifyDto.getRating();
+        lecture.setReviewSum(
+                (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum()) - oldScore + newScore
+        );
         lectureReview.modifyReview(reviewModifyDto);
 
     }
@@ -104,6 +122,10 @@ public class LectureReviewService {
         lectureReviewRepository.delete(lectureReview);
 
         Lecture lecture = lectureReview.getLecture();
+        //            리뷰평점 평균을 위한 합 캐싱처리
+        int s = lectureReview.getRating();
+        lecture.setReviewSum( (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum()) - s );
+        lecture.setReviewCount( Math.max(0, (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount()) - 1) );
         lecture.setReviewCount(Math.max(0, lecture.getReviewCount() - 1));
     }
 

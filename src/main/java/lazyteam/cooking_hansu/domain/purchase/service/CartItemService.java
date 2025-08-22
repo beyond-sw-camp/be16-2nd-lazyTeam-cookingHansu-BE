@@ -61,8 +61,11 @@ public class CartItemService {
 
 
     public void deleteOne(CartDeleteOneDto cartDeleteOneDto) {
-        User user = userRepository.findById(cartDeleteOneDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+        //        테스트용 유저 세팅
+        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        User user = userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+
         Lecture lecture = lectureRepository.findById(cartDeleteOneDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의 없음"));
 

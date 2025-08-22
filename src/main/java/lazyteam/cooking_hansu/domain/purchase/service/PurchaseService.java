@@ -141,7 +141,7 @@ public class PurchaseService {
                     paymentRepository.save(payment);
                     log.info("결제정보 저장 완료");
 
-                    // 5-2. 구매 내역 저장
+                    // 5-2. 구매 내역 저장, 강의 카운트 추가
                     for (UUID lectureId : lectureIds) {
                         Lecture lecture = lectureRepository.findById(lectureId)
                                 .orElseThrow(() -> new EntityNotFoundException("강의가 없습니다: " + lectureId));
@@ -154,6 +154,8 @@ public class PurchaseService {
                                 .priceSnapshot(Integer.parseInt(jsonObject.get("balanceAmount").toString()))
                                 .build();
                         purchasedLectureRepository.save(purchased);
+
+                        lecture.setPurchaseCount(lecture.getPurchaseCount() + 1);
                     }
                     log.info("구매내역저장완료");
 
