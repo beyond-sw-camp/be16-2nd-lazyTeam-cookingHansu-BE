@@ -201,26 +201,12 @@ public class LectureService {
             );
         }
 
+
         // ===== 강의영상 수정 =====
-
-        // [FIX] '실제 파일이 있을 때만' 개수 검사 (DTO만 수정하는 케이스 허용)
-        if (lectureVideoFiles != null && !lectureVideoFiles.isEmpty()) {
-            if (lectureVideoDto == null || lectureVideoDto.size() != lectureVideoFiles.size()) {
-                throw new IllegalArgumentException("영상 정보와 파일 수가 일치하지 않습니다.");
-            }
-        }
-
-        // [FIX] 기존 로직 진입 조건 변경:
-        //  - 예전: if(!lectureVideoDto.isEmpty()) { ... } → DTO만 있어도 기존 영상 삭제됨 (문제)
-        //  - 지금: '파일이 있을 때'만 교체 로직 실행
-        if (lectureVideoFiles != null && !lectureVideoFiles.isEmpty() && lectureVideoDto != null && !lectureVideoDto.isEmpty()) {
-
-            // 기존 영상 제거
+        if (lectureVideoDto != null && !lectureVideoDto.isEmpty()) {
+            // 1. 기존 영상 제거
             List<LectureVideo> oldVideos = lectureVideoRepository.findByLecture(lecture);
-
-            if (oldVideos.isEmpty()) {
-                log.info("기존 강의영상 없음 → 삭제 스킵");
-            } else {
+            if (!oldVideos.isEmpty()) {
                 for (LectureVideo video : oldVideos) {
                     try {
                         s3Uploader.delete(video.getVideoUrl());
@@ -229,43 +215,52 @@ public class LectureService {
                     }
                 }
                 lectureVideoRepository.deleteAll(oldVideos);
-                log.info("기존 강의영상 제거했습니다.");
+                log.info("기존 강의영상 제거 완료");
             }
 
-            // 새 영상 등록
+            // 2. 새 영상 등록
             List<LectureVideo> newVideos = new ArrayList<>();
 
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
-                log.info("dto: " + dto.toString());
-                MultipartFile file = lectureVideoFiles.get(i);
+                MultipartFile file = (lectureVideoFiles != null && i < lectureVideoFiles.size())
+                        ? lectureVideoFiles.get(i)
+                        : null;
 
-                String ext = videoUtil.detectAndValidateContainerExt(file);
-                String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + "." + ext;
-
-                log.info(fileName);
-                String videoUrl = s3Uploader.upload(file, fileName);
-                log.info(videoUrl);
-
+                String videoUrl;
                 int duration;
-                try {
-                    log.info("파일길이 추출 시작");
-                    duration = videoUtil.extractDuration(file);
-                    log.info("파일길이추출완료");
-                } catch (IOException | InterruptedException e) {
-                    throw new IllegalArgumentException("파일길이 추출 중 오류 발생", e);
-                }
-                boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
 
+                if (file != null && !file.isEmpty()) {
+                    // 새 파일 업로드
+                    String ext = videoUtil.detectAndValidateContainerExt(file);
+                    String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + "." + ext;
+
+                    log.info("업로드 파일명={}", fileName);
+                    videoUrl = s3Uploader.upload(file, fileName);
+
+                    try {
+                        duration = videoUtil.extractDuration(file);
+                    } catch (IOException | InterruptedException e) {
+                        throw new IllegalArgumentException("파일길이 추출 중 오류 발생", e);
+                    }
+                } else {
+                    // 파일이 없고, 기존 URL만 전달된 경우 → 그대로 사용
+                    videoUrl = dto.getVideoUrl();
+                    duration = dto.getDuration(); // DTO에 기존 길이 담아두는 방식
+                }
+
+                boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
                 LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
                 newVideos.add(video);
             }
-            // DB 저장
+
+            // 3. DB 저장
             lectureVideoRepository.saveAll(newVideos);
+            log.info("새 강의영상 등록 완료 (총 {}개)", newVideos.size());
         } else {
-            // [FIX] 파일이 없으면 영상 교체 없음 (DTO만 온 경우에도 S3/DB 삭제하지 않음)
-            log.info("영상 파일 미전달 → 영상 교체 스킵");
+            log.info("영상 DTO 미전달 → 교체 스킵");
         }
+
 
         return lectureId;
     }
