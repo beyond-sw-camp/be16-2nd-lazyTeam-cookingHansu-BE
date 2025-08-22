@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, UUID> {
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     // 추가적인 메소드 선언이 필요할 경우 여기에 작성할 수 있습니다.
 

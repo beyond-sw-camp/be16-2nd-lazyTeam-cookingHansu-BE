@@ -23,7 +23,7 @@ public class AdminReportController {
     private final ReportService reportService;
 
     @GetMapping("/list")
-    public ResponseEntity<?> getReportList(@Valid @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> getReportList(@Valid @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ReportDetailDto> dtos = reportService.findAll(pageable);
         return new ResponseEntity<>(ResponseDto.ok(dtos, HttpStatus.OK), HttpStatus.OK);
     }
