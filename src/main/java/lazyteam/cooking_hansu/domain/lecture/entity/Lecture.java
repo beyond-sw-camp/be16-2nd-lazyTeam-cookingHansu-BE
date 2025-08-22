@@ -14,13 +14,13 @@ import lombok.*;
 import org.hibernate.annotations.DialectOverride;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@EqualsAndHashCode(callSuper = false)
 @Builder
 @SQLRestriction("is_delete = false")
 public class Lecture extends BaseIdAndTimeAndApprovalEntity {
@@ -66,18 +66,26 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @Column(columnDefinition = "TEXT")
     private String thumbUrl;
 
-    @Column(columnDefinition = "TEXT")
-    private String videoUrl;
-
     @Builder.Default
     private Boolean isDelete = false;
 
     @Builder.Default
-    private long reviewCount = 0L;
+    private Integer reviewCount = 0;
 
     @Builder.Default
-    private long qnaCount = 0L;
+    private Integer qnaCount = 0;
 
+    @Builder.Default
+    private Integer purchaseCount = 0;
+
+//    평점 평균값을 위해 BigDecimal 타입 사용
+    @Builder.Default
+    @Column(nullable = false)
+    private BigDecimal reviewAvg = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer reviewSum = 0;
 
     // 역방향 관계설정(조회용)
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)

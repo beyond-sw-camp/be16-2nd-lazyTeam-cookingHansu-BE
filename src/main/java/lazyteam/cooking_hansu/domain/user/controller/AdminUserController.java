@@ -32,13 +32,13 @@ public class AdminUserController {
 
 //    사용자 승인 대기 목록 조회(요리업종)
     @GetMapping("/waiting/chef")
-    public ResponseEntity<?> getWaitingChefList(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> getWaitingChefList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<WaitingChefListDto> waitingChefList = userService.getWaitingChefList(pageable);
         return new ResponseEntity<>(ResponseDto.ok(waitingChefList, HttpStatus.OK), HttpStatus.OK);
     }
 
     @GetMapping("/waiting/business")
-    public ResponseEntity<?> getWaitingBusinessList(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<?> getWaitingBusinessList(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<WaitingBusinessListDto> waitingBusinessList = userService.getWaitingBusinessList(pageable);
         return new ResponseEntity<>(ResponseDto.ok(waitingBusinessList, HttpStatus.OK), HttpStatus.OK);
     }

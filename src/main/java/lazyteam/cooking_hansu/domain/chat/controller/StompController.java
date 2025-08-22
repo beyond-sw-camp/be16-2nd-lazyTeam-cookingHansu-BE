@@ -1,40 +1,77 @@
 package lazyteam.cooking_hansu.domain.chat.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageReqDto;
 import lazyteam.cooking_hansu.domain.chat.dto.ChatMessageResDto;
+import lazyteam.cooking_hansu.domain.chat.dto.ChatParticipantStatReq;
 import lazyteam.cooking_hansu.domain.chat.service.ChatService;
-import lazyteam.cooking_hansu.domain.chat.service.RedisPubSubService;
+import lazyteam.cooking_hansu.domain.chat.service.ChatRedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 public class StompController {
 
     private final ChatService chatService;
-    private final RedisPubSubService redisPubSubService;
+    private final ChatRedisService chatRedisService;
 
+    @MessageMapping("/chat-rooms/{roomId}/chat-message")
+    public void sendMessage(@DestinationVariable Long roomId, ChatMessageReqDto messageReqDto) {
+        ChatMessageResDto saved = chatService.saveMessage(roomId, messageReqDto);
 
-    @MessageMapping("/{roomId}") // 클라이언트에서 특정 Publish/{roomId}로 메시지를 발행하면 해당 메소드가 호출됨
-    @SendTo("/topic/{roomId}") // 해당 roomId에 메시지를 발행하여 구독중인 클라이언트에게 메시지 전송
-//    destinationVariable은 @MessageMapping 어노테이션으로 정의된 WebSocket Controller 내에서만 사용
-    public void sendMessage(@DestinationVariable UUID roomId, ChatMessageReqDto messageReqDto) throws JsonProcessingException {
-        // 메시지 저장하고 시간 정보가 포함된 응답 받기
-        ChatMessageResDto savedMessage = chatService.saveMessage(roomId, messageReqDto);
+        // 2. 재활성화된 참여자들을 Redis에 추가
+        addReactivatedParticipantsToRedis(roomId, messageReqDto.getSenderId());
 
-        // Redis에 발행할 때도 시간 정보 포함
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // LocalDateTime 직렬화를 위해 필요
-        String message = objectMapper.writeValueAsString(savedMessage);
-        redisPubSubService.publish("chat", message);
+        chatRedisService.publishChatMessageToRedis(roomId, saved);
+    }
+
+//    @MessageMapping("/chat-rooms/{roomId}/invite")
+//    public void inviteUsers(@DestinationVariable Long roomId, List<ChatParticipantStatReq> chatParticipantAddReqs) {
+//        List<ChatParticipantStatReq> chatParticipantAddRes = chatService.inviteUsers(roomId, chatParticipantAddReqs);
+//        // Redis에 초대된 참여자 정보를 발행
+//        chatRedisService.publishInvitedUsersToRedis(roomId, chatParticipantAddRes);
+//    }
+//
+//    @MessageMapping("/chat-rooms/{roomId}/leave")
+//    public void leaveRoom(@DestinationVariable Long roomId) {
+//        chatService.leaveChatRoomAndRemoveIfEmpty(roomId);
+//        // Redis에 참여자 퇴장 정보를 발행
+//        chatRedisService.publishLeftUserToRedis(roomId);
+//    }
+
+    @MessageMapping("/chat-rooms/{roomId}/online")
+    public void online(@DestinationVariable Long roomId, ChatParticipantStatReq req) {
+        chatRedisService.publishChatOnlineToRedis(roomId, req);
+    }
+
+    @MessageMapping("/chat-rooms/{roomId}/offline")
+    public void offline(@DestinationVariable Long roomId, ChatParticipantStatReq req) {
+        chatService.readMessages(roomId, req.getUserId());
+        chatRedisService.publishChatOfflineToRedis(roomId, req);
+    }
+
+    private void addReactivatedParticipantsToRedis(Long roomId, UUID senderId) {
+        try {
+            // ChatService에서 재활성화된 참여자 정보를 가져와서 Redis에 추가
+            List<UUID> reactivatedUsers = chatService.getReactivatedParticipants(roomId, senderId);
+
+            for (UUID userId : reactivatedUsers) {
+                chatRedisService.addUserToRoom(roomId, userId);
+            }
+
+            if (!reactivatedUsers.isEmpty()) {
+                log.info("Added {} reactivated participants to Redis for room {}", reactivatedUsers.size(), roomId);
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to add reactivated participants to Redis: {}", e.getMessage());
+        }
     }
 }

@@ -6,11 +6,15 @@ import lazyteam.cooking_hansu.domain.chat.entity.*;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatMessageRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatParticipantRepository;
 import lazyteam.cooking_hansu.domain.chat.repository.ChatRoomRepository;
-import lazyteam.cooking_hansu.domain.chat.repository.ReadStatusRepository;
+import lazyteam.cooking_hansu.domain.chat.util.ChatFileValidator;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,75 +29,75 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final ReadStatusRepository readStatusRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final S3Uploader s3Uploader;
 
-
     //    메세지 전송
-    public ChatMessageResDto saveMessage(UUID roomId, ChatMessageReqDto chatMessageReqDto) {
-        // 유효성 검사
-        validateMessageAndFile(chatMessageReqDto);
+    public ChatMessageResDto saveMessage(Long roomId, ChatMessageReqDto chatMessageReqDto) {
+        ChatFileValidator.validateMessageAndFile(chatMessageReqDto);
 
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        User sender = userRepository.findById(chatMessageReqDto.getSenderId()).orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User sender = userRepository.findById(chatMessageReqDto.getSenderId())
+                .orElseThrow(() -> new EntityNotFoundException("발신자를 찾을 수 없습니다."));
 
-        // 현재 사용자가 채팅방 참여자인지 확인
-        if (!isRoomParticipant(sender.getId(), roomId)) {
+        if (!chatParticipantRepository.existsByChatRoomAndUser(chatRoom, sender)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
-        // 메시지 생성
+
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .sender(sender)
                 .messageText(chatMessageReqDto.getMessage())
-                .isDeleted("N") // 기본값은 "N" (삭제되지 않음)
+                .isDeleted("N")
                 .build();
 
-        chatMessageRepository.save(chatMessage);
-
-        // 파일이 있는 경우 파일 저장
-        if(chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
-            List<ChatFile> chatFiles = chatMessageReqDto.getFiles().stream()
-                    .map(file -> ChatFile.builder()
+        // 파일 DTO가 있으면 엔티티 생성 후 add
+        if (chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty()) {
+            List<ChatFile> files = chatMessageReqDto.getFiles().stream()
+                    .map(f -> ChatFile.builder()
                             .chatMessage(chatMessage)
-                            .fileUrl(file.getFileUrl())
-                            .fileName(file.getFileName())
-                            .fileType(file.getFileType())
-                            .fileSize(file.getFileSize())
+                            .fileUrl(f.getFileUrl())
+                            .fileName(f.getFileName())
+                            .fileType(f.getFileType())
+                            .fileSize(f.getFileSize())
                             .build())
                     .collect(Collectors.toList());
-            
-            // 파일들을 메시지에 추가
-            chatMessage.getFiles().addAll(chatFiles);
+            chatMessage.getFiles().addAll(files);
         }
 
-        // 메시지 읽음 상태 저장
+        chatMessageRepository.save(chatMessage); // cascade 설정에 따라 files도 함께 저장
+
+        // 채팅방 참여자 중 발신자가 아닌 사람들은 비활성화 상태를 Y로 변경
         List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for (ChatParticipant participant : participants) {
-            String readFlag = participant.getUser().equals(sender) ? "Y" : "N";
-            ReadStatus readStatus = ReadStatus.builder()
-                    .chatRoom(chatRoom)
-                    .user(participant.getUser())
-                    .chatMessage(chatMessage)
-                    .isRead(readFlag)
-                    .build();
-            readStatusRepository.save(readStatus);
-        }
-
-        // 참여자 상태 복구
-        for (ChatParticipant participant : participants) {
-            if (!participant.getUser().getId().equals(sender.getId())) {
-                if ("N".equals(participant.getIsActive())) {
-                    participant.joinChatRoom(); // 참여자 상태 복구: isActive = "Y"
-                }
+        for (ChatParticipant p : participants) {
+            if (!p.getUser().getId().equals(sender.getId()) && "N".equals(p.getIsActive())) {
+                p.joinChatRoom();
             }
         }
+
+//        // 읽음 상태 – 보낸 사람은 Y, 나머지 N
+//        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+//        for (ChatParticipant p : participants) {
+//            String readFlag = p.getUser().getId().equals(sender.getId()) ? "Y" : "N";
+//            readStatusRepository.save(ReadStatus.builder()
+//                    .chatRoom(chatRoom)
+//                    .user(p.getUser())
+//                    .chatMessage(chatMessage)
+//                    .isRead(readFlag)
+//                    .build());
+//            // 비활성 복구
+//            if (!p.getUser().getId().equals(sender.getId()) && "N".equals(p.getIsActive())) {
+//                p.joinChatRoom();
+//            }
+//        }
+
 
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
@@ -109,36 +113,33 @@ public class ChatService {
                                 .fileSize(file.getFileSize())
                                 .build())
                         .collect(Collectors.toList()))
-                .createdAt(chatMessage.getCreatedAt()) // 생성 시간
+                .createdAt(chatMessage.getCreatedAt())
                 .build();
     }
 
     //    채팅메시지 파일 업로드
-    public ChatFileUploadResDto uploadFiles(UUID roomId, ChatFileUploadReqDto requestDto) {
+    public ChatFileUploadResDto uploadFiles(Long roomId, ChatFileUploadReqDto requestDto) {
         // 채팅방 존재 확인
         chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        
+
         // 현재 사용자가 채팅방 참여자인지 확인
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         if (!isRoomParticipant(userId, roomId)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
-        
+
         List<MultipartFile> files = requestDto.getFiles();
         List<FileType> fileTypes = requestDto.getFileTypes();
-        
-        // 파일 개수 검증
-        validateFileCount(files, fileTypes);
-        
+
+        // 업로드 요청 전체 검증 (파일 개수, 크기, 타입 등 모든 검증)
+        ChatFileValidator.validateUploadRequest(files, fileTypes);
+
         List<ChatFileUploadResDto.FileInfo> uploadedFiles = new ArrayList<>();
-        
+
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
             FileType fileType = fileTypes.get(i);
-            
-            // validateFileType에서 모든 검증 수행
-            validateFileType(file, fileType);
-            
+
             // S3에 파일 업로드
             String fileUrl = s3Uploader.upload(file, "chat-files/" + roomId);
             
@@ -149,84 +150,90 @@ public class ChatService {
                     .fileType(fileType)
                     .fileSize((int) file.getSize())
                     .build();
-            
+
             uploadedFiles.add(fileInfo);
         }
-        
+
         return ChatFileUploadResDto.builder()
                 .files(uploadedFiles)
                 .build();
     }
 
+    //   채팅방 참여자 목록 조회
+    @Transactional(readOnly = true)
+    public List<ChatParticipantRes> getChatRoomParticipants(Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        return chatRoom.getParticipants().stream()
+                .map(ChatParticipantRes::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
-    public List<MyChatListDto> getMyChatRooms() {
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    public PaginatedResponseDto<ChatRoomListDto> getMyChatRooms(int size, String cursor) {
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-    List<ChatParticipant> chatParticipants = chatParticipantRepository.findByUserAndIsActive(user, "Y");
+        // 인덱스 기반 cursor pagination
+        int pageIndex = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            try {
+                pageIndex = Integer.parseInt(cursor);
+            } catch (NumberFormatException e) {
+                // cursor가 유효한 숫자가 아닌 경우 첫 페이지로
+                pageIndex = 0;
+            }
+        }
 
-        return chatParticipants.stream()
-                .map(participant -> {
-                    ChatRoom chatRoom = participant.getChatRoom();
+        // Pageable 생성
+        PageRequest pageRequest = PageRequest.of(pageIndex, size);
 
-                    // 상대방 찾기
-                    User otherUser = chatParticipantRepository.findByChatRoom(chatRoom).stream()
-                            .map(ChatParticipant::getUser)
-                            .filter(u -> !u.getId().equals(user.getId()))
-                            .findFirst()
-                            .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
+        // Slice로 채팅방 참여자 조회
+        Slice<ChatParticipant> chatParticipantsSlice = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessageSlice(user, pageRequest);
 
-                    // 마지막 메시지
-                    Optional<ChatMessage> lastMessageOpt = chatMessageRepository.findTopByChatRoomOrderByCreatedAtDesc(chatRoom);
-                    String lastMessage = null;
-                    LocalDateTime lastMessageTime = lastMessageOpt.map(ChatMessage::getCreatedAt).orElse(null);
-                    
-                    if (lastMessageOpt.isPresent()) {
-                        ChatMessage lastMessageEntity = lastMessageOpt.get();
-                        // 텍스트 메시지가 있는 경우
-                        if (lastMessageEntity.getMessageText() != null && !lastMessageEntity.getMessageText().trim().isEmpty()) {
-                            lastMessage = lastMessageEntity.getMessageText();
-                        }
-                        // 파일이 있는 경우
-                        else if (lastMessageEntity.getFiles() != null && !lastMessageEntity.getFiles().isEmpty()) {
-                            ChatFile firstFile = lastMessageEntity.getFiles().get(0);
-                            switch (firstFile.getFileType()) {
-                                case IMAGE:
-                                    lastMessage = "이미지를 보냈습니다.";
-                                    break;
-                                case VIDEO:
-                                    lastMessage = "동영상을 보냈습니다.";
-                                    break;
-                                default:
-                                    lastMessage = "파일을 보냈습니다.";
-                                    break;
-                            }
-                        }
-                    }
+        // ChatParticipant를 ChatRoomListDto로 변환
+        List<ChatRoomListDto> result = chatParticipantsSlice.getContent().stream().map(participant -> {
+            User otherUser = chatParticipantRepository.findByChatRoom(participant.getChatRoom()).stream()
+                    .map(ChatParticipant::getUser)
+                    .filter(u -> !u.getId().equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 다른 사용자를 찾을 수 없습니다."));
 
-                    // 안 읽은 메시지 수
-                    int unreadCount = readStatusRepository.countByChatRoomAndUserAndIsRead(chatRoom, user, "N").intValue();
+            // 가독성 위해 유틸 변수
+            ChatRoom room = participant.getChatRoom();
 
-                    return MyChatListDto.builder()
-                            .chatRoomId(chatRoom.getId())
-                            .customRoomName(participant.getCustomRoomName())
-                            .otherUserName(otherUser.getName())
-                            .otherUserNickname(otherUser.getNickname())
-                            .otherUserProfileImage(otherUser.getPicture())
-                            .lastMessage(lastMessage)
-                            .lastMessageTime(lastMessageTime)
-                            .unreadCount(unreadCount)
-                            .build();
-                }).collect(Collectors.toList());
+            // 1) 기준점(baseline) 계산: 마지막 읽음 > 나간시각 > 방생성시각
+            LocalDateTime baseline =
+                    participant.getLastReadMessage() != null ? participant.getLastReadMessage().getCreatedAt() :
+                            participant.getLeftAt() != null ? participant.getLeftAt() :
+                                    room.getCreatedAt();
+
+            // 2) 필터링: 삭제 제외 + 본인메시지 제외 + baseline 이후
+            int newMessageCount = (int) room.getMessages().stream()
+                    .filter(m -> "N".equals(m.getIsDeleted()))
+                    .filter(m -> !m.getSender().getId().equals(user.getId()))
+                    .filter(m -> {
+                        // == 같은 시각 메시지까지 읽은 것으로 처리하고 싶으면 isAfter 대신 !isBefore 사용
+                        return m.getCreatedAt().isAfter(baseline); // 필요시 >= 로 바꾸려면 !isBefore(baseline)
+                    })
+                    .count();
+
+            return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount);
+        }).collect(Collectors.toList());
+
+        // 커스텀 응답 DTO 반환
+        return PaginatedResponseDto.<ChatRoomListDto>builder()
+                .data(result)
+                .hasNext(chatParticipantsSlice.hasNext())
+                .nextCursor(chatParticipantsSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
+                .build();
     }
 
     //    채팅방 상세 내역 조회
     @Transactional(readOnly = true)
-    public List<ChatMessageResDto> getChatHistory(UUID roomId) {
+    public PaginatedResponseDto<ChatMessageResDto> getChatHistory(Long roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
         // 현재 사용자가 채팅방 참여자인지 확인
@@ -242,15 +249,37 @@ public class ChatService {
                 .findByChatRoomAndUser(chatRoom, user)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
 
-        List<ChatMessage> chatMessages;
+        Long lastMessageId = participant.getLastReadMessage() == null ? 0 : participant.getLastReadMessage().getId();
+
+        // 인덱스 기반 cursor pagination
+        int pageIndex = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            try {
+                pageIndex = Integer.parseInt(cursor);
+            } catch (NumberFormatException e) {
+                // cursor가 유효한 숫자가 아닌 경우 첫 페이지로
+                pageIndex = 0;
+            }
+        }
+
+        PageRequest pageRequest = PageRequest.of(pageIndex, size);
+
+        Slice<ChatMessage> chatMessagesSlice;
 
         if (participant.getLeftAt() != null) {
-            chatMessages = chatMessageRepository.findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(chatRoom, participant.getLeftAt());
+            // 채팅방을 나갔다가 다시 들어온 경우, 나간 시간 이후 메시지만 조회
+            // 이 경우는 기존 List 방식 사용 (pagination 적용 어려움)
+            List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(
+                chatRoom, participant.getLeftAt());
+            chatMessagesSlice = new SliceImpl<>(chatMessages, pageRequest, false);
         } else {
-            chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+            // 인덱스 기반 pagination 사용
+            chatMessagesSlice = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageRequest);
         }
+
+        // Slice를 ChatMessageResDto로 변환
         List<ChatMessageResDto> result = new ArrayList<>();
-        for (ChatMessage cm : chatMessages) {
+        for (ChatMessage cm : chatMessagesSlice.getContent()) {
             // 메시지에 파일이 있는 경우
             List<ChatFileUploadResDto.FileInfo> fileList = new ArrayList<>();
             if (cm.getFiles() != null && !cm.getFiles().isEmpty()) {
@@ -277,14 +306,21 @@ public class ChatService {
                     .build();
             result.add(chatMessageResDto);
         }
-        return result;
+
+
+
+        // 커스텀 응답 DTO 반환
+        return PaginatedResponseDto.<ChatMessageResDto>builder()
+                .data(result)
+                .hasNext(chatMessagesSlice.hasNext())
+                .nextCursor(chatMessagesSlice.hasNext() ? String.valueOf(pageIndex + 1) : null)
+                .build();
     }
 
     //    채팅방 생성 or 기존 채팅방 조회
-    public UUID getOrCreateChatRoom(UUID otherUserId) {
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        User otherUser = userRepository.findById(otherUserId).orElseThrow(() -> new EntityNotFoundException("상대 사용자를 찾을 수 없습니다."));
+    public Long getOrCreateChatRoom(ChatInviteReqDto dto) {
+        User user = userRepository.findById(dto.getMyId()).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User otherUser = userRepository.findById(dto.getInviteeId()).orElseThrow(() -> new EntityNotFoundException("상대 사용자를 찾을 수 없습니다."));
 
         // 채팅방이 이미 존재하는지 확인
         Optional<ChatRoom> existingChatRoom = chatParticipantRepository.findExistingChatRoom(user.getId(), otherUser.getId());
@@ -317,51 +353,37 @@ public class ChatService {
     }
 
     //    방 참여자인지 확인
-    public boolean isRoomParticipant(UUID userId, UUID roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
+// 기존: 리스트 조회 후 루프
+    public boolean isRoomParticipant(UUID userId, Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 회원입니다."));
 
-        List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
-        for (ChatParticipant c : chatParticipants) {
-            if (c.getUser().equals(user)) {
-                return true; // 해당 이메일이 참여자 목록에 있으면 메서드 종료
-            }
-        }
-        return false;
-    }
-
-    //    메시지 읽음
-    public void messageRead(UUID roomId) {
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        List<ReadStatus> readStatuses = readStatusRepository.findByChatRoomAndUser(chatRoom, user);
-        for (ReadStatus r : readStatuses) {
-            r.updateIsRead("Y");
-        }
+        return chatParticipantRepository.existsByChatRoomAndUser(chatRoom, user);
     }
 
     //    채팅방 나가기
-    public void leaveChatRoom(UUID roomId) {
+    public void leaveChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
         chatParticipant.leaveChatRoom();
 
         // 채팅방에 참여자가 없으면 채팅방 삭제
-        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoomAndIsActive(chatRoom, "Y");
-        if (participants.isEmpty()) {
+        long activeCount = chatParticipantRepository.countByChatRoomAndIsActive(chatRoom, "Y");
+        if (activeCount == 0) {
             chatRoomRepository.delete(chatRoom);
         }
     }
 
     //    채팅방 이름 변경(상대방 이름 변경)
-    public void updateChatRoomName(UUID roomId, ChatRoomUpdateDto updateDto) {
+    public void updateChatRoomName(Long roomId, ChatRoomUpdateDto updateDto) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
         // 현재 사용자가 채팅방 참여자인지 확인
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         if (!isRoomParticipant(user.getId(), roomId)) {
@@ -371,82 +393,34 @@ public class ChatService {
         ChatParticipant participant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
         // 참여자의 커스텀 채팅방 이름을 업데이트
         participant.updateCustomRoomName(updateDto.getName());
-
     }
 
-    // 메시지와 파일 유효성 검사
-    private void validateMessageAndFile(ChatMessageReqDto chatMessageReqDto) {
-        boolean hasMessage = chatMessageReqDto.getMessage() != null && !chatMessageReqDto.getMessage().trim().isEmpty();
-        boolean hasFile = chatMessageReqDto.getFiles() != null && !chatMessageReqDto.getFiles().isEmpty();
+    //    메시지 읽음 처리
+    public void readMessages(Long roomId, UUID userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("participant not found"));
 
-        // 메시지만 있는 경우
-        if (hasMessage && !hasFile) {
-            // 메시지는 비어있으면 안됨 (이미 위에서 체크했지만 한번 더)
-            if (chatMessageReqDto.getMessage().trim().isEmpty()) {
-                throw new IllegalArgumentException("메시지 내용은 비어있을 수 없습니다.");
+        chatParticipant.read(chatRoom.getMessages().get(chatRoom.getMessages().size() - 1));
+    }
+
+    public List<UUID> getReactivatedParticipants(Long roomId, UUID senderId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
+
+        List<UUID> reactivatedUsers = new ArrayList<>();
+
+        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
+        for (ChatParticipant p : participants) {
+            if (!p.getUser().getId().equals(senderId) && "Y".equals(p.getIsActive())) {
+                // 최근에 활성화된 참여자인지 확인 (예: 1초 이내)
+                if (p.getUpdatedAt() != null &&
+                        p.getUpdatedAt().isAfter(LocalDateTime.now().minusSeconds(1))) {
+                    reactivatedUsers.add(p.getUser().getId());
+                }
             }
         }
-        // 파일만 있는 경우
-        else if (!hasMessage && hasFile) {
-            // 파일은 1개 이상 있어야 함
-            if (chatMessageReqDto.getFiles().size() < 1) {
-                throw new IllegalArgumentException("파일은 최소 1개 이상 있어야 합니다.");
-            }
-        }
-        // 둘 다 있는 경우 (허용하지 않음)
-        else if (hasMessage && hasFile) {
-            throw new IllegalArgumentException("메시지와 파일을 동시에 전송할 수 없습니다. 메시지 또는 파일 중 하나만 전송해주세요.");
-        }
-        // 둘 다 없는 경우
-        else {
-            throw new IllegalArgumentException("메시지 또는 파일 중 하나는 반드시 있어야 합니다.");
-        }
-    }
 
-    // 파일 타입 검증
-    private void validateFileType(MultipartFile file, FileType fileType) {
-        // 빈 파일 검사
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다.");
-        }
-        
-        String fileName = file.getOriginalFilename();
-        if (fileName == null) {
-            throw new IllegalArgumentException("파일명이 없습니다.");
-        }
-
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-
-        switch (fileType) {
-            case IMAGE:
-                if (!extension.matches("(jpg|jpeg|png|gif|webp)")) {
-                    throw new IllegalArgumentException("이미지 파일은 jpg, jpeg, png, gif 형식만 허용됩니다.");
-                }
-                break;
-            case VIDEO:
-                if (!extension.matches("(mp4|avi|mov)")) {
-                    throw new IllegalArgumentException("비디오 파일은 mp4, avi, mov 형식만 허용됩니다.");
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("지원하지 않는 파일 타입입니다.");
-        }
-    }
-
-    // 파일 개수 검증
-    private void validateFileCount(List<MultipartFile> files, List<FileType> fileTypes) {
-        if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
-        }
-        if (files.size() < 1) {
-            throw new IllegalArgumentException("파일은 최소 1개 이상 있어야 합니다.");
-        }
-        if (files.size() > 10) {
-            throw new IllegalArgumentException("파일은 최대 10개까지 업로드할 수 있습니다.");
-        }
-        if (files.size() != fileTypes.size()) {
-            throw new IllegalArgumentException("파일과 파일 타입의 개수가 일치하지 않습니다.");
-        }
+        return reactivatedUsers;
     }
 }
-

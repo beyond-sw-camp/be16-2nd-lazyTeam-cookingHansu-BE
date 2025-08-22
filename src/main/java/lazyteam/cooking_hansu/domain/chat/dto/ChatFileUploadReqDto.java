@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class ChatFileUploadReqDto {
-    private UUID roomId; // 채팅방 ID
+    private Long roomId; // 채팅방 ID
     private List<MultipartFile> files; // 업로드할 파일들 (최대 10개)
     private List<FileType> fileTypes; // 파일 타입들
 } 

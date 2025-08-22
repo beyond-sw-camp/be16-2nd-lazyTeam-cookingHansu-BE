@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.common.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,7 +22,7 @@ public class BaseIdAndTimeAndApprovalEntity{
     private LocalDateTime approvalTime; // 승인 일자
 
     @Enumerated(EnumType.STRING)
-    private ApprovalStatus approvalStatus; // 승인 상태 (PENDING, APPROVED, REJECTED)
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING; // 승인 상태 (PENDING, APPROVED, REJECTED)
 
     private LocalDateTime rejectionTime; // 반려 일자
 
@@ -33,6 +34,14 @@ public class BaseIdAndTimeAndApprovalEntity{
     @UpdateTimestamp
     private LocalDateTime updatedAt; // 수정 시간
 
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
+    }
 
     public void approve(){
         this.approvalStatus = ApprovalStatus.APPROVED;

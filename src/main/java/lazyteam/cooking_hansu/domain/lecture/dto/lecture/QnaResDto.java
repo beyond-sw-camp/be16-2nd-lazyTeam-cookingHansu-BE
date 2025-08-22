@@ -32,12 +32,12 @@ public class QnaResDto {
         LectureQna parent = (lectureQna.getParent() != null)
                 ? lectureQna.getParent()
                 : lectureQna;
-        LectureQna answer = lectureQna.getChild();
+        LectureQna answer = parent.getChild();
 
         return QnaResDto.builder()
                 .parentName(parent.getUser() != null ? parent.getUser().getName() : null)
-                .parentStatus(lectureQna.getStatus())
-                .parentContent(lectureQna.getContent())
+                .parentStatus(parent.getStatus())
+                .parentContent(parent.getContent())
                 .parentCreatedAt(parent.getCreatedAt())
                 .questionUpdatedAt(parent.getUpdatedAt())
 

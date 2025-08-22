@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.global.config;
 
-import lazyteam.cooking_hansu.domain.chat.service.RedisPubSubService;
+import lazyteam.cooking_hansu.domain.chat.service.ChatRedisService;
 import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationPublisher;
 import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,7 +88,7 @@ public class RedisConfig {
 
     //    redis에서 수신된 메시지를 처리하는 객체 생성
     @Bean
-    public MessageListenerAdapter messageListenerAdapter(RedisPubSubService redisPubSubService) {
+    public MessageListenerAdapter messageListenerAdapter(ChatRedisService redisPubSubService) {
 //        RedisPubSubService의 특정 메서드가 수신된 메시지를 처리할 수 있도록 지정
         return new MessageListenerAdapter(redisPubSubService, "onMessage");
     }
