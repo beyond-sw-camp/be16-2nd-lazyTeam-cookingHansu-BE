@@ -2,7 +2,7 @@ package lazyteam.cooking_hansu.domain.lecture.controller;
 
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
-import lazyteam.cooking_hansu.domain.lecture.dto.WaitingLectureDto;
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.WaitingLectureDto;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;

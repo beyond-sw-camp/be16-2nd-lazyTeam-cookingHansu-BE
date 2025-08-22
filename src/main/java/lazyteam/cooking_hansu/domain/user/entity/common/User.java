@@ -52,6 +52,16 @@ public class User extends BaseIdAndTimeEntity {
     @Column(length = 512, nullable = false)
     private String profileImageUrl; // 프로필 이미지 URL
 
+    @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
+    @Column(length = 200)
+    private String info; // 자기소개
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private String isDeleted = "N";
+
+    public void deleteUser() { this.isDeleted = "Y"; }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
@@ -167,5 +177,18 @@ public class User extends BaseIdAndTimeEntity {
 
     public void updateStatus(LoginStatus loginStatus) {
         this.loginStatus = loginStatus;
+    }
+
+    // 프로필 업데이트 메서드 추가
+    public void updateProfile(String nickname, String info, String profileImageUrl) {
+        this.nickname = nickname;
+        this.info = info;
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

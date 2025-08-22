@@ -1,7 +1,6 @@
-package lazyteam.cooking_hansu.domain.lecture.dto;
+package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
 
 
-import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.lecture.dto;
+package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
 
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
@@ -8,14 +8,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
-@AllArgsConstructor
+import java.util.ArrayList;
+import java.util.List;
+
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 
-public class LectureUpdateDto {
+public class LectureCreateDto {
 
     private User user;
 
@@ -29,7 +31,14 @@ public class LectureUpdateDto {
 
     private Integer price;
 
+    @Builder.Default
+    private List<LectureIngredientsListDto> lectureIngredientsListDtos = new ArrayList<>();
+
+
+
+
     public Lecture toEntity(User user) {
+
         return Lecture.builder()
                 .submittedBy(user)
                 .title(title)
@@ -39,4 +48,7 @@ public class LectureUpdateDto {
                 .price(price)
                 .build();
     }
+
+
+
 }

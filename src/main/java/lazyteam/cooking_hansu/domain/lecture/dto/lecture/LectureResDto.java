@@ -1,0 +1,60 @@
+package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
+
+
+import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.UUID;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
+public class LectureResDto {
+    private UUID id; // 강의 ID
+    private String title; // 강의 제목
+    private String description; // 강의 설명
+    private CategoryEnum category; // 강의 카테고리
+    private ApprovalStatus status; // 강의 상태 (필터링 용도)
+    private Integer price; // 강의 가격
+    private String thumbUrl;
+    private Integer reviewCount;
+    private Integer qnaCount;
+    private Integer purchaseCount;
+    private BigDecimal reviewAvg;
+
+    public static LectureResDto fromEntity(Lecture lecture) {
+
+        int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
+        int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
+
+//        Decimal 타입의 나눗셈 수행, 0 나눗셈 방지
+        BigDecimal avg = (cnt == 0)
+                ? BigDecimal.ZERO.setScale(1)
+                : BigDecimal.valueOf(sum)
+                .divide(BigDecimal.valueOf(cnt), 1, RoundingMode.HALF_UP);
+
+        return LectureResDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .description(lecture.getDescription())
+                .category(lecture.getCategory())
+                .status(lecture.getApprovalStatus())
+                .price(lecture.getPrice())
+                .thumbUrl(lecture.getThumbUrl())
+                .reviewCount(lecture.getReviewCount())
+                .qnaCount(lecture.getQnaCount())
+                .purchaseCount(lecture.getPurchaseCount())
+                .reviewAvg(avg)
+                .build();
+    }
+
+
+}

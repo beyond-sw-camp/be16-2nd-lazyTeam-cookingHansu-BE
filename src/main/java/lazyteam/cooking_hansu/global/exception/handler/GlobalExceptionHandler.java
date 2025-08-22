@@ -29,6 +29,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
@@ -146,6 +147,7 @@ public class GlobalExceptionHandler {
          return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 처리 중 오류가 발생했습니다.");
 //        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
+
 
     /**
      * ======================== 런타임 예외 ========================
@@ -336,6 +338,19 @@ public class GlobalExceptionHandler {
         log.error("[NoHandlerFoundException] {} {}", e.getHttpMethod(), e.getRequestURL());
          return buildError(HttpStatus.NOT_FOUND, "요청한 API 엔드포인트를 찾을 수 없습니다.");
 //        return buildError(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    // ResponseStatusException (ex. 415 Unsupported Media Type 등)
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<?> handleRSE(ResponseStatusException e) {
+        HttpStatus status = (e.getStatusCode() instanceof HttpStatus hs)
+                ? hs
+                : HttpStatus.valueOf(e.getStatusCode().value()); // HttpStatusCode → HttpStatus
+        log.error("[ResponseStatusException] {} {}", status, e.getReason());
+        String message = (e.getReason() != null && !e.getReason().isBlank())
+                ? e.getReason()
+                : "요청이 거부되었습니다.";
+        return buildError(status, message);
     }
 
     /**

@@ -8,6 +8,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class CartDeleteOneDto {
-    private UUID userId;
+
     private UUID lectureId;
 }

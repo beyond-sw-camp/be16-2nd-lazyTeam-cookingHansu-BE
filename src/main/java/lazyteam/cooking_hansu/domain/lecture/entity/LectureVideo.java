@@ -22,7 +22,7 @@ public class LectureVideo extends BaseIdAndTimeEntity {
     @Column(length = 255, nullable = false)
     private String title;
 
-    @Column(length = 255, nullable = false)
+    @Column(length = 512, nullable = false)
     private String videoUrl;
 
     @Column(nullable = false)
