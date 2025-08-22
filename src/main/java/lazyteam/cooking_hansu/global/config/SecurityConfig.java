@@ -34,35 +34,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(e ->
-                        e.authenticationEntryPoint(jwtAuthenticationHandler)
-                                .accessDeniedHandler(jwtAuthorizationHandler)
-                )
-                // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
-                .authorizeHttpRequests(a -> a.requestMatchers(
-                        "/user/create",
-                        "/user/login",
-                        "/swagger-ui.html",
-                        "/swagger-ui/**",// Swagger UI (html, js, css)
-                        "/api-docs/**",       // OpenAPI JSON
-                        "/v3/api-docs/**",       // OpenAPI JSON
-                        "/swagger-resources/**", // Swagger 리소스
-                        "/notice/**",
-                        "/admin/**", // Admin 관련 API
-                        "/report/**", // Report 관련 API
-                        "/api/my/**", // Mypage 관련 API
-                        "/lecture/**",
-                        "/user/**",
-                        "/chat/**",
-                        "/post/**",
-                        "cart/**",
-                        "/purchase/**",
-                        "/connect/**", // WebSocket 연결 엔드포인트
-                        "/topic/**", // WebSocket 토픽
-                        "/publish/**", // WebSocket 메시지 발행
-                        "/api/notifications/**" // 알림
-                ).permitAll().anyRequest().authenticated())
+                // .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class) // 테스트용 비활성화
+                // .exceptionHandling(e ->
+                //         e.authenticationEntryPoint(jwtAuthenticationHandler)
+                //                 .accessDeniedHandler(jwtAuthorizationHandler)
+                // ) // 테스트용 비활성화
+                // 테스트용: 모든 요청 허용
+                .authorizeHttpRequests(a -> a.anyRequest().permitAll())
                 .build();
     }
 
