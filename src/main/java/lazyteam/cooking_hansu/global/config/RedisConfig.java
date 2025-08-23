@@ -25,10 +25,10 @@ import java.util.Map;
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
-    private String host;
+    private String redishost;
 
     @Value("${spring.data.redis.port}")
-    private int port;
+    private int redisport;
 
     // ================================
     // DB 0: Refresh Token 저장소
@@ -38,8 +38,8 @@ public class RedisConfig {
     @Qualifier("rtInventory")
     public RedisConnectionFactory rtConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
         configuration.setDatabase(0);
         return new LettuceConnectionFactory(configuration);
     }
@@ -64,8 +64,8 @@ public class RedisConfig {
     @Qualifier("interactionRedis")
     public RedisConnectionFactory interactionRedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
         configuration.setDatabase(2); // 상호작용용 DB 2번
         return new LettuceConnectionFactory(configuration);
     }
@@ -96,8 +96,8 @@ public class RedisConfig {
     @Qualifier("chatPubSub")
     public RedisConnectionFactory chatPubSubConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
 //        Redis pub/sub에서는 특정 데이터베이스에 의존적이지 않음.
 //        configuration.setDatabase(0); // 기본 데이터베이스 설정
 
@@ -145,8 +145,8 @@ public class RedisConfig {
     @Qualifier("chatFactory")
     public RedisConnectionFactory chatRedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
         configuration.setDatabase(12);
         return new LettuceConnectionFactory(configuration);
     }
