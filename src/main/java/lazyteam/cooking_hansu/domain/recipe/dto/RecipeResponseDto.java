@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.recipe.dto;
 
 import lazyteam.cooking_hansu.domain.recipe.entity.*;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,8 +24,8 @@ public class RecipeResponseDto {
     private String title;
     private String description;
     private String thumbnailUrl;
-    private LevelType level;
-    private CategoryType category;
+    private LevelEnum level;
+    private CategoryEnum category;
     private Integer cookTime;
     // ========== 인분 정보: 숫자만 저장 ==========
     private Integer servings;        // 몇 인분 (숫자만)

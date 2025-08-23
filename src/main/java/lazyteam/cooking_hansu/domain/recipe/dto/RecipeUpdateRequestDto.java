@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.recipe.dto;
 
-import lazyteam.cooking_hansu.domain.recipe.entity.CategoryType;
-import lazyteam.cooking_hansu.domain.recipe.entity.LevelType;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -27,9 +27,9 @@ public class RecipeUpdateRequestDto {
     @Size(max = 512, message = "썸네일 URL은 512자 이하여야 합니다")
     private String thumbnailUrl;
 
-    private LevelType level;
+    private LevelEnum level;
 
-    private CategoryType category;
+    private CategoryEnum category;
 
     @Min(value = 1, message = "조리 시간은 1분 이상이어야 합니다")
     private Integer cookTime;

@@ -1,8 +1,8 @@
 package lazyteam.cooking_hansu.domain.recipe.dto;
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.recipe.entity.CategoryType;
-import lazyteam.cooking_hansu.domain.recipe.entity.LevelType;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -29,10 +29,10 @@ public class RecipeCreateRequestDto {
     private String thumbnailUrl;
 
     @NotNull(message = "레시피 난이도는 필수입니다")
-    private LevelType level;
+    private LevelEnum level;
 
     @NotNull(message = "레시피 카테고리는 필수입니다")
-    private CategoryType category;
+    private CategoryEnum category;
 
     @NotNull(message = "조리 시간은 필수입니다")
     @Min(value = 1, message = "조리 시간은 1분 이상이어야 합니다")

@@ -3,16 +3,18 @@ package lazyteam.cooking_hansu.domain.recipe.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "recipe")
 public class Recipe extends BaseIdAndTimeEntity {
 
@@ -36,12 +38,12 @@ public class Recipe extends BaseIdAndTimeEntity {
     @NotNull(message = "레시피 난이도는 필수입니다")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LevelType level;
+    private LevelEnum level;
 
     @NotNull(message = "레시피 카테고리는 필수입니다")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CategoryType category;
+    private CategoryEnum category;
 
     @NotNull(message = "조리 시간은 필수입니다")
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
@@ -56,7 +58,7 @@ public class Recipe extends BaseIdAndTimeEntity {
     // ========== 생성자 ==========
     @Builder
     public Recipe(User user, String description, String title, String thumbnailUrl,
-                  LevelType level, CategoryType category, int cookTime, Integer servings) {
+                  LevelEnum level, CategoryEnum category, int cookTime, Integer servings) {
         this.user = user;
         this.description = description;
         this.title = title;
@@ -73,7 +75,7 @@ public class Recipe extends BaseIdAndTimeEntity {
      * 레시피 정보 수정
      */
     public void updateRecipe(String title, String description, String thumbnailUrl,
-                           LevelType level, CategoryType category, Integer cookTime, Integer servings) {
+                           LevelEnum level, CategoryEnum category, Integer cookTime, Integer servings) {
         if (title != null && !title.trim().isEmpty()) {
             this.title = title.trim();
         }
@@ -109,15 +111,5 @@ public class Recipe extends BaseIdAndTimeEntity {
      */
     public String getServingsText() {
         return this.servings != null ? this.servings + "인분" : null;
-    }
-
-    /**
-     * 1인분당 재료 비율 계산용 메서드
-     */
-    public double getServingRatio(int targetServings) {
-        if (this.servings == null || this.servings == 0) {
-            return 1.0;
-        }
-        return (double) targetServings / this.servings;
     }
 }

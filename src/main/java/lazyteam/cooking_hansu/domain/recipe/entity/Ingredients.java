@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.recipe.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
 import lombok.*;
 
@@ -11,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @ToString
 public class Ingredients extends BaseIdEntity {
 
