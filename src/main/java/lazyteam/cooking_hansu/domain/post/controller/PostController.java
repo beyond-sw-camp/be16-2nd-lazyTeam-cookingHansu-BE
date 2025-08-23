@@ -39,23 +39,29 @@ public class PostController {
     private final S3Uploader s3Uploader;
     private final InteractionService interactionService;
 
-    // 레시피 공유게시글 목록 조회 (공개) - 유저타입 필터링 추가
+    // 레시피 공유게시글 목록 조회 (공개) - 필터링만 지원
     @GetMapping
     public ResponseEntity<?> getRecipePosts(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Role userType, // String -> Role enum으로 변경
+            @RequestParam(required = false) CategoryEnum category,
+            @RequestParam(required = false) Role userType,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<PostResponseDto> posts;
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            posts = postService.searchRecipePosts(keyword.trim(), pageable);
-            log.info("레시피 게시글 검색 완료. 키워드: {}, 결과 수: {}", keyword, posts.getTotalElements());
+        if (category != null && userType != null) {
+            // 카테고리 + 유저타입 필터링
+            posts = postService.getRecipePostsByCategoryAndUserRole(category, userType, pageable);
+            log.info("카테고리+유저타입 필터링 완료. 카테고리: {}, 타입: {}, 결과 수: {}", category, userType, posts.getTotalElements());
+        } else if (category != null) {
+            // 카테고리 필터링
+            posts = postService.getRecipePostsByCategory(category, pageable);
+            log.info("카테고리별 레시피 게시글 조회 완료. 카테고리: {}, 결과 수: {}", category, posts.getTotalElements());
         } else if (userType != null) {
-            // 유저타입 필터링 (Enum이므로 자동 검증됨)
+            // 유저타입 필터링
             posts = postService.getRecipePostsByUserRole(userType, pageable);
             log.info("유저타입별 레시피 게시글 조회 완료. 타입: {}, 결과 수: {}", userType, posts.getTotalElements());
         } else {
+            // 필터 없이 전체 조회
             posts = postService.getRecipePosts(pageable);
             log.info("레시피 게시글 목록 조회 완료. 총 개수: {}", posts.getTotalElements());
         }

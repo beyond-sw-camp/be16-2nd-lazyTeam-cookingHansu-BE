@@ -26,4 +26,7 @@ public interface LikesRepository extends JpaRepository<Likes, UUID> {
     
     @Query("SELECT COUNT(l) FROM Likes l WHERE l.post.id = :postId")
     long countByPostId(@Param("postId") UUID postId);
+
+    @Query("DELETE FROM Likes l WHERE l.post.id = :postId")
+    void deleteByPostId(@Param("postId") UUID postId);
 }

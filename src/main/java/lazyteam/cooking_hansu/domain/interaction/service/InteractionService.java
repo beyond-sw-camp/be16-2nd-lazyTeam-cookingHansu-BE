@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.interaction.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lazyteam.cooking_hansu.domain.interaction.dto.LectureLikeInfoDto;
 import lazyteam.cooking_hansu.domain.interaction.entity.Bookmark;
 import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
@@ -20,8 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -36,167 +33,284 @@ public class InteractionService {
     private final PostRepository postRepository;
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
-
-    // 중복 방지를 위한 메모리 캐시
-    private final Set<String> viewedPosts = new HashSet<>();
+    private final RedisInteractionService redisInteractionService;
 
     @Value("${my.test.user-id}")
     private String testUserIdStr;
 
     // ========== 게시글 좋아요 ==========
-
-    public String togglePostLike(UUID postId, UUID userId) {
+    public String togglePostLike(UUID postId) {
+        UUID userId = getCurrentUserId();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
-        User user = getOrCreateDefaultUser(userId);
+        User user = getCurrentUser();
 
-        Likes existingLike = likesRepository.findByUserIdAndPostId(userId, postId);
+        try {
+            // Redis에서 좋아요 상태 확인 (먼저 Redis 체크)
+            boolean isLiked = redisInteractionService.isPostLikedByUser(postId, userId);
+            
+            // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
+            if (!isLiked) {
+                boolean dbLikedStatus = likesRepository.findByUserIdAndPostId(userId, postId) != null;
+                if (dbLikedStatus) {
+                    redisInteractionService.setPostLikeStatus(postId, userId, true);
+                    isLiked = true;
+                }
+            }
 
-        if (existingLike != null) {
-            // 좋아요 취소
-            likesRepository.delete(existingLike);
-            post.decrementLikeCount();
-            log.info("좋아요 취소 - 게시글: {}, 사용자: {}, 현재 좋아요 수: {}", postId, userId, post.getLikeCount());
-        } else {
-            // 좋아요 추가
-            Likes newLike = Likes.builder()
-                    .user(user)
-                    .post(post)
-                    .build();
-            likesRepository.save(newLike);
-            post.incrementLikeCount();
-            log.info("좋아요 추가 - 게시글: {}, 사용자: {}, 현재 좋아요 수: {}", postId, userId, post.getLikeCount());
+            if (isLiked) {
+                // 좋아요 취소
+                Likes existingLike = likesRepository.findByUserIdAndPostId(userId, postId);
+                if (existingLike != null) {
+                    likesRepository.delete(existingLike);
+                }
+                redisInteractionService.updatePostLike(postId, userId, false);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = likesRepository.countByPostId(postId);
+                redisInteractionService.setPostLikesCount(postId, actualCount);
+                post.setLikeCount(actualCount);
+                postRepository.save(post);
+                
+                log.info("좋아요 취소 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
+                return "좋아요를 취소했습니다.";
+            } else {
+                // 좋아요 추가
+                Likes newLike = Likes.builder().user(user).post(post).build();
+                likesRepository.save(newLike);
+                redisInteractionService.updatePostLike(postId, userId, true);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = likesRepository.countByPostId(postId);
+                redisInteractionService.setPostLikesCount(postId, actualCount);
+                post.setLikeCount(actualCount);
+                postRepository.save(post);
+                
+                log.info("좋아요 추가 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
+                return "좋아요를 추가했습니다.";
+            }
+        } catch (Exception e) {
+            log.error("좋아요 처리 실패 - postId: {}, userId: {}", postId, userId, e);
+            // 오류 발생 시 Redis 캐시 무효화하여 다음 요청에서 DB에서 다시 읽어오도록 함
+            redisInteractionService.deletePostLikesCache(postId);
+            throw new RuntimeException("좋아요 처리 중 오류가 발생했습니다.", e);
         }
-        
-        postRepository.save(post);
-        return existingLike != null ? "좋아요를 취소했습니다." : "좋아요를 추가했습니다.";
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isPostLiked(UUID postId, UUID userId) {
-        return likesRepository.findByUserIdAndPostId(userId, postId) != null;
     }
 
     // ========== 게시글 북마크 ==========
-
-    public String toggleBookmark(UUID postId, UUID userId) {
+    public String toggleBookmark(UUID postId) {
+        UUID userId = getCurrentUserId();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
-        User user = getOrCreateDefaultUser(userId);
+        User user = getCurrentUser();
 
-        Bookmark existingBookmark = bookmarkRepository.findByUserIdAndPostId(userId, postId);
+        try {
+            // Redis에서 북마크 상태 확인 (먼저 Redis 체크)
+            boolean isBookmarked = redisInteractionService.isPostBookmarkedByUser(postId, userId);
+            
+            // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
+            if (!isBookmarked) {
+                boolean dbBookmarkedStatus = bookmarkRepository.findByUserIdAndPostId(userId, postId) != null;
+                if (dbBookmarkedStatus) {
+                    redisInteractionService.setPostBookmarkStatus(postId, userId, true);
+                    isBookmarked = true;
+                }
+            }
 
-        if (existingBookmark != null) {
-            // 북마크 취소
-            bookmarkRepository.delete(existingBookmark);
-            post.decrementBookmarkCount();
-            log.info("북마크 취소 - 게시글: {}, 사용자: {}, 현재 북마크 수: {}", postId, userId, post.getBookmarkCount());
-        } else {
-            // 북마크 추가
-            Bookmark newBookmark = Bookmark.builder()
-                    .user(user)
-                    .post(post)
-                    .build();
-            bookmarkRepository.save(newBookmark);
-            post.incrementBookmarkCount();
-            log.info("북마크 추가 - 게시글: {}, 사용자: {}, 현재 북마크 수: {}", postId, userId, post.getBookmarkCount());
+            if (isBookmarked) {
+                // 북마크 취소
+                Bookmark existingBookmark = bookmarkRepository.findByUserIdAndPostId(userId, postId);
+                if (existingBookmark != null) {
+                    bookmarkRepository.delete(existingBookmark);
+                }
+                redisInteractionService.updatePostBookmark(postId, userId, false);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = bookmarkRepository.countByPostId(postId);
+                redisInteractionService.setPostBookmarksCount(postId, actualCount);
+                post.setBookmarkCount(actualCount);
+                postRepository.save(post);
+                
+                log.info("북마크 취소 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
+                return "북마크를 취소했습니다.";
+            } else {
+                // 북마크 추가
+                Bookmark newBookmark = Bookmark.builder().user(user).post(post).build();
+                bookmarkRepository.save(newBookmark);
+                redisInteractionService.updatePostBookmark(postId, userId, true);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = bookmarkRepository.countByPostId(postId);
+                redisInteractionService.setPostBookmarksCount(postId, actualCount);
+                post.setBookmarkCount(actualCount);
+                postRepository.save(post);
+                
+                log.info("북마크 추가 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
+                return "북마크를 추가했습니다.";
+            }
+        } catch (Exception e) {
+            log.error("북마크 처리 실패 - postId: {}, userId: {}", postId, userId, e);
+            // 오류 발생 시 Redis 캐시 무효화
+            redisInteractionService.deletePostBookmarksCache(postId);
+            throw new RuntimeException("북마크 처리 중 오류가 발생했습니다.", e);
         }
-        
-        postRepository.save(post);
-        return existingBookmark != null ? "북마크를 취소했습니다." : "북마크를 추가했습니다.";
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isBookmarked(UUID postId, UUID userId) {
-        return bookmarkRepository.findByUserIdAndPostId(userId, postId) != null;
     }
 
     // ========== 강의 좋아요 ==========
-
-    public String toggleLectureLike(UUID lectureId, UUID userId) {
+    public String toggleLectureLike(UUID lectureId) {
+        UUID userId = getCurrentUserId();
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. ID: " + lectureId));
-        User user = getOrCreateDefaultUser(userId);
+        User user = getCurrentUser();
 
-        LectureLikes existingLike = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId);
+        try {
+            // Redis에서 좋아요 상태 확인 (먼저 Redis 체크)
+            boolean isLiked = redisInteractionService.isLectureLikedByUser(lectureId, userId);
+            
+            // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
+            if (!isLiked) {
+                boolean dbLikedStatus = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId) != null;
+                if (dbLikedStatus) {
+                    redisInteractionService.setLectureLikeStatus(lectureId, userId, true);
+                    isLiked = true;
+                }
+            }
 
-        if (existingLike != null) {
-            // 좋아요 취소
-            lectureLikesRepository.delete(existingLike);
-            log.info("강의 좋아요 취소 - 강의: {}, 사용자: {}", lectureId, userId);
-            return "강의 좋아요를 취소했습니다.";
-        } else {
-            // 좋아요 추가
-            LectureLikes newLike = LectureLikes.builder()
-                    .user(user)
-                    .lecture(lecture)
-                    .build();
-            lectureLikesRepository.save(newLike);
-            log.info("강의 좋아요 추가 - 강의: {}, 사용자: {}", lectureId, userId);
-            return "강의 좋아요를 추가했습니다.";
+            if (isLiked) {
+                // 좋아요 취소
+                LectureLikes existingLike = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId);
+                if (existingLike != null) {
+                    lectureLikesRepository.delete(existingLike);
+                }
+                redisInteractionService.updateLectureLike(lectureId, userId, false);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = lectureLikesRepository.countByLectureId(lectureId);
+                redisInteractionService.setLectureLikesCount(lectureId, actualCount);
+                
+                log.info("강의 좋아요 취소 - lectureId: {}, userId: {}, 총 개수: {}", lectureId, userId, actualCount);
+                return "강의 좋아요를 취소했습니다.";
+            } else {
+                // 좋아요 추가
+                LectureLikes newLike = LectureLikes.builder().user(user).lecture(lecture).build();
+                lectureLikesRepository.save(newLike);
+                redisInteractionService.updateLectureLike(lectureId, userId, true);
+                
+                // DB 카운트와 Redis 동기화
+                Long actualCount = lectureLikesRepository.countByLectureId(lectureId);
+                redisInteractionService.setLectureLikesCount(lectureId, actualCount);
+                
+                log.info("강의 좋아요 추가 - lectureId: {}, userId: {}, 총 개수: {}", lectureId, userId, actualCount);
+                return "강의 좋아요를 추가했습니다.";
+            }
+        } catch (Exception e) {
+            log.error("강의 좋아요 처리 실패 - lectureId: {}, userId: {}", lectureId, userId, e);
+            // 오류 발생 시 Redis 캐시 무효화
+            redisInteractionService.deleteLectureLikesCache(lectureId);
+            throw new RuntimeException("강의 좋아요 처리 중 오류가 발생했습니다.", e);
         }
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isLectureLiked(UUID lectureId, UUID userId) {
-        return lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId) != null;
-    }
-
-    @Transactional(readOnly = true)
-    public LectureLikeInfoDto getLectureLikeInfo(UUID lectureId, UUID userId) {
-        long likeCount = lectureLikesRepository.countByLectureId(lectureId);
-        boolean isLiked = userId != null && isLectureLiked(lectureId, userId);
-
-        return LectureLikeInfoDto.builder()
-                .lectureId(lectureId)
-                .likeCount(likeCount)
-                .isLiked(isLiked)
-                .build();
     }
 
     // ========== 조회수 ==========
-
     public void incrementViewCount(UUID postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
-        
-        post.incrementViewCount();
-        postRepository.save(post);
+        try {
+            // Redis에서 조회수 관리
+            Long cachedCount = redisInteractionService.getPostViewCount(postId);
+            Long newViewCount;
+            
+            if (cachedCount == null) {
+                // Redis에 캐시가 없으면 DB에서 현재 조회수를 가져와 Redis에 저장 후 증가
+                Post post = postRepository.findById(postId).orElse(null);
+                if (post != null) {
+                    newViewCount = post.getViewCount() + 1;
+                    redisInteractionService.setPostViewCount(postId, newViewCount);
+                    post.setViewCount(newViewCount);
+                    postRepository.save(post);
+                } else {
+                    throw new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId);
+                }
+            } else {
+                // Redis에서 증가
+                newViewCount = redisInteractionService.incrementPostViewCount(postId);
+                
+                // 주기적으로 DB 동기화 (10의 배수마다)
+                if (newViewCount % 10 == 0) {
+                    Post post = postRepository.findById(postId).orElse(null);
+                    if (post != null) {
+                        post.setViewCount(newViewCount);
+                        postRepository.save(post);
+                        log.debug("게시글 조회수 DB 동기화 완료 - postId: {}, count: {}", postId, newViewCount);
+                    }
+                }
+            }
+            
+            log.debug("게시글 조회수 증가 - postId: {}, newCount: {}", postId, newViewCount);
+        } catch (Exception e) {
+            log.error("조회수 처리 실패 - postId: {}", postId, e);
+            // 오류 발생 시 Redis 캐시 무효화
+            redisInteractionService.deletePostViewCache(postId);
+            throw new RuntimeException("조회수 처리 중 오류가 발생했습니다.", e);
+        }
     }
 
-    public boolean incrementViewCountWithCheck(UUID postId, UUID userId) {
-        String viewKey = postId + ":" + userId;
+    public boolean incrementViewCountWithCheck(UUID postId) {
+        UUID userId = getCurrentUserId();
         
-        if (viewedPosts.contains(viewKey)) {
-            return false; // 이미 조회한 경우
+        // 이미 조회한 사용자인지 Redis에서 확인
+        if (redisInteractionService.hasUserViewedPost(postId, userId)) {
+            log.debug("이미 조회한 게시글 - postId: {}, userId: {}", postId, userId);
+            return false;
         }
         
-        // 조회 기록 추가
-        viewedPosts.add(viewKey);
-        
-        // 조회수 증가
+        // 조회 기록을 Redis에 저장하고 조회수 증가
+        redisInteractionService.markPostAsViewed(postId, userId);
         incrementViewCount(postId);
-        
-        return true; // 조회수 증가됨
+        return true;
+    }
+
+    // ========== 데이터 정리 메서드 ==========
+    public void deletePostInteractions(UUID postId) {
+        try {
+            // DB에서 삭제
+            likesRepository.deleteByPostId(postId);
+            bookmarkRepository.deleteByPostId(postId);
+            
+            // Redis 캐시 삭제
+            redisInteractionService.deletePostLikesCache(postId);
+            redisInteractionService.deletePostBookmarksCache(postId);
+            redisInteractionService.deletePostViewCache(postId);
+            
+            log.info("게시글 상호작용 데이터 삭제 완료 - postId: {}", postId);
+        } catch (Exception e) {
+            log.error("게시글 상호작용 데이터 삭제 실패 - postId: {}", postId, e);
+            throw new RuntimeException("데이터 삭제 중 오류가 발생했습니다.", e);
+        }
     }
 
     // ========== 유틸리티 메서드 ==========
+    private UUID getCurrentUserId() {
+        try {
+            return UUID.fromString(testUserIdStr);
+        } catch (IllegalArgumentException e) {
+            log.warn("잘못된 UUID 형식: {}, 기본값 사용", testUserIdStr);
+            // 기본 UUID 생성 (테스트용)
+            return UUID.randomUUID();
+        }
+    }
 
-    /**
-     * 사용자 조회 또는 기본 사용자 생성
-     */
-    private User getOrCreateDefaultUser(UUID userId) {
+    private User getCurrentUser() {
+        UUID userId = getCurrentUserId();
         return userRepository.findById(userId)
                 .orElseGet(() -> {
-                    // 기본 사용자가 없으면 생성
-                    User defaultUser = User.builder()
+                    log.info("사용자를 찾을 수 없어 기본 사용자 생성 - userId: {}", userId);
+                    User testUser = User.builder()
                             .name("기본사용자")
                             .email("default@test.com")
                             .nickname("기본사용자")
                             .password("password123")
                             .profileImageUrl("https://via.placeholder.com/150")
                             .build();
-                    return userRepository.save(defaultUser);
+                    return userRepository.save(testUser);
                 });
     }
 }

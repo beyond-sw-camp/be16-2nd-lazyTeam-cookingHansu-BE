@@ -129,4 +129,19 @@ public class Post extends BaseIdAndTimeEntity {
     public boolean isOwnedBy(User user) {
         return this.user != null && this.user.getId().equals(user.getId());
     }
+
+    // Redis 동기화를 위한 조회수 직접 설정 메서드
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount != null ? viewCount : 0L;
+    }
+
+    // Redis 동기화를 위한 좋아요 수 직접 설정 메서드
+    public void setLikeCount(Long likeCount) {
+        this.likeCount = likeCount != null ? likeCount : 0L;
+    }
+
+    // Redis 동기화를 위한 북마크 수 직접 설정 메서드
+    public void setBookmarkCount(Long bookmarkCount) {
+        this.bookmarkCount = bookmarkCount != null ? bookmarkCount : 0L;
+    }
 }
