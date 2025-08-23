@@ -19,23 +19,19 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     List<Post> findAllByUser(User user);
 
-    // 기본조회 - 삭제안한거 공개한것만 찾기
     Page<Post> findByIsOpenTrueAndDeletedAtIsNull(Pageable pageable);
 
-    // 사용자별 조회
     Page<Post> findByUserAndDeletedAtIsNull(User user, Pageable pageable);
 
-    // 특정 사용자의 공개 게시글만 조회
     Page<Post> findByUserAndIsOpenTrueAndDeletedAtIsNull(User user, Pageable pageable);
 
-    // 카테고리별 조회 (공개된 것만)
     Page<Post> findByCategoryAndIsOpenTrueAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
 
-    // 유저 역할별 게시글 조회
+    Page<Post> findByCategoryAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
+
     @Query("SELECT p FROM Post p JOIN p.user u WHERE u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
     Page<Post> findByUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("role") Role role, Pageable pageable);
-    
-    // 카테고리 + 유저 역할 조합 필터링
+
     @Query("SELECT p FROM Post p JOIN p.user u WHERE p.category = :category AND u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
     Page<Post> findByCategoryAndUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("category") CategoryEnum category, @Param("role") Role role, Pageable pageable);
 }

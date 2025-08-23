@@ -47,15 +47,19 @@ public class Recipe extends BaseIdAndTimeEntity {
 
     @NotNull(message = "조리 시간은 필수입니다")
     @Column(name = "cook_time", nullable = false, columnDefinition = "BIGINT UNSIGNED")
-    private int cookTime; // 조리 시간 (분)
+    private int cookTime;
+
     @Min(value = 1, message = "인분 수는 1 이상이어야 합니다")
     @Max(value = 20, message = "인분 수는 20 이하여야 합니다")
     @Column(name = "servings", nullable = true)
-    private Integer servings; // 몇 인분 (null 허용)
+    private Integer servings;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingredients> ingredients;
-    // ========== 생성자 ==========
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeStep> steps;
+
     @Builder
     public Recipe(User user, String description, String title, String thumbnailUrl,
                   LevelEnum level, CategoryEnum category, int cookTime, Integer servings) {
@@ -66,16 +70,11 @@ public class Recipe extends BaseIdAndTimeEntity {
         this.level = level;
         this.category = category;
         this.cookTime = cookTime;
-        this.servings = servings; // 기본값 없음, null 허용
+        this.servings = servings;
     }
 
-    // ========== 비즈니스 메서드 ==========
-
-    /**
-     * 레시피 정보 수정
-     */
     public void updateRecipe(String title, String description, String thumbnailUrl,
-                           LevelEnum level, CategoryEnum category, Integer cookTime, Integer servings) {
+                             LevelEnum level, CategoryEnum category, Integer cookTime, Integer servings) {
         if (title != null && !title.trim().isEmpty()) {
             this.title = title.trim();
         }
@@ -99,17 +98,11 @@ public class Recipe extends BaseIdAndTimeEntity {
         }
     }
 
-    /**
-     * 레시피 소유자 확인
-     */
     public boolean isOwnedBy(User user) {
         return this.user != null && this.user.getId().equals(user.getId());
     }
 
-    /**
-     * 인분 수를 문자열로 반환 (예: "4인분", null인 경우 null 반환)
-     */
-    public String getServingsText() {
-        return this.servings != null ? this.servings + "인분" : null;
-    }
+//    public String getServingsText() {
+//        return this.servings != null ? this.servings + "인분" : null;
+//    }
 }

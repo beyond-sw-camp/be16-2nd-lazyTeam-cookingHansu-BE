@@ -16,7 +16,7 @@ import java.util.UUID;
 @Builder
 public class PostCreateRequestDto {
 
-    @NotBlank(message = "게시글 작성을 필수입니다.")
+    @NotBlank(message = "게시글 제목은 필수입니다.")
     @Size(max = 255, message = "게시글 제목은 255자 이하여야 합니다.")
     private String title;
 
@@ -33,24 +33,19 @@ public class PostCreateRequestDto {
     @NotNull(message = "공개 여부는 필수입니다.")
     private Boolean isOpen = true;
 
-    // 연결할 레시피 ID (선택적)
     private UUID recipe;
-    
-    // 각 조리순서별 추가 설명 (레시피 연결 시 사용)
+
     private List<PostRecipeStepDto> stepDescriptions;
 
-//    유효성 검증
     public boolean isValid() {
-        return title != null && !title.trim().isEmpty() &&
-                category != null;
+        return title != null && !title.trim().isEmpty() && category != null;
     }
 
-//    레시피 연결 확인
-    public boolean hasRecipe() {return recipe != null;}
-    
-//    레시피 단계별 설명 존재 확인
-    public boolean hasStepDescriptions() {
-        return stepDescriptions != null && !stepDescriptions.isEmpty();
+    public boolean hasRecipe() {
+        return recipe != null;
     }
-
+//
+//    public boolean hasStepDescriptions() {
+//        return stepDescriptions != null && !stepDescriptions.isEmpty();
+//    }
 }
