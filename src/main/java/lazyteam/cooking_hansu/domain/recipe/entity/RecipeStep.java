@@ -6,13 +6,15 @@ import lombok.*;
 
 /**
  * 조리 순서 엔티티
- * ERD의 Lecture_Step 테이블과 매핑
+ * ERD의 Recipe_Step 테이블과 매핑
  */
 @Entity
+@Table(name = "Recipe_Step")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @ToString
 public class RecipeStep extends BaseIdAndTimeEntity {
 

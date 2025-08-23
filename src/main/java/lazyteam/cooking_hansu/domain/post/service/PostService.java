@@ -67,20 +67,6 @@ public class PostService {
             // JSON으로 전달된 URL 사용
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
-        
-        // 레시피 연결 시 레시피 썸네일 사용 옵션
-        if (requestDto.hasRecipe() && thumbnailUrl == null) {
-            Recipe recipe = recipeRepository.findById(requestDto.getRecipe())
-                    .orElseThrow(() -> new EntityNotFoundException("레시피를 찾을 수 없습니다."));
-            
-            // 레시피 소유자만 공유 가능
-            if (!recipe.isOwnedBy(currentUser)) {
-                throw new IllegalArgumentException("본인의 레시피만 공유할 수 있습니다.");
-            }
-            
-            thumbnailUrl = recipe.getThumbnailUrl(); // 레시피 썸네일 사용
-        }
-
         // 게시글 엔티티 생성
         Post post = Post.builder()
                 .user(currentUser)
@@ -92,14 +78,6 @@ public class PostService {
                 .build();
 
         Post savedPost = postRepository.save(post);
-        
-        // 레시피 연결 처리
-        if (requestDto.hasRecipe()) {
-            linkRecipeToPost(savedPost, requestDto.getRecipe(), requestDto.getStepDescriptions());
-        }
-
-        log.info("레시피 공유 게시글 작성 완료. 사용자: {}, 게시글 ID: {}, 레시피 연결: {}", 
-                currentUser.getEmail(), savedPost.getId(), requestDto.hasRecipe());
         return savedPost.getId();
     }
 
@@ -178,18 +156,9 @@ public class PostService {
             throw new IllegalArgumentException("비공개 게시글입니다.");
         }
 
-        // 조회수 증가
-        post.incrementViewCount();
-        
-        // 레시피 연결 정보 조회
-        List<PostSequenceDescription> descriptions = getPostRecipeDescriptions(postId);
-        Recipe connectedRecipe = getConnectedRecipe(postId);
+        // 조회수 증가는 InteractionService에서 처리됨
 
-        if (connectedRecipe != null) {
-            return PostResponseDto.fromEntityWithRecipe(post, connectedRecipe, descriptions);
-        } else {
             return PostResponseDto.fromEntity(post);
-        }
     }
 
     /**
