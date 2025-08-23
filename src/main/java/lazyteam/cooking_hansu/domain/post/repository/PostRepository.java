@@ -24,7 +24,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     // 사용자별 조회
     Page<Post> findByUserAndDeletedAtIsNull(User user, Pageable pageable);
-    List<Post> findByUserAndDeletedAtIsNull(User user);
 
     // 특정 사용자의 공개 게시글만 조회
     Page<Post> findByUserAndIsOpenTrueAndDeletedAtIsNull(User user, Pageable pageable);
@@ -32,14 +31,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     // 카테고리별 조회 (공개된 것만)
     Page<Post> findByCategoryAndIsOpenTrueAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
 
-    // 카테고리별 조회 (전체 - 관리자용)
-    Page<Post> findByCategoryAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
-    
-    // === 필터링 메서드 ===
-    
-    // 사용자별 조회 (생성일 내림차순 정렬)
-    Page<Post> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(User user, Pageable pageable);
-    
     // 유저 역할별 게시글 조회
     @Query("SELECT p FROM Post p JOIN p.user u WHERE u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
     Page<Post> findByUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("role") Role role, Pageable pageable);

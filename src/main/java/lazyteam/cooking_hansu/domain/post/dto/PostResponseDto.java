@@ -5,7 +5,6 @@ import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -32,33 +31,6 @@ public class PostResponseDto {
 
     // 작성자 정보
     private UserInfoDto user;
-
-    // 레시피 단계별 설명 (있는 경우)
-    private List<StepDescriptionDto> stepDescriptions;
-
-    /**
-     * 레시피 단계별 설명 DTO
-     */
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class StepDescriptionDto {
-        private UUID stepId;
-        private Integer stepSequence;
-        private String originalContent;     // 원본 레시피의 조리순서 내용
-        private String additionalContent;   // 게시글 작성자가 추가한 설명
-
-        public static StepDescriptionDto fromEntity(lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription description) {
-            return StepDescriptionDto.builder()
-                    .stepId(description.getRecipeStep().getId())
-                    .stepSequence(description.getRecipeStep().getStepSequence())
-                    .originalContent(description.getRecipeStep().getContent())
-                    .additionalContent(description.getContent())
-                    .build();
-        }
-    }
 
     /**
      * Entity -> DTO 변환

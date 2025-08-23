@@ -2,15 +2,8 @@ package lazyteam.cooking_hansu.domain.post.service;
 
 import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
-import lazyteam.cooking_hansu.domain.post.dto.PostRecipeStepDto;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
-import lazyteam.cooking_hansu.domain.recipe.repository.RecipeRepository;
-import lazyteam.cooking_hansu.domain.recipe.repository.RecipeStepRepository;
-import lazyteam.cooking_hansu.domain.recipe.repository.PostSequenceDescriptionRepository;
-import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
-import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
-import lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -27,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,16 +30,13 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final RecipeRepository recipeRepository;
-    private final RecipeStepRepository recipeStepRepository;
-    private final PostSequenceDescriptionRepository postSequenceDescriptionRepository;
     private final S3Uploader s3Uploader;
 
     @Value("${my.test.user-id}")
     private String testUserIdStr;
 
     /**
-     * 레시피 공유 게시글 생성 (이미지 포함) - 레시피 연결 지원
+     * 레시피 공유 게시글 생성 (이미지 포함)
      */
     @Transactional
     public UUID createRecipePost(PostCreateRequestDto requestDto, MultipartFile thumbnail) {
@@ -139,7 +128,7 @@ public class PostService {
     }
 
     /**
-     * 레시피 공유 게시글 상세 조회 (레시피 연결 정보 포함)
+     * 레시피 공유 게시글 상세 조회
      */
     public PostResponseDto getRecipePost(UUID postId) {
         Post post = postRepository.findById(postId)
@@ -158,6 +147,16 @@ public class PostService {
         // 조회수 증가는 InteractionService에서 처리됨
 
             return PostResponseDto.fromEntity(post);
+    }
+
+    /**
+     * 수정을 위한 본인 게시글 상세 조회 (비공개 게시글도 포함)
+     */
+    public PostResponseDto getMyRecipePost(UUID postId) {
+        User currentUser = getCurrentUser();
+        Post post = getPostByIdAndUser(postId, currentUser);
+        
+        return PostResponseDto.fromEntity(post);
     }
 
     /**
@@ -202,6 +201,7 @@ public class PostService {
     public void updateRecipePost(UUID postId, PostCreateRequestDto requestDto) {
         updateRecipePost(postId, requestDto, null);
     }
+
 
     /**
      * 레시피 공유 게시글 삭제 (Soft Delete)
@@ -258,82 +258,8 @@ public class PostService {
 
         return post;
     }
-    
-    /**
-     * 게시글에 레시피 연결 (조리순서별 설명 포함)
-     */
-    private void linkRecipeToPost(Post post, UUID recipeId, List<PostRecipeStepDto> stepDescriptions) {
-        if (recipeId == null) {
-            return;
-        }
-        
-        // 레시피 존재 확인
-        Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new EntityNotFoundException("레시피를 찾을 수 없습니다."));
 
-        // 각 조리순서별 설명 생성
-        if (stepDescriptions != null && !stepDescriptions.isEmpty()) {
-            for (PostRecipeStepDto stepDto : stepDescriptions) {
-                // RecipeStep 존재 여부 확인
-                RecipeStep recipeStep = recipeStepRepository.findById(stepDto.getStepId())
-                        .orElseThrow(() -> new EntityNotFoundException("조리순서를 찾을 수 없습니다."));
 
-                // 해당 단계가 실제로 이 레시피의 것인지 확인
-                if (!recipeStep.getRecipe().getId().equals(recipeId)) {
-                    throw new IllegalArgumentException("잘못된 조리순서입니다.");
-                }
-
-                // 중복 방지
-                if (postSequenceDescriptionRepository.existsByPostIdAndRecipeStepId(post.getId(), stepDto.getStepId())) {
-                    throw new IllegalArgumentException("동일한 조리순서에 대한 설명이 이미 존재합니다.");
-                }
-                
-                PostSequenceDescription description = PostSequenceDescription.builder()
-                        .post(post)
-                        .recipeStep(recipeStep)
-                        .content(stepDto.getContent())
-                        .build();
-                
-                postSequenceDescriptionRepository.save(description);
-            }
-            
-            log.info("레시피 연결 완료 - postId: {}, recipeId: {}, 설명 개수: {}", 
-                    post.getId(), recipeId, stepDescriptions.size());
-        }
-    }
-    
-    /**
-     * 게시글의 레시피 연결 정보 조회
-     */
-    @Transactional(readOnly = true)
-    public List<PostSequenceDescription> getPostRecipeDescriptions(UUID postId) {
-        return postSequenceDescriptionRepository.findByPostIdOrderByStepSequence(postId);
-    }
-    
-    /**
-     * 게시글에 연결된 레시피 조회
-     */
-    @Transactional(readOnly = true)
-    public Recipe getConnectedRecipe(UUID postId) {
-        List<PostSequenceDescription> descriptions = getPostRecipeDescriptions(postId);
-        if (descriptions.isEmpty()) {
-            return null;
-        }
-        return descriptions.get(0).getRecipeStep().getRecipe();
-    }
-    
-    /**
-     * 게시글의 레시피 연결 해제
-     */
-    @Transactional
-    public void unlinkRecipeFromPost(UUID postId) {
-        User currentUser = getCurrentUser();
-        Post post = getPostByIdAndUser(postId, currentUser);
-        
-        postSequenceDescriptionRepository.deleteByPostId(postId);
-        
-        log.info("레시피 연결 해제 완료 - postId: {}", postId);
-    }
 
     /**
      * 유저 역할별 레시피 공유 게시글 조회 (Enum 검증 자동)
