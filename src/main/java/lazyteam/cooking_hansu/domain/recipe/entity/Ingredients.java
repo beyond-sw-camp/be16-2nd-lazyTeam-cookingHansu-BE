@@ -24,6 +24,17 @@ public class Ingredients extends BaseIdEntity {
     @Column(nullable = false, length = 255)
     private String amount; // 재료량 (예: 200g, 1/2개, 2컵)
 
+//    비즈니스메서드
+
+//    재료정보수정
+    public void updateIngredient(String name, String amount) {
+        if (name != null && !name.trim().isEmpty()) {
+            this.name = name.trim();
+        }
+        if (amount != null && !amount.trim().isEmpty()) {
+            this.amount = amount.trim();
+        }
+    }
 
 //    재료정보 유효성 수정
     public boolean isValid() {

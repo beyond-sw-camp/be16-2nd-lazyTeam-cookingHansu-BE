@@ -81,6 +81,11 @@ public class RecipeService {
         return savedRecipe.getId();
     }
 
+//    레시피 작성 (썸네일 없음)
+    public UUID createRecipe(RecipeCreateRequestDto requestDto) {
+        return createRecipe(requestDto, null);
+    }
+
 //    상세 레시피 조회
     @Transactional(readOnly = true)
     public RecipeResponseDto getRecipe(UUID recipeId) {
@@ -160,6 +165,12 @@ public class RecipeService {
                 recipe.getServings() != null ? recipe.getServings() + "인분" : "미표시");
     }
 
+    /**
+     * REQ017: 레시피 수정 (썸네일 없음)
+     */
+    public void updateRecipe(UUID recipeId, RecipeUpdateRequestDto requestDto) {
+        updateRecipe(recipeId, requestDto, null);
+    }
 
     /**
      * REQ018: 레시피 삭제
