@@ -17,8 +17,4 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID>{
 
     // 사용자별 개인 레시피 조회
     Page<Recipe> findByUser(User user, Pageable pageable);
-
-    // 개인 레시피 내 검색
-    Page<Recipe> findByUserAndTitleContaining(User user, String keyword, Pageable pageable);
-
 }

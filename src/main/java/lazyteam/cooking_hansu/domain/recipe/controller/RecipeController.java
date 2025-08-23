@@ -41,23 +41,16 @@ public class RecipeController {
     }
 
     // 내 레시피 목록조회 (페이징)
-    @GetMapping("/list")
+    @GetMapping("/my-list")
     public ResponseEntity<?> getMyRecipes(
-            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<RecipeResponseDto> recipes;
-        
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            recipes = recipeService.searchMyRecipes(keyword.trim(), pageable);
-            log.info("내 레시피 검색 완료. 키워드: {}, 결과 수: {}", keyword, recipes.getTotalElements());
-        } else {
-            recipes = recipeService.getMyRecipes(pageable);
-            log.info("내 레시피 목록 조회 완료. 총 개수: {}", recipes.getTotalElements());
-        }
+        Page<RecipeResponseDto> recipes = recipeService.getMyRecipes(pageable);
+        log.info("내 레시피 목록 조회 완료. 총 개수: {}", recipes.getTotalElements());
         
         return ResponseEntity.ok(ResponseDto.ok(recipes, HttpStatus.OK));
     }
+
 
     // 레시피 상세조회
     @GetMapping("/{recipeId}")

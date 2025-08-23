@@ -99,11 +99,10 @@ public class PostService {
     }
 
     /**
-     * 레시피 공유 게시글 검색
+     * 카테고리와 유저 역할 조합 필터링
      */
-    public Page<PostResponseDto> searchRecipePosts(String keyword, Pageable pageable) {
-        Page<Post> posts = postRepository.findByIsOpenTrueAndDeletedAtIsNullAndTitleContaining(keyword, pageable);
-
+    public Page<PostResponseDto> getRecipePostsByCategoryAndUserRole(CategoryEnum category, Role role, Pageable pageable) {
+        Page<Post> posts = postRepository.findByCategoryAndUserRoleAndIsOpenTrueAndDeletedAtIsNull(category, role, pageable);
         return posts.map(PostResponseDto::fromEntity);
     }
 

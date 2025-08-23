@@ -22,9 +22,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     // 기본조회 - 삭제안한거 공개한것만 찾기
     Page<Post> findByIsOpenTrueAndDeletedAtIsNull(Pageable pageable);
 
-    // 검색 - 삭제안한거 공개한것 중에서 제목으로 검색
-    Page<Post> findByIsOpenTrueAndDeletedAtIsNullAndTitleContaining(String title, Pageable pageable);
-
     // 사용자별 조회
     Page<Post> findByUserAndDeletedAtIsNull(User user, Pageable pageable);
     List<Post> findByUserAndDeletedAtIsNull(User user);
@@ -38,20 +35,16 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     // 카테고리별 조회 (전체 - 관리자용)
     Page<Post> findByCategoryAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
     
-    // === 레시피 공유 서비스용 추가 메서드 ===
+    // === 필터링 메서드 ===
     
     // 사용자별 조회 (생성일 내림차순 정렬)
     Page<Post> findByUserAndDeletedAtIsNullOrderByCreatedAtDesc(User user, Pageable pageable);
     
-    // 제목과 설명에서 키워드 검색 (공개된 것만)
-    Page<Post> findByIsOpenTrueAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(
-            String titleKeyword, String descriptionKeyword, Pageable pageable);
-    
-    // 카테고리 + 키워드 검색 (공개된 것만)
-    Page<Post> findByCategoryAndIsOpenTrueAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(
-            CategoryEnum category, String titleKeyword, String descriptionKeyword, Pageable pageable);
-    
-    // 유저 역할별 게시글 조회 (간단한 버전)
+    // 유저 역할별 게시글 조회
     @Query("SELECT p FROM Post p JOIN p.user u WHERE u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
     Page<Post> findByUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("role") Role role, Pageable pageable);
+    
+    // 카테고리 + 유저 역할 조합 필터링
+    @Query("SELECT p FROM Post p JOIN p.user u WHERE p.category = :category AND u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
+    Page<Post> findByCategoryAndUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("category") CategoryEnum category, @Param("role") Role role, Pageable pageable);
 }
