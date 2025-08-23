@@ -177,22 +177,6 @@ public class PostService {
         Page<Post> posts = postRepository.findByCategoryAndUserRoleAndIsOpenTrueAndDeletedAtIsNull(category, role, pageable);
         return posts.map(PostResponseDto::fromEntity);
     }
-
-    @Transactional(readOnly = true)
-    public Page<PostResponseDto> getMyRecipePosts(Pageable pageable) {
-        User currentUser = getCurrentUser();
-        Page<Post> posts = postRepository.findByUserAndDeletedAtIsNull(currentUser, pageable);
-        return posts.map(PostResponseDto::fromEntity);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<PostResponseDto> getRecipePostsByUser(UUID userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        Page<Post> posts = postRepository.findByUserAndIsOpenTrueAndDeletedAtIsNull(user, pageable);
-        return posts.map(PostResponseDto::fromEntity);
-    }
-
     @Transactional
     public void updateRecipePost(UUID postId, PostUpdateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();

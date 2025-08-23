@@ -95,22 +95,6 @@ public class RecipeService {
     }
 
     /**
-     * REQ016: 내 레시피 목록 조회
-     */
-    @Transactional(readOnly = true)
-    public Page<RecipeResponseDto> getMyRecipes(Pageable pageable) {
-        User currentUser = getCurrentUser();
-        Page<Recipe> recipes = recipeRepository.findByUser(currentUser, pageable);
-
-        return recipes.map(recipe -> {
-            List<Ingredients> ingredients = ingredientsRepository.findByRecipe(recipe);
-            List<RecipeStep> steps = recipeStepRepository.findByRecipeOrderByStepSequence(recipe);
-            return RecipeResponseDto.fromEntity(recipe, ingredients, steps);
-        });
-    }
-
-
-    /**
      * REQ017: 레시피 수정 (썸네일 포함)
      */
     public void updateRecipe(UUID recipeId, RecipeUpdateRequestDto requestDto, MultipartFile thumbnail) {

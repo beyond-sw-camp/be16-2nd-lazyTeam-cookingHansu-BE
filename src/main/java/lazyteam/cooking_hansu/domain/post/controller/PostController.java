@@ -90,25 +90,6 @@ public class PostController {
         return ResponseEntity.ok(ResponseDto.ok(posts, HttpStatus.OK));
     }
 
-    @Operation(summary = "내 레시피 공유 게시글 조회", description = "현재 사용자의 게시글을 조회합니다.")
-    @GetMapping("/my")
-    public ResponseEntity<?> getMyRecipePosts(
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<PostResponseDto> posts = postService.getMyRecipePosts(pageable);
-        log.info("내 레시피 공유게시글 목록 조회 완료. 총 개수: {}", posts.getTotalElements());
-        return ResponseEntity.ok(ResponseDto.ok(posts, HttpStatus.OK));
-    }
-
-    @Operation(summary = "특정 사용자의 공개 게시글 조회", description = "특정 사용자의 공개된 게시글을 조회합니다.")
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getRecipePostsByUser(
-            @PathVariable UUID userId,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<PostResponseDto> posts = postService.getRecipePostsByUser(userId, pageable);
-        log.info("사용자 {} 레시피 공유게시글 목록 조회 완료. 총 개수: {}", userId, posts.getTotalElements());
-        return ResponseEntity.ok(ResponseDto.ok(posts, HttpStatus.OK));
-    }
-
     @Operation(summary = "카테고리별 레시피 공유 게시글 조회", description = "특정 카테고리의 공개된 게시글을 조회합니다.")
     @GetMapping("/category/{category}")
     public ResponseEntity<?> getRecipePostsByCategory(
