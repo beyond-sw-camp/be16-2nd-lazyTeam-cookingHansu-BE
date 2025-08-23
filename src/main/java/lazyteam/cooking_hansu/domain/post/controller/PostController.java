@@ -99,7 +99,7 @@ public class PostController {
     }
 
     // 레시피 공유게시글 수정
-    @PutMapping(consumes = "multipart/form-data")
+    @PutMapping(value = "/{postId}", consumes = "multipart/form-data")
     public ResponseEntity<?> updateRecipePost(
             @PathVariable UUID postId,
             @RequestPart("data") @Valid PostCreateRequestDto requestDto,
