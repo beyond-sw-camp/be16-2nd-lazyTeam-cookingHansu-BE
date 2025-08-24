@@ -151,20 +151,14 @@ public class Post extends BaseIdAndTimeEntity {
         this.bookmarkCount = bookmarkCount != null ? bookmarkCount : 0L;
     }
 
-    // Redis 동기화를 위한 조회수 직접 설정 메서드 (deprecated)
-    @Deprecated
     public void setViewCount(Long viewCount) {
         updateViewCount(viewCount);
     }
 
-    // Redis 동기화를 위한 좋아요 수 직접 설정 메서드 (deprecated)
-    @Deprecated
     public void setLikeCount(Long likeCount) {
         updateLikeCount(likeCount);
     }
 
-    // Redis 동기화를 위한 북마크 수 직접 설정 메서드 (deprecated)
-    @Deprecated
     public void setBookmarkCount(Long bookmarkCount) {
         updateBookmarkCount(bookmarkCount);
     }
