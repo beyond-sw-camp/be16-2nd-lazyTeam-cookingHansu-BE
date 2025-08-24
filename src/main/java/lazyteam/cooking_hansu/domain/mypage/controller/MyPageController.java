@@ -1,9 +1,10 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
-import lazyteam.cooking_hansu.domain.mypage.dto.*;
+import lazyteam.cooking_hansu.domain.mypage.dto.ProfileUpdateRequestDto;
 import lazyteam.cooking_hansu.domain.mypage.service.*;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -11,11 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/my")
+@Slf4j
 public class MyPageController {
 
     private final MyPageService myPageService;
@@ -43,15 +43,6 @@ public class MyPageController {
     public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image) {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.uploadProfileImage(image), HttpStatus.OK),
-                HttpStatus.OK
-        );
-    }
-
-
-    @GetMapping("/recipes")
-    public ResponseEntity<?> myRecipeList() {
-        return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyRecipes(), HttpStatus.OK),
                 HttpStatus.OK
         );
     }
@@ -87,4 +78,5 @@ public class MyPageController {
                 HttpStatus.OK
         );
     }
+
 }

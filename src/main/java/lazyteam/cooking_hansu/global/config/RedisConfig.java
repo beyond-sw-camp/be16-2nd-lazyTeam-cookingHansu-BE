@@ -5,8 +5,10 @@ import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationPublisher;
 import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -16,7 +18,10 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.Map;
 
 /**
  * Redis 환경 설정 클래스
@@ -24,65 +29,116 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * 0: refresh token 저장소
  */
 @Configuration
+@EnableCaching
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
-    private String host;
+    private String redishost;
 
     @Value("${spring.data.redis.port}")
-    private int port;
+    private int redisport;
 
+    // ================================
+    // DB 0: Refresh Token 저장소
+    // ================================
     @Bean
-    @Qualifier("rtTemplate")
+    @Primary
+    @Qualifier("rtInventory")
     public RedisConnectionFactory rtConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
         configuration.setDatabase(0);
-
         return new LettuceConnectionFactory(configuration);
     }
 
     @Bean
-    @Qualifier("rtTemplate")
-    public RedisTemplate<String, String> redisTemplate(@Qualifier("rtTemplate") RedisConnectionFactory rtConnectionFactory) {
+    @Qualifier("rtInventory")
+    public RedisTemplate<String, String> rtTemplate(@Qualifier("rtInventory") RedisConnectionFactory rtConnectionFactory) {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.setConnectionFactory(rtConnectionFactory);
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
+
+    // ================================
+    // DB 2: 상호작용 (좋아요/북마크/조회수)
+    // ================================
+    @Bean
+    @Qualifier("interactionRedis")
+    public RedisConnectionFactory interactionRedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
+        configuration.setDatabase(2); // 상호작용용 DB 2번
+        return new LettuceConnectionFactory(configuration);
+    }
+
+    @Bean
+    @Qualifier("interactionRedisTemplate")
+    public RedisTemplate<String, Object> interactionRedisTemplate(@Qualifier("interactionRedis") RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean
+    @Qualifier("interactionStringRedisTemplate")
+    public StringRedisTemplate interactionStringRedisTemplate(@Qualifier("interactionRedis") RedisConnectionFactory connectionFactory) {
+        return new StringRedisTemplate(connectionFactory);
+    }
+
+
 
     //    연결기본객체
     @Bean
     @Qualifier("chatPubSub")
     public RedisConnectionFactory chatPubSubConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(port);
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
 //        Redis pub/sub에서는 특정 데이터베이스에 의존적이지 않음.
-        configuration.setDatabase(1); // 기본 데이터베이스 설정
+//        configuration.setDatabase(0); // 기본 데이터베이스 설정
 
         return new LettuceConnectionFactory(configuration);
     }
 
     //    publish 객체
     @Bean
-    @Qualifier("chatPub")
+    @Qualifier("chatPubSub")
 //    일반적으로는 RedisTemplate<키데이터타입, 밸류데이터타입>을 사용
-    public StringRedisTemplate stringRedisTemplate(@Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
-        return new StringRedisTemplate(redisConnectionFactory);
+    public RedisTemplate<String, String> chatPubSubRedisTemplate(@Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
     }
 
     //    subscribe 객체
     @Bean
+    @Qualifier("chatMessageListenerContainer")
     public RedisMessageListenerContainer redisMessageListenerContainer(
             @Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory,
             MessageListenerAdapter messageListenerAdapter)
     {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(messageListenerAdapter, new PatternTopic("chat"));
+        // 채팅 메시지와 읽음 상태 이벤트 모두 구독
+        container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/chat-message"));
+        container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/online-participant"));
+        container.addMessageListener(messageListenerAdapter, new PatternTopic("/topic/chat-rooms/*/chat-participants"));
         return container;
     }
 
@@ -91,6 +147,56 @@ public class RedisConfig {
     public MessageListenerAdapter messageListenerAdapter(ChatRedisService redisPubSubService) {
 //        RedisPubSubService의 특정 메서드가 수신된 메시지를 처리할 수 있도록 지정
         return new MessageListenerAdapter(redisPubSubService, "onMessage");
+    }
+
+    @Bean
+    @Qualifier("chatFactory")
+    public RedisConnectionFactory chatRedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(redishost);
+        configuration.setPort(redisport);
+        configuration.setDatabase(12);
+        return new LettuceConnectionFactory(configuration);
+    }
+
+    @Bean
+    @Qualifier("chatParticipants")
+    public RedisTemplate<String, Map<String, String>> chatParticipantsRedisTemplate(
+            @Qualifier("chatFactory") RedisConnectionFactory chatRedisConnectionFactory) {
+        RedisTemplate<String, Map<String, String>> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(chatRedisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Map.class));
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+
+        return redisTemplate;
+    }
+
+    @Bean
+    @Qualifier("chatOnlineParticipants")
+    public RedisTemplate<String, String> chatOnlineParticipantRedisTemplate(
+            @Qualifier("chatFactory") RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+
+    // 기본 redisTemplate 빈 추가 (필수)
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(
+            @Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
     }
 
     // 알림용 RedisTemplate

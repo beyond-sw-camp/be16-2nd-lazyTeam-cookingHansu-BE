@@ -15,6 +15,6 @@ public class MyPostListDto {
     private String description;
     private String thumbnailUrl;
     private LocalDateTime createdAt;
-    private Integer likeCount;
-    private Integer bookmarkCount;
+    private Long likeCount;
+    private Long bookmarkCount;
 }

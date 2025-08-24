@@ -1,8 +1,7 @@
 package lazyteam.cooking_hansu.domain.common.entity;
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
-import lombok.Builder;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;

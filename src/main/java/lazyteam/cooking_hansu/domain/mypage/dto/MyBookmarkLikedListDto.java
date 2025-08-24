@@ -15,8 +15,8 @@ public class MyBookmarkLikedListDto {
     private String title;
     private String description;
     private String thumbnailUrl;
-    private int likeCount;
-    private int bookmarkCount;
+    private Long likeCount;
+    private Long bookmarkCount;
     private LocalDateTime createdAt;
     private String writerNickname;
 }

@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
 
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

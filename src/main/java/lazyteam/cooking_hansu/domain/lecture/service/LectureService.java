@@ -9,22 +9,21 @@ import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.domain.interaction.service.RedisInteractionService;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -50,6 +49,7 @@ public class LectureService {
     private final S3Uploader s3Uploader;
     private final LectureReviewRepository lectureReviewRepository;
     private final LectureQnaRepository lectureQnaRepository;
+    private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
 
 
     @Value("${cloud.aws.s3.bucket}")
@@ -333,6 +333,24 @@ public class LectureService {
 
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
+
+        // Redis에서 좋아요 수 가져와서 동기화
+        try {
+            Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
+            if (cachedLikeCount != null) {
+                // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
+                lecture.updateLikeCount(cachedLikeCount);
+                log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
+            } else {
+                // Redis에 캐시가 없으면 DB 값을 Redis에 저장
+                Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
+                redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
+                log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
+            }
+        } catch (Exception e) {
+            log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
+            // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+        }
 
         User submittedBy = lecture.getSubmittedBy();
         List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
