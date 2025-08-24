@@ -91,7 +91,7 @@ public class PostController {
         return ResponseEntity.ok(ResponseDto.ok("Post 삭제 완료", HttpStatus.OK));
     }
 
-// 강의 팀메이트 스타일을 참고한 Post 목록 조회
+//    목록조회(필터추가)
     @Operation(summary = "Post 목록 조회", description = "필터링과 정렬 옵션을 포함한 Post 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<?> getPostList(
