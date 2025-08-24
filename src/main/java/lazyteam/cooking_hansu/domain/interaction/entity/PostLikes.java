@@ -16,7 +16,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class Likes extends BaseIdAndTimeEntity {
+public class PostLikes extends BaseIdAndTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

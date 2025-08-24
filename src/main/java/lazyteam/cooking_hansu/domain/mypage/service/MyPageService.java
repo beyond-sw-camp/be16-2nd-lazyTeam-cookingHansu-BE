@@ -192,9 +192,9 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public List<MyBookmarkLikedListDto> getMyLikes() {
         User user = getCurrentUser();
-        List<Likes> likesList = postLikesRepository.findAllByUser(user);
+        List<PostLikes> postLikesList = postLikesRepository.findAllByUser(user);
 
-        return likesList.stream()
+        return postLikesList.stream()
                 .map(like -> {
                     Post post = like.getPost();
                     return MyBookmarkLikedListDto.builder()

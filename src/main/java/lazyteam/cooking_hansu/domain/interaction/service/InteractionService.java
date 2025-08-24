@@ -3,7 +3,7 @@ package lazyteam.cooking_hansu.domain.interaction.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.interaction.entity.Bookmark;
 import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
-import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
+import lazyteam.cooking_hansu.domain.interaction.entity.PostLikes;
 import lazyteam.cooking_hansu.domain.interaction.repository.BookmarkRepository;
 import lazyteam.cooking_hansu.domain.interaction.repository.LectureLikesRepository;
 import lazyteam.cooking_hansu.domain.interaction.repository.PostLikesRepository;
@@ -60,7 +60,7 @@ public class InteractionService {
 
             if (isLiked) {
                 // 좋아요 취소
-                Likes existingLike = postLikesRepository.findByUserIdAndPostId(userId, postId);
+                PostLikes existingLike = postLikesRepository.findByUserIdAndPostId(userId, postId);
                 if (existingLike != null) {
                     postLikesRepository.delete(existingLike);
                 }
@@ -76,7 +76,7 @@ public class InteractionService {
                 return "좋아요를 취소했습니다.";
             } else {
                 // 좋아요 추가
-                Likes newLike = Likes.builder().user(user).post(post).build();
+                PostLikes newLike = PostLikes.builder().user(user).post(post).build();
                 postLikesRepository.save(newLike);
                 redisInteractionService.updatePostLike(postId, userId, true);
 

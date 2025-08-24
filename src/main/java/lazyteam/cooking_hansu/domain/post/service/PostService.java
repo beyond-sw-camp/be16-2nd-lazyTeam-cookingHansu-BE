@@ -171,13 +171,13 @@ public class PostService {
         // 재료 정보 갱신
         if (requestDto.getIngredients() != null) {
             ingredientsRepository.deleteByPost(post);
-            saveIngredientsForUpdate(post, requestDto.getIngredients());
+            saveIngredients(post, requestDto.getIngredients());
         }
 
         // 조리순서 정보 갱신
         if (requestDto.getSteps() != null) {
             recipeStepRepository.deleteByPost(post);
-            saveRecipeStepsForUpdate(post, requestDto.getSteps());
+            saveRecipeSteps(post, requestDto.getSteps());
         }
 
         log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
@@ -242,74 +242,61 @@ public class PostService {
 
     // ========== 유틸리티 메서드 ==========
 
-    /**
-     * 재료 정보 저장 (생성용)
-     */
-    private void saveIngredients(Post post, List<PostCreateRequestDto.IngredientRequestDto> ingredientDtos) {
-        List<Ingredients> ingredients = new ArrayList<>();
+    private void saveIngredients(Post post, List<?> ingredientDtos) {
+        if (ingredientDtos == null || ingredientDtos.isEmpty()) return;
 
-        for (PostCreateRequestDto.IngredientRequestDto dto : ingredientDtos) {
-            Ingredients ingredient = Ingredients.builder()
-                    .post(post)
-                    .name(dto.getName())
-                    .amount(dto.getAmount())
-                    .build();
-            ingredients.add(ingredient);
-        }
+        List<Ingredients> ingredients = ingredientDtos.stream()
+                .map(dto -> {
+                    String name, amount;
 
-        ingredientsRepository.saveAll(ingredients);
-    }
+                    // 타입 확인해서 필드 추출
+                    if (dto instanceof PostCreateRequestDto.IngredientRequestDto createDto) {
+                        name = createDto.getName();
+                        amount = createDto.getAmount();
+                    } else if (dto instanceof PostUpdateRequestDto.IngredientUpdateDto updateDto) {
+                        name = updateDto.getName();
+                        amount = updateDto.getAmount();
+                    } else {
+                        throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
+                    }
 
-    /**
-     * 조리순서 정보 저장 (생성용)
-     */
-    private void saveRecipeSteps(Post post, List<PostCreateRequestDto.RecipeStepRequestDto> stepDtos) {
-        List<RecipeStep> steps = new ArrayList<>();
-
-        for (PostCreateRequestDto.RecipeStepRequestDto dto : stepDtos) {
-            RecipeStep step = RecipeStep.builder()
-                    .post(post)
-                    .stepSequence(dto.getStepSequence())
-                    .content(dto.getContent())
-                    .build();
-            steps.add(step);
-        }
-
-        recipeStepRepository.saveAll(steps);
-    }
-
-    /**
-     * 재료 정보 저장 (수정용)
-     */
-    private void saveIngredientsForUpdate(Post post, List<PostUpdateRequestDto.IngredientUpdateDto> ingredientDtos) {
-        List<Ingredients> ingredients = new ArrayList<>();
-
-        for (PostUpdateRequestDto.IngredientUpdateDto dto : ingredientDtos) {
-            Ingredients ingredient = Ingredients.builder()
-                    .post(post)
-                    .name(dto.getName())
-                    .amount(dto.getAmount())
-                    .build();
-            ingredients.add(ingredient);
-        }
+                    return Ingredients.builder()
+                            .post(post)
+                            .name(name)
+                            .amount(amount)
+                            .build();
+                })
+                .toList();
 
         ingredientsRepository.saveAll(ingredients);
     }
 
-    /**
-     * 조리순서 정보 저장 (수정용)
-     */
-    private void saveRecipeStepsForUpdate(Post post, List<PostUpdateRequestDto.RecipeStepUpdateDto> stepDtos) {
-        List<RecipeStep> steps = new ArrayList<>();
+    private void saveRecipeSteps(Post post, List<?> stepDtos) {
+        if (stepDtos == null || stepDtos.isEmpty()) return;
 
-        for (PostUpdateRequestDto.RecipeStepUpdateDto dto : stepDtos) {
-            RecipeStep step = RecipeStep.builder()
-                    .post(post)
-                    .stepSequence(dto.getStepSequence())
-                    .content(dto.getContent())
-                    .build();
-            steps.add(step);
-        }
+        List<RecipeStep> steps = stepDtos.stream()
+                .map(dto -> {
+                    Integer stepSequence;
+                    String content;
+
+                    // 타입 확인해서 필드 추출
+                    if (dto instanceof PostCreateRequestDto.RecipeStepRequestDto createDto) {
+                        stepSequence = createDto.getStepSequence();
+                        content = createDto.getContent();
+                    } else if (dto instanceof PostUpdateRequestDto.RecipeStepUpdateDto updateDto) {
+                        stepSequence = updateDto.getStepSequence();
+                        content = updateDto.getContent();
+                    } else {
+                        throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
+                    }
+
+                    return RecipeStep.builder()
+                            .post(post)
+                            .stepSequence(stepSequence)
+                            .content(content)
+                            .build();
+                })
+                .toList();
 
         recipeStepRepository.saveAll(steps);
     }
