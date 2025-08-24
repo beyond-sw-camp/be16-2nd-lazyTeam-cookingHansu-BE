@@ -17,10 +17,4 @@ public interface OAuthService<T> {
      * 액세스 토큰을 통한 사용자 프로필 정보 가져오는 메서드
      */
     T getProfile(String token);
-
-    /**
-     * OAuth 제공자 이름 반환
-     * @return OAuth 제공자 이름 (예: "google", "kakao")
-     */
-    String getProviderName();
 }

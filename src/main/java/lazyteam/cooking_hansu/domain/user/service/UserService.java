@@ -47,12 +47,14 @@ public class UserService {
 
 
 //    요리업종 승인 대기 목록 조회
+    @Transactional(readOnly = true)
     public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
         Page<Chef> waitingChefs = chefRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
         return waitingChefs.map(WaitingChefListDto::fromEntity);
     }
 
 //    사업자 승인 대기 목록 조회
+    @Transactional(readOnly = true)
     public Page<WaitingBusinessListDto> getWaitingBusinessList(Pageable pageable) {
         Page<Owner> waitingBusinesses = ownerRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
         return waitingBusinesses.map(WaitingBusinessListDto::fromEntity);
@@ -115,6 +117,7 @@ public class UserService {
     }
 
 //    모든 사용자 조회
+    @Transactional(readOnly = true)
     public Page<UserListDto> getUserList(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
         return userPage.map(UserListDto::fromEntity);
@@ -184,53 +187,9 @@ public class UserService {
         return user;
     }
 
-    /**
-     * 기존 사용자의 프로필 이미지를 S3에 업로드하여 업데이트
-     * @param user 업데이트할 사용자
-     * @param newPictureUrl 새로운 프로필 이미지 URL
-     * @return 업데이트된 S3 URL
-     */
-    public String updateUserProfileImage(User user, String newPictureUrl) {
-        if (newPictureUrl == null || newPictureUrl.isEmpty()) {
-            return null;
-        }
-
-        try {
-            // 기존 S3 이미지 삭제 (S3 URL인 경우에만)
-            if (user.getPicture() != null && user.getPicture().contains("amazonaws.com")) {
-                try {
-                    s3Uploader.delete(user.getPicture());
-                    log.info("기존 프로필 이미지 S3 삭제 성공: {}", user.getPicture());
-                } catch (Exception e) {
-                    log.warn("기존 프로필 이미지 S3 삭제 실패: {}", user.getPicture(), e);
-                }
-            }
-
-            // 새 이미지 S3 업로드
-            String fileName = user.getSocialId(); // 소셜 ID를 파일명으로 사용
-            String uploadedUrl = s3Uploader.uploadFromUrl(
-                newPictureUrl,
-                "profiles/",
-                fileName
-            );
-
-            // 사용자 프로필 이미지 URL 업데이트
-            user.updateAdditionalInfo(user.getName(), user.getNickname(), uploadedUrl);
-            userRepository.save(user);
-
-            log.info("사용자 프로필 이미지 업데이트 성공: {} -> {}", newPictureUrl, uploadedUrl);
-            return uploadedUrl;
-
-        } catch (Exception e) {
-            log.error("프로필 이미지 업데이트 실패: {}", newPictureUrl, e);
-            throw new IllegalArgumentException("프로필 이미지 업데이트 실패", e);
-        }
-    }
-
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
     }
-
 
     // 로그인 전 테스트 요
     private User getCurrentUser() {

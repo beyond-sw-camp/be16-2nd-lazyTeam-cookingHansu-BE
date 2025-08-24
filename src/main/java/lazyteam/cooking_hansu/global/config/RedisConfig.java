@@ -5,7 +5,6 @@ import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationPublisher;
 import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationSubscriber;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -32,10 +31,10 @@ import java.util.Map;
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
-    private String redishost;
+    private String redisHost;
 
     @Value("${spring.data.redis.port}")
-    private int redisport;
+    private int redisPort;
 
     // ================================
     // DB 0: Refresh Token 저장소
@@ -45,8 +44,8 @@ public class RedisConfig {
     @Qualifier("rtInventory")
     public RedisConnectionFactory rtConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redishost);
-        configuration.setPort(redisport);
+        configuration.setHostName(redisHost);
+        configuration.setPort(redisPort);
         configuration.setDatabase(0);
         return new LettuceConnectionFactory(configuration);
     }
@@ -71,8 +70,8 @@ public class RedisConfig {
     @Qualifier("interactionRedis")
     public RedisConnectionFactory interactionRedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redishost);
-        configuration.setPort(redisport);
+        configuration.setHostName(redisHost);
+        configuration.setPort(redisPort);
         configuration.setDatabase(2); // 상호작용용 DB 2번
         return new LettuceConnectionFactory(configuration);
     }
@@ -103,8 +102,8 @@ public class RedisConfig {
     @Qualifier("chatPubSub")
     public RedisConnectionFactory chatPubSubConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redishost);
-        configuration.setPort(redisport);
+        configuration.setHostName(redisHost);
+        configuration.setPort(redisPort);
 //        Redis pub/sub에서는 특정 데이터베이스에 의존적이지 않음.
 //        configuration.setDatabase(0); // 기본 데이터베이스 설정
 
@@ -152,8 +151,8 @@ public class RedisConfig {
     @Qualifier("chatFactory")
     public RedisConnectionFactory chatRedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(redishost);
-        configuration.setPort(redisport);
+        configuration.setHostName(redisHost);
+        configuration.setPort(redisPort);
         configuration.setDatabase(12);
         return new LettuceConnectionFactory(configuration);
     }
@@ -185,7 +184,7 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    // 기본 redisTemplate 빈 추가 (필수)
+    /*// 기본 redisTemplate 빈 추가 (필수)
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
             @Qualifier("chatPubSub") RedisConnectionFactory redisConnectionFactory) {
@@ -196,7 +195,7 @@ public class RedisConfig {
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         return redisTemplate;
-    }
+    }*/
 
     // 알림용 RedisTemplate
     @Bean(name = "ssePubSub")

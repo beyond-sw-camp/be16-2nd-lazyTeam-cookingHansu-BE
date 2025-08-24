@@ -64,8 +64,4 @@ public class NaverService implements OAuthService<NaverProfileDto> {
         return response.getBody();
     }
 
-    @Override
-    public String getProviderName() {
-        return "naver";
-    }
 }

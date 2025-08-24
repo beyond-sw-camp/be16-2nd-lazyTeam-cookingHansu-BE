@@ -59,8 +59,4 @@ public class KakaoService implements OAuthService<KakaoProfileDto> {
         return response.getBody();
     }
 
-    @Override
-    public String getProviderName() {
-        return "kakao";
-    }
 }

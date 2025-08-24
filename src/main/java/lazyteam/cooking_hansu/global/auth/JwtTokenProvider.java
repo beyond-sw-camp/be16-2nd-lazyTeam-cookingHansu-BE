@@ -31,14 +31,14 @@ public class JwtTokenProvider {
     private Key secret_rt_key;
 
     public JwtTokenProvider(@Value("${jwt.secretKeyAt}") String secretKeyAt, @Value("${jwt.expirationAt}") int expirationAt,
-                            @Value("${jwt.secretKeyRt}") String serectKeyRt, @Value("${jwt.expirationRt}") int expirationRt) {
+                            @Value("${jwt.secretKeyRt}") String secretKeyRt, @Value("${jwt.expirationRt}") int expirationRt) {
         this.secretKeyAt = secretKeyAt;
         this.expirationAt = expirationAt;
-        this.secretKeyRt = serectKeyRt;
+        this.secretKeyRt = secretKeyRt;
         this.expirationRt = expirationRt;
         this.secret_at_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyAt), SignatureAlgorithm.HS512
                 .getJcaName());
-        this.secret_rt_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(serectKeyRt), SignatureAlgorithm.HS512.getJcaName());
+        this.secret_rt_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyRt), SignatureAlgorithm.HS512.getJcaName());
     }
 
     public String createAtToken(User user) {

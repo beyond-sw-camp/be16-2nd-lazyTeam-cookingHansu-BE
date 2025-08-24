@@ -63,8 +63,4 @@ public class GoogleService implements OAuthService<GoogleProfileDto> {
         return response.getBody();
     }
 
-    @Override
-    public String getProviderName() {
-        return "google";
-    }
 }

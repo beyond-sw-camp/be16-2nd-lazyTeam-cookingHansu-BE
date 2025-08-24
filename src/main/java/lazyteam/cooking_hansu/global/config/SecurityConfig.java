@@ -56,7 +56,7 @@ public class SecurityConfig {
                         "/lecture/**",
                         "/user/**",
                         "/chat/**",
-                        "cart/**",
+                        "/cart/**",
                         "/purchase/**",
                         "/review/**",
                         "/api/recipes/**",
