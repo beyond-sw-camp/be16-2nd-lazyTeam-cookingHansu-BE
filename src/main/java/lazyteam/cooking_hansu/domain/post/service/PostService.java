@@ -1,10 +1,7 @@
 package lazyteam.cooking_hansu.domain.post.service;
 
 import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
-import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
-import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
-import lazyteam.cooking_hansu.domain.post.dto.PostUpdateRequestDto;
-import lazyteam.cooking_hansu.domain.post.dto.PostListResponseDto;
+import lazyteam.cooking_hansu.domain.post.dto.*;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
@@ -154,19 +151,32 @@ public class PostService {
         } else if (requestDto.getThumbnailUrl() != null) {
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
+        PostUpdateData updateData = PostUpdateData.builder()
+                .title(requestDto.getTitle())
+                .description(requestDto.getDescription())
+                .thumbnailUrl(thumbnailUrl)
+                .category(requestDto.getCategory())
+                .level(requestDto.getLevel())
+                .cookTime(requestDto.getCookTime())
+                .serving(requestDto.getServing())
+                .cookTip(requestDto.getCookTip())
+                .isOpen(requestDto.getIsOpen())
+                .build();
 
-        // Post 기본 정보 수정
-        post.updatePost(
-                requestDto.getTitle(),
-                requestDto.getDescription(),
-                thumbnailUrl,
-                requestDto.getCategory(),
-                requestDto.getLevel(),
-                requestDto.getCookTime(),
-                requestDto.getServing(),
-                requestDto.getCookTip(),
-                requestDto.getIsOpen()
-        );
+        post.updatePost(updateData);
+
+//        재료 요리순서 굳
+        if (requestDto.getIngredients() != null) {
+            ingredientsRepository.deleteByPost(post);
+            saveIngredients(post, requestDto.getIngredients());
+        }
+
+        if (requestDto.getSteps() != null) {
+            recipeStepRepository.deleteByPost(post);
+            saveRecipeSteps(post, requestDto.getSteps());
+        }
+
+        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
 
         // 재료 정보 갱신
         if (requestDto.getIngredients() != null) {

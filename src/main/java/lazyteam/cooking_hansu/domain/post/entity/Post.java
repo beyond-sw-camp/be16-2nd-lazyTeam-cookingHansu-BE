@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.dto.PostUpdateData;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
@@ -97,36 +98,17 @@ public class Post extends BaseIdAndTimeEntity {
 //   삭제 여부 확인
     public boolean isDeleted() { return this.deletedAt != null;}
 
-    public void updatePost(String title, String description, String thumbnailUrl, 
-                          CategoryEnum category, LevelEnum level, Integer cookTime, 
-                          Integer serving, String cookTip, Boolean isOpen) {
-        if (title != null && !title.trim().isEmpty()) {
-            this.title = title.trim();
-        }
-        if (description != null) {
-            this.description = description.trim();
-        }
-        if (thumbnailUrl != null) {
-            this.thumbnailUrl = thumbnailUrl.trim();
-        }
-        if (category != null) {
-            this.category = category;
-        }
-        if (level != null) {
-            this.level = level;
-        }
-        if (cookTime != null && cookTime > 0) {
-            this.cookTime = cookTime;
-        }
-        if (serving != null && serving > 0) {
-            this.serving = serving;
-        }
-        if (cookTip != null) {
-            this.cookTip = cookTip.trim();
-        }
-        if (isOpen != null) {
-            this.isOpen = isOpen;
-        }
+//    업데이트
+    public void updatePost(PostUpdateData data) {
+        this.title = data.getTitle();
+        this.description = data.getDescription();
+        this.thumbnailUrl = data.getThumbnailUrl();
+        this.category = data.getCategory();
+        this.level = data.getLevel();
+        this.cookTime = data.getCookTime();
+        this.serving = data.getServing();
+        this.cookTip = data.getCookTip();
+        this.isOpen = data.getIsOpen();
     }
 
 //    엔티티 포스트 어노테이션 걸고 업데이트 간단하게 만들기
