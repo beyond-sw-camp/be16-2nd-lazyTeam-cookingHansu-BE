@@ -24,15 +24,4 @@ public class RecipeStep extends BaseIdEntity {
     @Column(nullable = false)
     private String content; // 조리 단계 설명
 
-    // ========== 비즈니스 메서드 ==========
-
-
-
-    /**
-     * 조리 단계 유효성 확인
-     */
-    public boolean isValid() {
-        return this.content != null && !this.content.trim().isEmpty() &&
-               this.stepSequence != null && this.stepSequence > 0;
-    }
 }

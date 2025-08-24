@@ -2,7 +2,6 @@ package lazyteam.cooking_hansu.global.init;
 
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.admin.repository.AdminRepository;
-import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class InitialDataLoader implements CommandLineRunner {
     private final AdminRepository adminRepository;
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.admin.email}")

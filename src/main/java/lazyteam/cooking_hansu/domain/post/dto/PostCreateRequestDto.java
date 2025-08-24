@@ -2,21 +2,20 @@ package lazyteam.cooking_hansu.domain.post.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lombok.*;
 
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PostCreateRequestDto {
 
     @NotBlank(message = "게시글 제목은 필수입니다.")
-    @Size(max = 255, message = "게시글 제목은 255자 이하여야 합니다.")
+    @Size(max = 20, message = "게시글 제목은 20자 이하여야 합니다.")
     private String title;
 
     @Size(max = 2000, message = "게시글 설명은 2000자 이하여야 합니다.")
@@ -55,7 +54,6 @@ public class PostCreateRequestDto {
     private List<RecipeStepRequestDto> steps;
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -70,7 +68,6 @@ public class PostCreateRequestDto {
     }
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -82,13 +79,6 @@ public class PostCreateRequestDto {
         @NotBlank(message = "단계 설명은 필수입니다.")
         @Size(max = 255, message = "단계 설명은 255자 이하여야 합니다.")
         private String content;
-    }
 
-    public boolean isValid() {
-        return title != null && !title.trim().isEmpty() 
-            && category != null 
-            && level != null 
-            && cookTime != null && cookTime > 0
-            && serving != null && serving > 0;
     }
 }

@@ -1,9 +1,8 @@
 package lazyteam.cooking_hansu.domain.admin.service;
 
 import lazyteam.cooking_hansu.domain.admin.dto.DashBoardResDto;
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
-import lazyteam.cooking_hansu.domain.report.repository.ReportRepository;
 import lazyteam.cooking_hansu.domain.user.repository.BusinessRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;

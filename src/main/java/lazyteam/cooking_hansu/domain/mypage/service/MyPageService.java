@@ -35,7 +35,7 @@ public class MyPageService {
     private final PurchasedLectureRepository purchasedLectureRepository;
     private final LectureReviewRepository lectureReviewRepository;
     private final BookmarkRepository bookmarkRepository;
-    private final LikesRepository likesRepository;
+    private final PostLikesRepository postLikesRepository;
     private final S3Uploader s3Uploader;
 
     @Value("${my.test.user-id}")
@@ -192,7 +192,7 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public List<MyBookmarkLikedListDto> getMyLikes() {
         User user = getCurrentUser();
-        List<Likes> likesList = likesRepository.findAllByUser(user);
+        List<Likes> likesList = postLikesRepository.findAllByUser(user);
 
         return likesList.stream()
                 .map(like -> {

@@ -3,8 +3,8 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
 import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureUpdateDto;
@@ -12,7 +12,6 @@ import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
-import org.hibernate.annotations.DialectOverride;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;

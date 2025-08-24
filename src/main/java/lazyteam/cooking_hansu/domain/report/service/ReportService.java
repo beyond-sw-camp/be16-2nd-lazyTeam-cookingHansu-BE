@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.report.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import lazyteam.cooking_hansu.domain.common.dto.Status;
+import lazyteam.cooking_hansu.domain.common.enums.Status;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportCreateDto;
 import lazyteam.cooking_hansu.domain.report.dto.ReportDetailDto;

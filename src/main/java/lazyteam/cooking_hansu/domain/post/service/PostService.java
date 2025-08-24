@@ -1,24 +1,23 @@
 package lazyteam.cooking_hansu.domain.post.service;
 
+import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
 import lazyteam.cooking_hansu.domain.post.dto.PostCreateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostResponseDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostUpdateRequestDto;
 import lazyteam.cooking_hansu.domain.post.dto.PostListResponseDto;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
 import lazyteam.cooking_hansu.domain.post.repository.IngredientsRepository;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.post.repository.RecipeStepRepository;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -34,7 +33,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
@@ -64,7 +63,7 @@ public class PostService {
         return post;
     }
 
-    @Transactional
+
     public UUID createPost(PostCreateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
 
@@ -137,10 +136,7 @@ public class PostService {
         return PostResponseDto.fromEntity(post, ingredients, steps);
     }
 
-    /**
-     * Post 수정
-     */
-    @Transactional
+
     public void updatePost(UUID postId, PostUpdateRequestDto requestDto, MultipartFile thumbnail) {
         User currentUser = getCurrentUser();
         Post post = getPostByIdAndUser(postId, currentUser);
@@ -207,34 +203,41 @@ public class PostService {
     }
 
     /**
-     * Post 목록 조회 (강의 팀메이트 스타일)
+     * Post 목록 조회
      */
-    @Transactional(readOnly = true) 
-    public List<PostListResponseDto> getPostList(String userType, CategoryEnum category, String sort, int page, int size) {
-        
-        // 강의쪽과 같은 정렬 방식
-        Sort sorting = switch (sort) {
-            case "popular" -> Sort.by(Sort.Direction.DESC, "viewCount");
-            case "likes" -> Sort.by(Sort.Direction.DESC, "likeCount");  
-            case "bookmarks" -> Sort.by(Sort.Direction.DESC, "bookmarkCount");
-            default -> Sort.by(Sort.Direction.DESC, "createdAt"); // latest
+    // 서비스도 Pageable로 변경
+    @Transactional(readOnly = true)
+    public Page<PostListResponseDto> getPostList(Role role, CategoryEnum category,
+                                                 FilterSort filterSort, Pageable pageable) {
+
+        // filterSort 기반으로 정렬 재정의
+        Sort customSort = switch (filterSort) {
+            case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
+            case LIKES -> Sort.by(Sort.Direction.DESC, "likeCount");
+            case BOOKMARKS -> Sort.by(Sort.Direction.DESC, "bookmarkCount");
+            case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
-        
-        Pageable pageable = PageRequest.of(page, size, sorting);
-        
-        // 기본 조회 (강의쪽과 동일한 패턴)
+
+        Pageable customPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                customSort
+        );
+        // 기본 조회
         Page<Post> postsPage;
         if (category != null) {
             postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrueAndCategory(category, pageable);
         } else {
             postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrue(pageable);
         }
-        
-        // 사용자 타입 필터링 후 DTO 변환 (강의쪽 방식)
-        return postsPage.stream()
-                .filter(post -> userType == null || post.getUser().getRole().name().equalsIgnoreCase(userType))
-                .map(PostListResponseDto::fromEntity)
-                .toList();
+        return new PageImpl<>(
+            postsPage.getContent().stream()
+                    .filter(post -> role == null || post.getUser().getRole().name().equalsIgnoreCase(String.valueOf(role)))
+                    .map(PostListResponseDto::fromEntity)
+                    .toList(),
+            customPageable,
+            postsPage.getTotalElements()
+        );
     }
 
     // ========== 유틸리티 메서드 ==========

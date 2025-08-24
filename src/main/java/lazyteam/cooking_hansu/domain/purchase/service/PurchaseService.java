@@ -3,8 +3,8 @@ package lazyteam.cooking_hansu.domain.purchase.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lazyteam.cooking_hansu.domain.common.PayMethod;
-import lazyteam.cooking_hansu.domain.common.PaymentStatus;
+import lazyteam.cooking_hansu.domain.common.enums.PayMethod;
+import lazyteam.cooking_hansu.domain.common.enums.PaymentStatus;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPaymentConfirmDto;
@@ -33,7 +33,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Base64;

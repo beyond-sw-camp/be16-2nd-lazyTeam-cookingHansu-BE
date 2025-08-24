@@ -1,10 +1,11 @@
 package lazyteam.cooking_hansu.domain.post.dto;
 
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
 import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -38,7 +38,6 @@ public class PostResponseDto {
     private List<RecipeStepDto> steps;
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -58,7 +57,6 @@ public class PostResponseDto {
     }
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -86,10 +84,9 @@ public class PostResponseDto {
         private UUID id;
         private String nickname;
         private String profileImageUrl;
-        private String role;
+        private String role; //이넘으로바꾸고
 
-        public static UserInfoDto fromEntity(lazyteam.cooking_hansu.domain.user.entity.common.User user) {
-            if (user == null) return null;
+        public static UserInfoDto fromEntity(User user) {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
@@ -121,10 +118,5 @@ public class PostResponseDto {
                 .ingredients(ingredients != null ? ingredients.stream().map(IngredientDto::fromEntity).toList() : List.of())
                 .steps(steps != null ? steps.stream().map(RecipeStepDto::fromEntity).toList() : List.of())
                 .build();
-    }
-
-    // 간단한 Post 정보만 필요한 경우 (목록 조회 등)
-    public static PostResponseDto fromEntity(Post post) {
-        return fromEntity(post, null, null);
     }
 }

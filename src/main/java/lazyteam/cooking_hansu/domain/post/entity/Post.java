@@ -2,8 +2,8 @@ package lazyteam.cooking_hansu.domain.post.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
@@ -25,7 +25,7 @@ public class Post extends BaseIdAndTimeEntity {
     private User user;
 
     @NotBlank(message = "게시글 제목은 필수입니다")
-    @Size(max = 255, message = "게시글 제목은 255자 이하여야 합니다")
+    @Size(max = 20, message = "게시글 제목은 20자 이하여야 합니다")
     @Column(nullable = false)
     private String title;
 
@@ -72,8 +72,8 @@ public class Post extends BaseIdAndTimeEntity {
     @Column(name = "serving", nullable = false, columnDefinition = "INT UNSIGNED")
     private Integer serving;
 
-    @Size(max = 2000, message = "요리 팁은 2000자 이하여야 합니다")
-    @Column(name = "cook_tip", columnDefinition = "TEXT")
+    @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
+    @Column(name = "message_text", nullable = false, columnDefinition = "TEXT")
     private String cookTip;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,10 +96,6 @@ public class Post extends BaseIdAndTimeEntity {
 
 //   삭제 여부 확인
     public boolean isDeleted() { return this.deletedAt != null;}
-
-    public boolean isPublic() {
-        return this.isOpen != null && this.isOpen;
-    }
 
     public void updatePost(String title, String description, String thumbnailUrl, 
                           CategoryEnum category, LevelEnum level, Integer cookTime, 
@@ -133,33 +129,22 @@ public class Post extends BaseIdAndTimeEntity {
         }
     }
 
-    // 소유자 확인 (RecipeService 스타일과 통일)
+//    엔티티 포스트 어노테이션 걸고 업데이트 간단하게 만들기
     public boolean isOwnedBy(User user) {
         return this.user != null && this.user.getId().equals(user.getId());
     }
 
     // Redis 동기화를 위한 카운트 업데이트 메서드들
-    public void updateViewCount(Long viewCount) {
+    public void setViewCount(Long viewCount) {
         this.viewCount = viewCount != null ? viewCount : 0L;
     }
 
-    public void updateLikeCount(Long likeCount) {
+    public void setLikeCount(Long likeCount) {
         this.likeCount = likeCount != null ? likeCount : 0L;
     }
 
-    public void updateBookmarkCount(Long bookmarkCount) {
+    public void setBookmarkCount(Long bookmarkCount) {
         this.bookmarkCount = bookmarkCount != null ? bookmarkCount : 0L;
     }
 
-    public void setViewCount(Long viewCount) {
-        updateViewCount(viewCount);
-    }
-
-    public void setLikeCount(Long likeCount) {
-        updateLikeCount(likeCount);
-    }
-
-    public void setBookmarkCount(Long bookmarkCount) {
-        updateBookmarkCount(bookmarkCount);
-    }
 }

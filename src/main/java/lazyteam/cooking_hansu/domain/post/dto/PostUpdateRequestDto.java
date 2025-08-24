@@ -2,20 +2,19 @@ package lazyteam.cooking_hansu.domain.post.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lombok.*;
 
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PostUpdateRequestDto {
 
-    @Size(max = 255, message = "게시글 제목은 255자 이하여야 합니다")
+    @Size(max = 20, message = "게시글 제목은 20자 이하여야 합니다")
     private String title;
 
     @Size(max = 2000, message = "게시글 설명은 2000자 이하여야 합니다")
@@ -48,7 +47,6 @@ public class PostUpdateRequestDto {
     private List<RecipeStepUpdateDto> steps;
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
@@ -63,7 +61,6 @@ public class PostUpdateRequestDto {
     }
 
     @Getter
-    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder

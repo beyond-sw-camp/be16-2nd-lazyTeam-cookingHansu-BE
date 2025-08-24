@@ -6,7 +6,7 @@ import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
 import lazyteam.cooking_hansu.domain.interaction.repository.BookmarkRepository;
 import lazyteam.cooking_hansu.domain.interaction.repository.LectureLikesRepository;
-import lazyteam.cooking_hansu.domain.interaction.repository.LikesRepository;
+import lazyteam.cooking_hansu.domain.interaction.repository.PostLikesRepository;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @Transactional
 public class InteractionService {
 
-    private final LikesRepository likesRepository;
+    private final PostLikesRepository postLikesRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LectureLikesRepository lectureLikesRepository;
     private final PostRepository postRepository;
@@ -51,7 +51,7 @@ public class InteractionService {
             
             // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
             if (!isLiked) {
-                boolean dbLikedStatus = likesRepository.findByUserIdAndPostId(userId, postId) != null;
+                boolean dbLikedStatus = postLikesRepository.findByUserIdAndPostId(userId, postId) != null;
                 if (dbLikedStatus) {
                     redisInteractionService.setPostLikeStatus(postId, userId, true);
                     isLiked = true;
@@ -60,14 +60,14 @@ public class InteractionService {
 
             if (isLiked) {
                 // 좋아요 취소
-                Likes existingLike = likesRepository.findByUserIdAndPostId(userId, postId);
+                Likes existingLike = postLikesRepository.findByUserIdAndPostId(userId, postId);
                 if (existingLike != null) {
-                    likesRepository.delete(existingLike);
+                    postLikesRepository.delete(existingLike);
                 }
                 redisInteractionService.updatePostLike(postId, userId, false);
 
                 // DB 카운트와 Redis 동기화
-                Long actualCount = likesRepository.countByPostId(postId);
+                Long actualCount = postLikesRepository.countByPostId(postId);
                 redisInteractionService.setPostLikesCount(postId, actualCount);
                 post.setLikeCount(actualCount);
                 postRepository.save(post);
@@ -77,11 +77,11 @@ public class InteractionService {
             } else {
                 // 좋아요 추가
                 Likes newLike = Likes.builder().user(user).post(post).build();
-                likesRepository.save(newLike);
+                postLikesRepository.save(newLike);
                 redisInteractionService.updatePostLike(postId, userId, true);
 
                 // DB 카운트와 Redis 동기화
-                Long actualCount = likesRepository.countByPostId(postId);
+                Long actualCount = postLikesRepository.countByPostId(postId);
                 redisInteractionService.setPostLikesCount(postId, actualCount);
                 post.setLikeCount(actualCount);
                 postRepository.save(post);

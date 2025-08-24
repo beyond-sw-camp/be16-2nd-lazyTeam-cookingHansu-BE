@@ -1,6 +1,6 @@
 package lazyteam.cooking_hansu.domain.post.repository;
 
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.domain.Page;
@@ -15,9 +15,6 @@ import java.util.UUID;
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
     List<Post> findAllByUser(User user);
-    
-    // 팀메이트 스타일: 간단한 기본 조회 메서드들
     Page<Post> findByDeletedAtIsNullAndIsOpenTrue(Pageable pageable);
-    
     Page<Post> findByDeletedAtIsNullAndIsOpenTrueAndCategory(CategoryEnum category, Pageable pageable);
 }

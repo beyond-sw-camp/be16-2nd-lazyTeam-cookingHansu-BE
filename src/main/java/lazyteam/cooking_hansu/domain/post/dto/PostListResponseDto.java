@@ -1,9 +1,9 @@
 package lazyteam.cooking_hansu.domain.post.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -27,15 +27,14 @@ public class PostListResponseDto {
     private Long likeCount;
     private Long viewCount;
     private Long bookmarkCount;
-    
+
+//    이넘
     // 작성자 정보
-    private String authorNickname;
-    private String authorRole;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String nickname;
+    private Role role;
+
     private LocalDateTime createdAt;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+
     private LocalDateTime updatedAt;
 
     /**
@@ -55,8 +54,8 @@ public class PostListResponseDto {
                 .likeCount(post.getLikeCount())
                 .viewCount(post.getViewCount())
                 .bookmarkCount(post.getBookmarkCount())
-                .authorNickname(post.getUser().getNickname())
-                .authorRole(post.getUser().getRole().name())
+                .nickname(post.getUser().getNickname())
+                .role(post.getUser().getRole())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .build();

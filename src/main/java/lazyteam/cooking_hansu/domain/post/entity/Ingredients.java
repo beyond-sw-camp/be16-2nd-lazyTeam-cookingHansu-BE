@@ -10,7 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
 @ToString
 public class Ingredients extends BaseIdEntity {
 
@@ -24,12 +23,5 @@ public class Ingredients extends BaseIdEntity {
     @Column(nullable = false)
     private String amount; // 재료량 (예: 200g, 1/2개, 2컵)
 
-//    비즈니스메서드
 
-
-//    재료정보 유효성 수정
-    public boolean isValid() {
-        return this.name != null && !this.name.trim().isEmpty() &&
-               this.amount != null && !this.amount.trim().isEmpty();
-    }
 }
