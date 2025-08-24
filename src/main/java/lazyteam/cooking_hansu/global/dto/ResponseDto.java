@@ -23,7 +23,7 @@ public class ResponseDto<T> {
                 .build();
     }
 
-        public static <T> ResponseDto<T> fail(HttpStatus status, String message) {
+    public static <T> ResponseDto<T> fail(HttpStatus status, String message) {
         return ResponseDto.<T>builder()
                 .success(false)
                 .code(status.value())

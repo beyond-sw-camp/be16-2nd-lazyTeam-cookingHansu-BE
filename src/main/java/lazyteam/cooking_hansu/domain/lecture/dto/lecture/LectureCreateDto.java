@@ -1,7 +1,7 @@
 package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
 
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;

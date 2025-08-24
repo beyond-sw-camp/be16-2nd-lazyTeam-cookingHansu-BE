@@ -1,0 +1,313 @@
+package lazyteam.cooking_hansu.domain.post.service;
+
+import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
+import lazyteam.cooking_hansu.domain.post.dto.*;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
+import lazyteam.cooking_hansu.domain.post.entity.Post;
+import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.post.repository.IngredientsRepository;
+import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
+import lazyteam.cooking_hansu.domain.post.repository.RecipeStepRepository;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
+import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
+public class PostService {
+
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final IngredientsRepository ingredientsRepository;
+    private final RecipeStepRepository recipeStepRepository;
+    private final S3Uploader s3Uploader;
+
+    @Value("${my.test.user-id}")
+    private String testUserIdStr;
+
+    private User getCurrentUser() {
+        UUID testUserId = UUID.fromString(testUserIdStr);
+        return userRepository.findById(testUserId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+
+    private Post getPostByIdAndUser(UUID postId, User user) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        if (!post.isOwnedBy(user)) {
+            throw new IllegalArgumentException("게시글에 대한 권한이 없습니다.");
+        }
+        if (post.isDeleted()) {
+            throw new EntityNotFoundException("삭제된 게시글입니다.");
+        }
+        return post;
+    }
+
+
+    public UUID createPost(PostCreateRequestDto requestDto, MultipartFile thumbnail) {
+        User currentUser = getCurrentUser();
+
+        // 썸네일 업로드 처리
+        String thumbnailUrl = null;
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
+                log.info("Post 썸네일 업로드 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("Post 썸네일 업로드 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
+
+        // Post 엔티티 생성
+        Post post = Post.builder()
+                .user(currentUser)
+                .title(requestDto.getTitle())
+                .description(requestDto.getDescription())
+                .category(requestDto.getCategory())
+                .level(requestDto.getLevel())
+                .cookTime(requestDto.getCookTime())
+                .serving(requestDto.getServing())
+                .cookTip(requestDto.getCookTip())
+                .thumbnailUrl(thumbnailUrl)
+                .isOpen(requestDto.getIsOpen())
+                .build();
+
+        Post savedPost = postRepository.save(post);
+
+        // 재료 저장
+        if (requestDto.getIngredients() != null && !requestDto.getIngredients().isEmpty()) {
+            saveIngredients(savedPost, requestDto.getIngredients());
+        }
+
+        // 조리순서 저장
+        if (requestDto.getSteps() != null && !requestDto.getSteps().isEmpty()) {
+            saveRecipeSteps(savedPost, requestDto.getSteps());
+        }
+
+        log.info("통합 Post 작성 완료. 사용자: {}, Post ID: {}, 인분: {}인분", 
+                currentUser.getEmail(), savedPost.getId(), savedPost.getServing());
+        return savedPost.getId();
+    }
+
+    /**
+     * Post 상세 조회 (재료, 조리순서 포함)
+     */
+    @Transactional(readOnly = true)
+    public PostResponseDto getPost(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 게시글입니다."));
+
+        if (post.isDeleted()) {
+            throw new EntityNotFoundException("삭제된 게시글입니다.");
+        }
+
+        User currentUser = getCurrentUser();
+        if (!post.getIsOpen() && !post.isOwnedBy(currentUser)) {
+            throw new IllegalArgumentException("비공개 게시글에 대한 권한이 없습니다.");
+        }
+
+        // 연관 데이터 조회
+        List<Ingredients> ingredients = ingredientsRepository.findByPost(post);
+        List<RecipeStep> steps = recipeStepRepository.findByPostOrderByStepSequence(post);
+
+        return PostResponseDto.fromEntity(post, ingredients, steps);
+    }
+
+
+    public void updatePost(UUID postId, PostUpdateRequestDto requestDto, MultipartFile thumbnail) {
+        User currentUser = getCurrentUser();
+        Post post = getPostByIdAndUser(postId, currentUser);
+
+        // 썸네일 업로드 처리
+        String thumbnailUrl = post.getThumbnailUrl(); // 기존 URL 유지
+        if (thumbnail != null && !thumbnail.isEmpty()) {
+            try {
+                thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
+                log.info("Post 썸네일 업데이트 성공: {}", thumbnailUrl);
+            } catch (Exception e) {
+                log.error("Post 썸네일 업데이트 실패: {}", e.getMessage());
+                throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (requestDto.getThumbnailUrl() != null) {
+            thumbnailUrl = requestDto.getThumbnailUrl();
+        }
+        PostUpdateData updateData = PostUpdateData.builder()
+                .title(requestDto.getTitle())
+                .description(requestDto.getDescription())
+                .thumbnailUrl(thumbnailUrl)
+                .category(requestDto.getCategory())
+                .level(requestDto.getLevel())
+                .cookTime(requestDto.getCookTime())
+                .serving(requestDto.getServing())
+                .cookTip(requestDto.getCookTip())
+                .isOpen(requestDto.getIsOpen())
+                .build();
+
+        post.updatePost(updateData);
+
+//        재료 요리순서 굳
+        if (requestDto.getIngredients() != null) {
+            ingredientsRepository.deleteByPost(post);
+            saveIngredients(post, requestDto.getIngredients());
+        }
+
+        if (requestDto.getSteps() != null) {
+            recipeStepRepository.deleteByPost(post);
+            saveRecipeSteps(post, requestDto.getSteps());
+        }
+
+        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
+
+        // 재료 정보 갱신
+        if (requestDto.getIngredients() != null) {
+            ingredientsRepository.deleteByPost(post);
+            saveIngredients(post, requestDto.getIngredients());
+        }
+
+        // 조리순서 정보 갱신
+        if (requestDto.getSteps() != null) {
+            recipeStepRepository.deleteByPost(post);
+            saveRecipeSteps(post, requestDto.getSteps());
+        }
+
+        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
+    }
+
+    /**
+     * Post 삭제
+     */
+    @Transactional
+    public void deletePost(UUID postId) {
+        User currentUser = getCurrentUser();
+        Post post = getPostByIdAndUser(postId, currentUser);
+
+        // 연관 데이터 삭제 (Cascade 설정으로 자동 삭제되지만 명시적으로)
+        ingredientsRepository.deleteByPost(post);
+        recipeStepRepository.deleteByPost(post);
+        
+        // Soft Delete
+        post.softDelete();
+        postRepository.save(post);
+
+        log.info("Post 삭제 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
+    }
+
+    /**
+     * Post 목록 조회
+     */
+    // 서비스도 Pageable로 변경
+    @Transactional(readOnly = true)
+    public Page<PostListResponseDto> getPostList(Role role, CategoryEnum category,
+                                                 FilterSort filterSort, Pageable pageable) {
+
+        // filterSort 기반으로 정렬 재정의
+        Sort customSort = switch (filterSort) {
+            case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
+            case LIKES -> Sort.by(Sort.Direction.DESC, "likeCount");
+            case BOOKMARKS -> Sort.by(Sort.Direction.DESC, "bookmarkCount");
+            case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+
+        Pageable customPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                customSort
+        );
+        // 기본 조회
+        Page<Post> postsPage;
+        if (category != null) {
+            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrueAndCategory(category, pageable);
+        } else {
+            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrue(pageable);
+        }
+        return new PageImpl<>(
+            postsPage.getContent().stream()
+                    .filter(post -> role == null || post.getUser().getRole().name().equalsIgnoreCase(String.valueOf(role)))
+                    .map(PostListResponseDto::fromEntity)
+                    .toList(),
+            customPageable,
+            postsPage.getTotalElements()
+        );
+    }
+
+    // ========== 유틸리티 메서드 ==========
+
+    private void saveIngredients(Post post, List<?> ingredientDtos) {
+        if (ingredientDtos == null || ingredientDtos.isEmpty()) return;
+
+        List<Ingredients> ingredients = ingredientDtos.stream()
+                .map(dto -> {
+                    String name, amount;
+
+                    // 타입 확인해서 필드 추출
+                    if (dto instanceof PostCreateRequestDto.IngredientRequestDto createDto) {
+                        name = createDto.getName();
+                        amount = createDto.getAmount();
+                    } else if (dto instanceof PostUpdateRequestDto.IngredientUpdateDto updateDto) {
+                        name = updateDto.getName();
+                        amount = updateDto.getAmount();
+                    } else {
+                        throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
+                    }
+
+                    return Ingredients.builder()
+                            .post(post)
+                            .name(name)
+                            .amount(amount)
+                            .build();
+                })
+                .toList();
+
+        ingredientsRepository.saveAll(ingredients);
+    }
+
+    private void saveRecipeSteps(Post post, List<?> stepDtos) {
+        if (stepDtos == null || stepDtos.isEmpty()) return;
+
+        List<RecipeStep> steps = stepDtos.stream()
+                .map(dto -> {
+                    Integer stepSequence;
+                    String content;
+
+                    // 타입 확인해서 필드 추출
+                    if (dto instanceof PostCreateRequestDto.RecipeStepRequestDto createDto) {
+                        stepSequence = createDto.getStepSequence();
+                        content = createDto.getContent();
+                    } else if (dto instanceof PostUpdateRequestDto.RecipeStepUpdateDto updateDto) {
+                        stepSequence = updateDto.getStepSequence();
+                        content = updateDto.getContent();
+                    } else {
+                        throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
+                    }
+
+                    return RecipeStep.builder()
+                            .post(post)
+                            .stepSequence(stepSequence)
+                            .content(content)
+                            .build();
+                })
+                .toList();
+
+        recipeStepRepository.saveAll(steps);
+    }
+}

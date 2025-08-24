@@ -3,7 +3,7 @@ package lazyteam.cooking_hansu.domain.report.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
-import lazyteam.cooking_hansu.domain.common.dto.Status;
+import lazyteam.cooking_hansu.domain.common.enums.Status;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;

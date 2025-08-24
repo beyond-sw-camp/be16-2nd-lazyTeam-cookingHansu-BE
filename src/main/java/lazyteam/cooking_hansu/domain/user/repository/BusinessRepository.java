@@ -1,13 +1,12 @@
 package lazyteam.cooking_hansu.domain.user.repository;
 
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository

@@ -55,10 +55,12 @@ public class SecurityConfig {
                         "/lecture/**",
                         "/user/**",
                         "/chat/**",
-                        "/post/**",
                         "cart/**",
                         "/purchase/**",
                         "/review/**",
+                        "/api/recipes/**",
+                        "/api/posts/**", // 게시글 API 모두 허용
+                        "/api/interactions/**", // 상호작용 API 모두 허용
                         "/connect/**", // WebSocket 연결 엔드포인트
                         "/topic/**", // WebSocket 토픽
                         "/publish/**", // WebSocket 메시지 발행

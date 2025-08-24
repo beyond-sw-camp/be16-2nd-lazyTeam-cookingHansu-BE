@@ -3,15 +3,15 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
-import lazyteam.cooking_hansu.domain.common.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
+import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureUpdateDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
-import org.hibernate.annotations.DialectOverride;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
@@ -76,6 +76,9 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     private Integer qnaCount = 0;
 
     @Builder.Default
+    private Long likeCount = 0L; // 좋아요 수 추가
+
+    @Builder.Default
     private Integer purchaseCount = 0;
 
 //    평점 평균값을 위해 BigDecimal 타입 사용
@@ -110,6 +113,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY)
     private List<CartItem> cartItems;
 
+    // 강의 좋아요 관계 추가
+    @OneToMany(mappedBy = "lecture", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LectureLikes> lectureLikes;
+
 
     public void updateImageUrl(String url) {
         this.thumbUrl = url;
@@ -126,5 +133,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     public void lectureDelete() {
         this.isDelete = true;
+    }
+
+    // Redis 동기화를 위한 좋아요 수 업데이트 메서드
+    public void updateLikeCount(Long likeCount) {
+        this.likeCount = likeCount != null ? likeCount.intValue() : 0L;
     }
 }

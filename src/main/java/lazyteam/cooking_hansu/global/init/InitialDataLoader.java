@@ -25,16 +25,15 @@ public class InitialDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(adminRepository.findByEmail("admin@naver.com").isPresent()){
-            return;
+        // 관리자 초기 데이터
+        if(adminRepository.findByEmail("admin@naver.com").isEmpty()){
+            Admin admin = Admin.builder()
+                    .email(adminEmail)
+                    .name(adminName)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .build();
+            adminRepository.save(admin);
         }
-        Admin admin = Admin.builder()
-                .email(adminEmail)
-                .name(adminName)
-                .password(passwordEncoder.encode(adminPassword))
-                .build();
-
-        adminRepository.save(admin);
     }
 
 }

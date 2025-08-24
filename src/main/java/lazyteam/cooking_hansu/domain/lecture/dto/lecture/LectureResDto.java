@@ -1,8 +1,8 @@
 package lazyteam.cooking_hansu.domain.lecture.dto.lecture;
 
 
-import lazyteam.cooking_hansu.domain.common.ApprovalStatus;
-import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +27,7 @@ public class LectureResDto {
     private String thumbUrl;
     private Integer reviewCount;
     private Integer qnaCount;
+    private Long likeCount;
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
 
@@ -51,6 +52,7 @@ public class LectureResDto {
                 .thumbUrl(lecture.getThumbUrl())
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
+                .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
                 .build();

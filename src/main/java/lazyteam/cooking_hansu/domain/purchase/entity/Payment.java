@@ -2,8 +2,8 @@ package lazyteam.cooking_hansu.domain.purchase.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lazyteam.cooking_hansu.domain.common.PayMethod;
-import lazyteam.cooking_hansu.domain.common.PaymentStatus;
+import lazyteam.cooking_hansu.domain.common.enums.PayMethod;
+import lazyteam.cooking_hansu.domain.common.enums.PaymentStatus;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;

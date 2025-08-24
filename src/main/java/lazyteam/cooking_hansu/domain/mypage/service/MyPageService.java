@@ -11,13 +11,10 @@ import lazyteam.cooking_hansu.domain.post.entity.*;
 import lazyteam.cooking_hansu.domain.post.repository.*;
 import lazyteam.cooking_hansu.domain.purchase.entity.*;
 import lazyteam.cooking_hansu.domain.purchase.repository.*;
-import lazyteam.cooking_hansu.domain.recipe.entity.*;
-import lazyteam.cooking_hansu.domain.recipe.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
 import lazyteam.cooking_hansu.global.service.*;
 import lombok.*;
-import org.springframework.beans.factory.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.*;
@@ -35,11 +32,10 @@ public class MyPageService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final RecipeRepository recipeRepository;
     private final PurchasedLectureRepository purchasedLectureRepository;
     private final LectureReviewRepository lectureReviewRepository;
     private final BookmarkRepository bookmarkRepository;
-    private final LikesRepository likesRepository;
+    private final PostLikesRepository postLikesRepository;
     private final S3Uploader s3Uploader;
 
     @Value("${my.test.user-id}")
@@ -116,29 +112,6 @@ public class MyPageService {
             throw e;
         }
     }
-
-    // ===== 내 레시피 관련 메서드 =====
-
-    @Transactional(readOnly = true)
-    public List<MyRecipeListDto> getMyRecipes() {
-        User user = getCurrentUser();
-        List<Recipe> recipes = recipeRepository.findAllByUser(user);
-
-        return recipes.stream()
-                .map(recipe -> MyRecipeListDto.builder()
-                        .id(recipe.getId())
-                        .title(recipe.getTitle())
-                        .ingredients(
-                                recipe.getIngredients().stream()
-                                        .map(i -> i.getName() + " " + i.getAmount())
-                                        .collect(Collectors.toList())
-                        )
-                        .createdAt(recipe.getCreatedAt())
-                        .thumbnailUrl(recipe.getThumbnailUrl())
-                        .build())
-                .collect(Collectors.toList());
-    }
-
     // ===== 내 게시글 관련 메서드 =====
 
     @Transactional(readOnly = true)
@@ -219,9 +192,9 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public List<MyBookmarkLikedListDto> getMyLikes() {
         User user = getCurrentUser();
-        List<Likes> likesList = likesRepository.findAllByUser(user);
+        List<PostLikes> postLikesList = postLikesRepository.findAllByUser(user);
 
-        return likesList.stream()
+        return postLikesList.stream()
                 .map(like -> {
                     Post post = like.getPost();
                     return MyBookmarkLikedListDto.builder()
