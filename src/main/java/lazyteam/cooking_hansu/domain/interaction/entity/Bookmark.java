@@ -13,7 +13,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
 @ToString
 public class Bookmark extends BaseIdAndTimeEntity {
     // 회원 정보
