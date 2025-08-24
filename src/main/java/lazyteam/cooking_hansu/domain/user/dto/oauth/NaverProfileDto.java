@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class NaverProfileDto {
     private String resultcode;
     private String message;
@@ -21,7 +20,6 @@ public class NaverProfileDto {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Response {
         private String id; // 동일인 식별 정보 (고유 번호)
         private String name; // 이름

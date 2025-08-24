@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleProfileDto {
     // 구글 프로필 정보
     private String sub; // 구글에서 사용하는 고유 사용자 ID

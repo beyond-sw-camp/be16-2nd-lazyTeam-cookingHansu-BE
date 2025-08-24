@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoProfileDto {
     // 카카오 프로필 정보
     private String id;
@@ -21,7 +20,6 @@ public class KakaoProfileDto {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KakaoAccount {
         private String email;
         private String name;
@@ -31,7 +29,6 @@ public class KakaoProfileDto {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Profile {
         private String profile_image_url;
     }
