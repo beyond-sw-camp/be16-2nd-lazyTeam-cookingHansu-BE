@@ -53,32 +53,6 @@ public class RedisInteractionService {
     }
 
     /**
-     * 강의 좋아요 수 캐시 증가/감소
-     */
-    public Long incrementLectureLikesCount(UUID lectureId, boolean isIncrement) {
-        String key = String.format(LECTURE_LIKES_COUNT_KEY, lectureId);
-        Long newCount;
-
-        if (isIncrement) {
-            newCount = redisTemplate.opsForValue().increment(key);
-        } else {
-            newCount = redisTemplate.opsForValue().decrement(key);
-            // 음수 방지
-            if (newCount != null && newCount < 0) {
-                redisTemplate.opsForValue().set(key, "0");
-                newCount = 0L;
-            }
-        }
-
-        // TTL 갱신
-        redisTemplate.expire(key, INTERACTION_TTL);
-
-        log.info("강의 좋아요 수 {} - lectureId: {}, newCount: {}",
-                isIncrement ? "증가" : "감소", lectureId, newCount);
-        return newCount;
-    }
-
-    /**
      * 사용자가 특정 강의에 좋아요를 눌렀는지 확인
      */
     public boolean isLectureLikedByUser(UUID lectureId, UUID userId) {
@@ -111,7 +85,7 @@ public class RedisInteractionService {
     public void updateLectureLike(UUID lectureId, UUID userId, boolean isLiked) {
         // 사용자 좋아요 상태 업데이트
         setLectureLikeStatus(lectureId, userId, isLiked);
-        
+
         // 좋아요 카운트 업데이트
         String countKey = String.format(LECTURE_LIKES_COUNT_KEY, lectureId);
         if (isLiked) {
@@ -125,8 +99,8 @@ public class RedisInteractionService {
         }
         // TTL 설정
         redisTemplate.expire(countKey, INTERACTION_TTL);
-        
-        log.info("강의 좋아요 {} - lectureId: {}, userId: {}", 
+
+        log.info("강의 좋아요 {} - lectureId: {}, userId: {}",
                 isLiked ? "추가" : "제거", lectureId, userId);
     }
 
@@ -144,15 +118,6 @@ public class RedisInteractionService {
     }
 
     // ========== 게시글 좋아요 관련 ==========
-
-    /**
-     * 게시글 좋아요 수 캐시에서 조회
-     */
-    public Long getPostLikesCount(UUID postId) {
-        String key = String.format(POST_LIKES_COUNT_KEY, postId);
-        String count = redisTemplate.opsForValue().get(key);
-        return count != null ? Long.parseLong(count) : null;
-    }
 
     /**
      * 게시글 좋아요 수 캐시에 저장
@@ -229,15 +194,6 @@ public class RedisInteractionService {
     }
 
     // ========== 게시글 북마크 관련 ==========
-
-    /**
-     * 게시글 북마크 수 캐시에서 조회
-     */
-    public Long getPostBookmarksCount(UUID postId) {
-        String key = String.format(POST_BOOKMARKS_COUNT_KEY, postId);
-        String count = redisTemplate.opsForValue().get(key);
-        return count != null ? Long.parseLong(count) : null;
-    }
 
     /**
      * 게시글 북마크 수 캐시에 저장

@@ -2,7 +2,6 @@ package lazyteam.cooking_hansu.domain.interaction.repository;
 
 import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 

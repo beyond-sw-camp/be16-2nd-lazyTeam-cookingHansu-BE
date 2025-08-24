@@ -21,7 +21,7 @@ public class RecipeStep extends BaseIdEntity {
     @Column(name = "step_sequence", nullable = false, columnDefinition = "INT UNSIGNED")
     private Integer stepSequence; // 순서 번호 (1, 2, 3, ...)
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String content; // 조리 단계 설명
 
     // ========== 비즈니스 메서드 ==========

@@ -1,10 +1,8 @@
 package lazyteam.cooking_hansu.domain.interaction.repository;
 
 import lazyteam.cooking_hansu.domain.interaction.entity.Likes;
-import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
