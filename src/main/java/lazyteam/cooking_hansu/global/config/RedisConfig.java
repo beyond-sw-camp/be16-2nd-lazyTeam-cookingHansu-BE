@@ -29,7 +29,6 @@ import java.util.Map;
  * 0: refresh token 저장소
  */
 @Configuration
-@EnableCaching
 public class RedisConfig {
 
     @Value("${spring.data.redis.host}")
