@@ -289,8 +289,7 @@ public class InteractionService {
                             .name("기본사용자")
                             .email("default@test.com")
                             .nickname("기본사용자")
-                            .password("password123")
-                            .profileImageUrl("https://via.placeholder.com/150")
+                            .picture("https://via.placeholder.com/150")
                             .build();
                     return userRepository.save(testUser);
                 });

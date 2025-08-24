@@ -90,7 +90,7 @@ public class PostResponseDto {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
-                    .profileImageUrl(user.getProfileImageUrl())
+                    .profileImageUrl(user.getPicture())
                     .role(user.getRole() != null ? user.getRole().name() : "GENERAL")
                     .build();
         }
