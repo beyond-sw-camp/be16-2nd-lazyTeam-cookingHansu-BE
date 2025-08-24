@@ -3,9 +3,8 @@ package lazyteam.cooking_hansu.domain.post.dto;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
-import lazyteam.cooking_hansu.domain.recipe.entity.Ingredients;
-import lazyteam.cooking_hansu.domain.recipe.entity.Recipe;
-import lazyteam.cooking_hansu.domain.recipe.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
+import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +22,10 @@ public class PostResponseDto {
     private String title;
     private String description;
     private CategoryEnum category;
+    private LevelEnum level;
+    private Integer cookTime;
+    private Integer serving;
+    private String cookTip;
     private String thumbnailUrl;
     private Long likeCount;
     private Long viewCount;
@@ -31,44 +34,8 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private UserInfoDto user;
-    private RecipeInfoDto recipe;
-    private List<StepDescriptionDto> stepDescriptions;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class RecipeInfoDto {
-        private UUID id;
-        private String title;
-        private String description;
-        private LevelEnum level;
-        private CategoryEnum category;
-        private int cookTime;
-        private Integer servings;
-        private List<IngredientDto> ingredients;
-        private List<RecipeStepDto> steps;
-
-        public static RecipeInfoDto fromEntity(Recipe recipe) {
-            if (recipe == null) return null;
-            return RecipeInfoDto.builder()
-                    .id(recipe.getId())
-                    .title(recipe.getTitle())
-                    .description(recipe.getDescription())
-                    .level(recipe.getLevel())
-                    .category(recipe.getCategory())
-                    .cookTime(recipe.getCookTime())
-                    .servings(recipe.getServings())
-                    .ingredients(recipe.getIngredients() != null
-                            ? recipe.getIngredients().stream().map(IngredientDto::fromEntity).toList()
-                            : List.of())
-                    .steps(recipe.getSteps() != null
-                            ? recipe.getSteps().stream().map(RecipeStepDto::fromEntity).toList()
-                            : List.of())
-                    .build();
-        }
-    }
+    private List<IngredientDto> ingredients;
+    private List<RecipeStepDto> steps;
 
     @Getter
     @Setter
@@ -115,53 +82,6 @@ public class PostResponseDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class StepDescriptionDto {
-        private UUID stepId;
-        private Integer stepSequence;
-        private String originalContent;
-        private String additionalContent;
-
-        public static StepDescriptionDto fromEntity(lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription description) {
-            if (description == null) return null;
-            return StepDescriptionDto.builder()
-                    .stepId(description.getRecipeStep().getId())
-                    .stepSequence(description.getRecipeStep().getStepSequence())
-                    .originalContent(description.getRecipeStep().getContent())
-                    .additionalContent(description.getContent())
-                    .build();
-        }
-    }
-
-    public static PostResponseDto fromEntity(Post post, Recipe recipe, List<lazyteam.cooking_hansu.domain.recipe.entity.PostSequenceDescription> descriptions) {
-        return PostResponseDto.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .description(post.getDescription())
-                .category(post.getCategory())
-                .thumbnailUrl(post.getThumbnailUrl())
-                .likeCount(post.getLikeCount())
-                .viewCount(post.getViewCount())
-                .bookmarkCount(post.getBookmarkCount())
-                .isOpen(post.getIsOpen())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .user(UserInfoDto.fromEntity(post.getUser()))
-                .recipe(RecipeInfoDto.fromEntity(recipe))
-                .stepDescriptions(descriptions != null
-                        ? descriptions.stream().map(StepDescriptionDto::fromEntity).toList()
-                        : List.of())
-                .build();
-    }
-
-    public static PostResponseDto fromEntity(Post post) {
-        return fromEntity(post, null, null);
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
     public static class UserInfoDto {
         private UUID id;
         private String nickname;
@@ -177,15 +97,34 @@ public class PostResponseDto {
                     .role(user.getRole() != null ? user.getRole().name() : "GENERAL")
                     .build();
         }
+    }
 
-        public String getRoleKorean() {
-            if (role == null) return "일반 사용자";
-            return switch (role) {
-                case "GENERAL" -> "일반 사용자";
-                case "CHEF" -> "셰프";
-                case "OWNER" -> "자영업자";
-                default -> "일반 사용자";
-            };
-        }
+    // 통합 Post 엔티티로부터 DTO 생성 (재료, 조리순서 포함)
+    public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps) {
+        return PostResponseDto.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .description(post.getDescription())
+                .category(post.getCategory())
+                .level(post.getLevel())
+                .cookTime(post.getCookTime())
+                .serving(post.getServing())
+                .cookTip(post.getCookTip())
+                .thumbnailUrl(post.getThumbnailUrl())
+                .likeCount(post.getLikeCount())
+                .viewCount(post.getViewCount())
+                .bookmarkCount(post.getBookmarkCount())
+                .isOpen(post.getIsOpen())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .user(UserInfoDto.fromEntity(post.getUser()))
+                .ingredients(ingredients != null ? ingredients.stream().map(IngredientDto::fromEntity).toList() : List.of())
+                .steps(steps != null ? steps.stream().map(RecipeStepDto::fromEntity).toList() : List.of())
+                .build();
+    }
+
+    // 간단한 Post 정보만 필요한 경우 (목록 조회 등)
+    public static PostResponseDto fromEntity(Post post) {
+        return fromEntity(post, null, null);
     }
 }

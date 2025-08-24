@@ -47,14 +47,6 @@ public class MyPageController {
         );
     }
 
-    @GetMapping("/recipes")
-    public ResponseEntity<?> myRecipeList() {
-        return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyRecipes(), HttpStatus.OK),
-                HttpStatus.OK
-        );
-    }
-
     @GetMapping("/posts")
     public ResponseEntity<?> myPostList() {
         return new ResponseEntity<>(

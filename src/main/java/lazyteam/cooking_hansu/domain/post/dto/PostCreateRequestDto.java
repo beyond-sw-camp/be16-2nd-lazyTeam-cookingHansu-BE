@@ -1,13 +1,12 @@
 package lazyteam.cooking_hansu.domain.post.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lombok.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -26,26 +25,70 @@ public class PostCreateRequestDto {
     @NotNull(message = "카테고리는 필수입니다.")
     private CategoryEnum category;
 
-    @Size(max = 512, message = "썸네일 url은 512자 이하여야 합니다.")
+    @NotNull(message = "난이도는 필수입니다.")
+    private LevelEnum level;
+
+    @NotNull(message = "조리 시간은 필수입니다.")
+    @Min(value = 1, message = "조리 시간은 1분 이상이어야 합니다.")
+    @Max(value = 999, message = "조리 시간은 999분 이하여야 합니다.")
+    private Integer cookTime;
+
+    @NotNull(message = "인분 수는 필수입니다.")
+    @Min(value = 1, message = "인분 수는 1 이상이어야 합니다.")
+    @Max(value = 20, message = "인분 수는 20 이하여야 합니다.")
+    private Integer serving;
+
+    @Size(max = 2000, message = "요리 팁은 2000자 이하여야 합니다.")
+    private String cookTip;
+
+    @Size(max = 512, message = "썸네일 URL은 512자 이하여야 합니다.")
     private String thumbnailUrl;
 
     @Builder.Default
     @NotNull(message = "공개 여부는 필수입니다.")
     private Boolean isOpen = true;
 
-    private UUID recipe;
+    @Valid
+    private List<IngredientRequestDto> ingredients;
 
-    private List<PostRecipeStepDto> stepDescriptions;
+    @Valid
+    private List<RecipeStepRequestDto> steps;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class IngredientRequestDto {
+        @NotBlank(message = "재료명은 필수입니다.")
+        @Size(max = 255, message = "재료명은 255자 이하여야 합니다.")
+        private String name;
+
+        @NotBlank(message = "재료 양은 필수입니다.")
+        @Size(max = 255, message = "재료 양은 255자 이하여야 합니다.")
+        private String amount;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RecipeStepRequestDto {
+        @NotNull(message = "단계 번호는 필수입니다.")
+        @Min(value = 1, message = "단계 번호는 1 이상이어야 합니다.")
+        private Integer stepSequence;
+
+        @NotBlank(message = "단계 설명은 필수입니다.")
+        @Size(max = 255, message = "단계 설명은 255자 이하여야 합니다.")
+        private String content;
+    }
 
     public boolean isValid() {
-        return title != null && !title.trim().isEmpty() && category != null;
+        return title != null && !title.trim().isEmpty() 
+            && category != null 
+            && level != null 
+            && cookTime != null && cookTime > 0
+            && serving != null && serving > 0;
     }
-
-    public boolean hasRecipe() {
-        return recipe != null;
-    }
-//
-//    public boolean hasStepDescriptions() {
-//        return stepDescriptions != null && !stepDescriptions.isEmpty();
-//    }
 }

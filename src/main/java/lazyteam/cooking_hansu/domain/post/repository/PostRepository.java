@@ -18,20 +18,9 @@ import java.util.UUID;
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
     List<Post> findAllByUser(User user);
-
-    Page<Post> findByIsOpenTrueAndDeletedAtIsNull(Pageable pageable);
-
-    Page<Post> findByUserAndDeletedAtIsNull(User user, Pageable pageable);
-
-    Page<Post> findByUserAndIsOpenTrueAndDeletedAtIsNull(User user, Pageable pageable);
-
-    Page<Post> findByCategoryAndIsOpenTrueAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
-
-    Page<Post> findByCategoryAndDeletedAtIsNull(CategoryEnum category, Pageable pageable);
-
-    @Query("SELECT p FROM Post p JOIN p.user u WHERE u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
-    Page<Post> findByUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("role") Role role, Pageable pageable);
-
-    @Query("SELECT p FROM Post p JOIN p.user u WHERE p.category = :category AND u.role = :role AND p.isOpen = true AND p.deletedAt IS NULL")
-    Page<Post> findByCategoryAndUserRoleAndIsOpenTrueAndDeletedAtIsNull(@Param("category") CategoryEnum category, @Param("role") Role role, Pageable pageable);
+    
+    // 팀메이트 스타일: 간단한 기본 조회 메서드들
+    Page<Post> findByDeletedAtIsNullAndIsOpenTrue(Pageable pageable);
+    
+    Page<Post> findByDeletedAtIsNullAndIsOpenTrueAndCategory(CategoryEnum category, Pageable pageable);
 }

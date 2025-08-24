@@ -65,13 +65,13 @@ public class InteractionService {
                     likesRepository.delete(existingLike);
                 }
                 redisInteractionService.updatePostLike(postId, userId, false);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = likesRepository.countByPostId(postId);
                 redisInteractionService.setPostLikesCount(postId, actualCount);
                 post.setLikeCount(actualCount);
                 postRepository.save(post);
-                
+
                 log.info("좋아요 취소 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
                 return "좋아요를 취소했습니다.";
             } else {
@@ -79,13 +79,13 @@ public class InteractionService {
                 Likes newLike = Likes.builder().user(user).post(post).build();
                 likesRepository.save(newLike);
                 redisInteractionService.updatePostLike(postId, userId, true);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = likesRepository.countByPostId(postId);
                 redisInteractionService.setPostLikesCount(postId, actualCount);
                 post.setLikeCount(actualCount);
                 postRepository.save(post);
-                
+
                 log.info("좋아요 추가 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
                 return "좋아요를 추가했습니다.";
             }
@@ -107,7 +107,7 @@ public class InteractionService {
         try {
             // Redis에서 북마크 상태 확인 (먼저 Redis 체크)
             boolean isBookmarked = redisInteractionService.isPostBookmarkedByUser(postId, userId);
-            
+
             // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
             if (!isBookmarked) {
                 boolean dbBookmarkedStatus = bookmarkRepository.findByUserIdAndPostId(userId, postId) != null;
@@ -124,13 +124,13 @@ public class InteractionService {
                     bookmarkRepository.delete(existingBookmark);
                 }
                 redisInteractionService.updatePostBookmark(postId, userId, false);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = bookmarkRepository.countByPostId(postId);
                 redisInteractionService.setPostBookmarksCount(postId, actualCount);
                 post.setBookmarkCount(actualCount);
                 postRepository.save(post);
-                
+
                 log.info("북마크 취소 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
                 return "북마크를 취소했습니다.";
             } else {
@@ -138,13 +138,13 @@ public class InteractionService {
                 Bookmark newBookmark = Bookmark.builder().user(user).post(post).build();
                 bookmarkRepository.save(newBookmark);
                 redisInteractionService.updatePostBookmark(postId, userId, true);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = bookmarkRepository.countByPostId(postId);
                 redisInteractionService.setPostBookmarksCount(postId, actualCount);
                 post.setBookmarkCount(actualCount);
                 postRepository.save(post);
-                
+
                 log.info("북마크 추가 - 게시글: {}, 사용자: {}, 총 개수: {}", postId, userId, actualCount);
                 return "북마크를 추가했습니다.";
             }
@@ -166,7 +166,7 @@ public class InteractionService {
         try {
             // Redis에서 좋아요 상태 확인 (먼저 Redis 체크)
             boolean isLiked = redisInteractionService.isLectureLikedByUser(lectureId, userId);
-            
+
             // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
             if (!isLiked) {
                 boolean dbLikedStatus = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId) != null;
@@ -183,11 +183,11 @@ public class InteractionService {
                     lectureLikesRepository.delete(existingLike);
                 }
                 redisInteractionService.updateLectureLike(lectureId, userId, false);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = lectureLikesRepository.countByLectureId(lectureId);
                 redisInteractionService.setLectureLikesCount(lectureId, actualCount);
-                
+
                 log.info("강의 좋아요 취소 - lectureId: {}, userId: {}, 총 개수: {}", lectureId, userId, actualCount);
                 return "강의 좋아요를 취소했습니다.";
             } else {
@@ -195,11 +195,11 @@ public class InteractionService {
                 LectureLikes newLike = LectureLikes.builder().user(user).lecture(lecture).build();
                 lectureLikesRepository.save(newLike);
                 redisInteractionService.updateLectureLike(lectureId, userId, true);
-                
+
                 // DB 카운트와 Redis 동기화
                 Long actualCount = lectureLikesRepository.countByLectureId(lectureId);
                 redisInteractionService.setLectureLikesCount(lectureId, actualCount);
-                
+
                 log.info("강의 좋아요 추가 - lectureId: {}, userId: {}, 총 개수: {}", lectureId, userId, actualCount);
                 return "강의 좋아요를 추가했습니다.";
             }
@@ -217,7 +217,7 @@ public class InteractionService {
             // Redis에서 조회수 관리
             Long cachedCount = redisInteractionService.getPostViewCount(postId);
             Long newViewCount;
-            
+
             if (cachedCount == null) {
                 // Redis에 캐시가 없으면 DB에서 현재 조회수를 가져와 Redis에 저장 후 증가
                 Post post = postRepository.findById(postId).orElse(null);
@@ -232,7 +232,7 @@ public class InteractionService {
             } else {
                 // Redis에서 증가
                 newViewCount = redisInteractionService.incrementPostViewCount(postId);
-                
+
                 // 주기적으로 DB 동기화 (10의 배수마다)
                 if (newViewCount % 10 == 0) {
                     Post post = postRepository.findById(postId).orElse(null);
@@ -243,7 +243,7 @@ public class InteractionService {
                     }
                 }
             }
-            
+
             log.debug("게시글 조회수 증가 - postId: {}, newCount: {}", postId, newViewCount);
         } catch (Exception e) {
             log.error("조회수 처리 실패 - postId: {}", postId, e);
@@ -255,37 +255,19 @@ public class InteractionService {
 
     public boolean incrementViewCountWithCheck(UUID postId) {
         UUID userId = getCurrentUserId();
-        
+
         // 이미 조회한 사용자인지 Redis에서 확인
         if (redisInteractionService.hasUserViewedPost(postId, userId)) {
             log.debug("이미 조회한 게시글 - postId: {}, userId: {}", postId, userId);
             return false;
         }
-        
+
         // 조회 기록을 Redis에 저장하고 조회수 증가
         redisInteractionService.markPostAsViewed(postId, userId);
         incrementViewCount(postId);
         return true;
     }
 
-    // ========== 데이터 정리 메서드 ==========
-    public void deletePostInteractions(UUID postId) {
-        try {
-            // DB에서 삭제
-            likesRepository.deleteByPostId(postId);
-            bookmarkRepository.deleteByPostId(postId);
-            
-            // Redis 캐시 삭제
-            redisInteractionService.deletePostLikesCache(postId);
-            redisInteractionService.deletePostBookmarksCache(postId);
-            redisInteractionService.deletePostViewCache(postId);
-            
-            log.info("게시글 상호작용 데이터 삭제 완료 - postId: {}", postId);
-        } catch (Exception e) {
-            log.error("게시글 상호작용 데이터 삭제 실패 - postId: {}", postId, e);
-            throw new RuntimeException("데이터 삭제 중 오류가 발생했습니다.", e);
-        }
-    }
 
     // ========== 유틸리티 메서드 ==========
     private UUID getCurrentUserId() {

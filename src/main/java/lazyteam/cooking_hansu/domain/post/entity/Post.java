@@ -3,11 +3,13 @@ package lazyteam.cooking_hansu.domain.post.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "post")
@@ -55,6 +57,31 @@ public class Post extends BaseIdAndTimeEntity {
     @Column(name = "bookmark_count", nullable = false)
     private Long bookmarkCount = 0L;
 
+    @NotNull(message = "조리 시간은 필수입니다")
+    @Column(name = "cook_time", nullable = false, columnDefinition = "INT UNSIGNED")
+    private Integer cookTime;
+
+    @NotNull(message = "난이도는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "level", nullable = false)
+    private LevelEnum level;
+
+    @NotNull(message = "인분 수는 필수입니다")
+    @Min(value = 1, message = "인분 수는 1 이상이어야 합니다")
+    @Max(value = 20, message = "인분 수는 20 이하여야 합니다")
+    @Column(name = "serving", nullable = false, columnDefinition = "INT UNSIGNED")
+    private Integer serving;
+
+    @Size(max = 2000, message = "요리 팁은 2000자 이하여야 합니다")
+    @Column(name = "cook_tip", columnDefinition = "TEXT")
+    private String cookTip;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredients> ingredients;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeStep> steps;
+
     @Builder.Default
     @NotNull(message = "공개 여부는 필수입니다")
     @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
@@ -63,37 +90,6 @@ public class Post extends BaseIdAndTimeEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    // 비즈니스 메서드
-    public void updateBoard(String title, String description, String thumbnailUrl, Boolean isOpen) {
-        if (title != null) this.title = title;
-        if (description != null) this.description = description;
-        if (thumbnailUrl != null) this.thumbnailUrl = thumbnailUrl;
-        if (isOpen != null) this.isOpen = isOpen;
-    }
-
-    public void incrementViewCount() {
-        this.viewCount++;
-    }
-
-    public void incrementLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decrementLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
-        }
-    }
-
-    public void incrementBookmarkCount() {
-        this.bookmarkCount++;
-    }
-
-    public void decrementBookmarkCount() {
-        if (this.bookmarkCount > 0) {
-            this.bookmarkCount--;
-        }
-    }
 
 //    레시피 공유 삭제
     public void softDelete() { this.deletedAt = LocalDateTime.now();}
@@ -105,7 +101,9 @@ public class Post extends BaseIdAndTimeEntity {
         return this.isOpen != null && this.isOpen;
     }
 
-    public void updatePost(String title, String description, String thumbnailUrl, CategoryEnum category, Boolean isOpen) {
+    public void updatePost(String title, String description, String thumbnailUrl, 
+                          CategoryEnum category, LevelEnum level, Integer cookTime, 
+                          Integer serving, String cookTip, Boolean isOpen) {
         if (title != null && !title.trim().isEmpty()) {
             this.title = title.trim();
         }
@@ -118,6 +116,18 @@ public class Post extends BaseIdAndTimeEntity {
         if (category != null) {
             this.category = category;
         }
+        if (level != null) {
+            this.level = level;
+        }
+        if (cookTime != null && cookTime > 0) {
+            this.cookTime = cookTime;
+        }
+        if (serving != null && serving > 0) {
+            this.serving = serving;
+        }
+        if (cookTip != null) {
+            this.cookTip = cookTip.trim();
+        }
         if (isOpen != null) {
             this.isOpen = isOpen;
         }
@@ -128,18 +138,34 @@ public class Post extends BaseIdAndTimeEntity {
         return this.user != null && this.user.getId().equals(user.getId());
     }
 
-    // Redis 동기화를 위한 조회수 직접 설정 메서드
-    public void setViewCount(Long viewCount) {
+    // Redis 동기화를 위한 카운트 업데이트 메서드들
+    public void updateViewCount(Long viewCount) {
         this.viewCount = viewCount != null ? viewCount : 0L;
     }
 
-    // Redis 동기화를 위한 좋아요 수 직접 설정 메서드
-    public void setLikeCount(Long likeCount) {
+    public void updateLikeCount(Long likeCount) {
         this.likeCount = likeCount != null ? likeCount : 0L;
     }
 
-    // Redis 동기화를 위한 북마크 수 직접 설정 메서드
-    public void setBookmarkCount(Long bookmarkCount) {
+    public void updateBookmarkCount(Long bookmarkCount) {
         this.bookmarkCount = bookmarkCount != null ? bookmarkCount : 0L;
+    }
+
+    // Redis 동기화를 위한 조회수 직접 설정 메서드 (deprecated)
+    @Deprecated
+    public void setViewCount(Long viewCount) {
+        updateViewCount(viewCount);
+    }
+
+    // Redis 동기화를 위한 좋아요 수 직접 설정 메서드 (deprecated)
+    @Deprecated
+    public void setLikeCount(Long likeCount) {
+        updateLikeCount(likeCount);
+    }
+
+    // Redis 동기화를 위한 북마크 수 직접 설정 메서드 (deprecated)
+    @Deprecated
+    public void setBookmarkCount(Long bookmarkCount) {
+        updateBookmarkCount(bookmarkCount);
     }
 }

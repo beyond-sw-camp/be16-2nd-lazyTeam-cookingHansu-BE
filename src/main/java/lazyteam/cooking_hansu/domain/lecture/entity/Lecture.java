@@ -77,6 +77,9 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
     private Integer qnaCount = 0;
 
     @Builder.Default
+    private Long likeCount = 0L; // 좋아요 수 추가
+
+    @Builder.Default
     private Integer purchaseCount = 0;
 
 //    평점 평균값을 위해 BigDecimal 타입 사용
@@ -131,5 +134,10 @@ public class Lecture extends BaseIdAndTimeAndApprovalEntity {
 
     public void lectureDelete() {
         this.isDelete = true;
+    }
+
+    // Redis 동기화를 위한 좋아요 수 업데이트 메서드
+    public void updateLikeCount(Long likeCount) {
+        this.likeCount = likeCount != null ? likeCount.intValue() : 0L;
     }
 }

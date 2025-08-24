@@ -1,11 +1,12 @@
 package lazyteam.cooking_hansu.domain.post.dto;
 
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.common.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.LevelEnum;
 import lombok.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,25 +23,57 @@ public class PostUpdateRequestDto {
 
     private CategoryEnum category;
 
+    private LevelEnum level;
+
+    @Min(value = 1, message = "조리 시간은 1분 이상이어야 합니다.")
+    @Max(value = 999, message = "조리 시간은 999분 이하여야 합니다.")
+    private Integer cookTime;
+
+    @Min(value = 1, message = "인분 수는 1 이상이어야 합니다.")
+    @Max(value = 20, message = "인분 수는 20 이하여야 합니다.")
+    private Integer serving;
+
+    @Size(max = 2000, message = "요리 팁은 2000자 이하여야 합니다.")
+    private String cookTip;
+
     @Size(max = 512, message = "썸네일 URL은 512자 이하여야 합니다")
     private String thumbnailUrl;
 
     private Boolean isOpen;
 
-    private UUID recipe;
+    @Valid
+    private List<IngredientUpdateDto> ingredients;
 
-    private List<PostRecipeStepDto> stepDescriptions;
+    @Valid
+    private List<RecipeStepUpdateDto> steps;
 
-    public boolean hasRecipe() {
-        return recipe != null;
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class IngredientUpdateDto {
+        @NotBlank(message = "재료명은 필수입니다.")
+        @Size(max = 255, message = "재료명은 255자 이하여야 합니다.")
+        private String name;
+
+        @NotBlank(message = "재료 양은 필수입니다.")
+        @Size(max = 255, message = "재료 양은 255자 이하여야 합니다.")
+        private String amount;
     }
 
-    public boolean hasStepDescriptions() {
-        return stepDescriptions != null && !stepDescriptions.isEmpty();
-    }
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RecipeStepUpdateDto {
+        @NotNull(message = "단계 번호는 필수입니다.")
+        @Min(value = 1, message = "단계 번호는 1 이상이어야 합니다.")
+        private Integer stepSequence;
 
-    public boolean shouldRemoveRecipe() {
-        return recipe != null && recipe.toString().equals("remove");
+        @NotBlank(message = "단계 설명은 필수입니다.")
+        @Size(max = 255, message = "단계 설명은 255자 이하여야 합니다.")
+        private String content;
     }
-
 }

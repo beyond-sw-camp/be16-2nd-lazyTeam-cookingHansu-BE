@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.recipe.entity;
+package lazyteam.cooking_hansu.domain.post.entity;
 
 import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdEntity;
@@ -15,8 +15,8 @@ import lombok.*;
 public class Ingredients extends BaseIdEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id", nullable = false)
-    private Recipe recipe; // 어떤 레시피의 재료인지
+    @JoinColumn(name = "Post_id", nullable = false)
+    private Post post; // 어떤 레시피의 재료인지
 
     @Column(nullable = false, length = 255)
     private String name; // 재료명 (예: 돼지고기, 김치, 양파)
@@ -26,15 +26,6 @@ public class Ingredients extends BaseIdEntity {
 
 //    비즈니스메서드
 
-//    재료정보수정
-    public void updateIngredient(String name, String amount) {
-        if (name != null && !name.trim().isEmpty()) {
-            this.name = name.trim();
-        }
-        if (amount != null && !amount.trim().isEmpty()) {
-            this.amount = amount.trim();
-        }
-    }
 
 //    재료정보 유효성 수정
     public boolean isValid() {

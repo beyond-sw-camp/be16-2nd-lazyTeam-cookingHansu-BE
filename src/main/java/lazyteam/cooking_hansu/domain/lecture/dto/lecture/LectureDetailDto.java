@@ -32,6 +32,7 @@ public class LectureDetailDto {
     private Integer price;
     private Integer reviewCount;
     private Integer qnaCount;
+    private Long likeCount; // 좋아요 수 추가
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
 
@@ -75,6 +76,7 @@ public class LectureDetailDto {
                 .price(lecture.getPrice())
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
+                .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
