@@ -47,7 +47,7 @@ public class LoginController {
             GoogleProfileDto googleProfileDto = googleService.getProfile(commonTokenDto.getAccess_token());
 
             // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialId(googleProfileDto.getSub());
+            User originalUser = userService.getUserByEmail(googleProfileDto.getEmail());
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {

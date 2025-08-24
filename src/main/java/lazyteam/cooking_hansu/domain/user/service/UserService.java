@@ -188,7 +188,7 @@ public class UserService {
     }
 
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. email: " + email));
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     // 로그인 전 테스트 요

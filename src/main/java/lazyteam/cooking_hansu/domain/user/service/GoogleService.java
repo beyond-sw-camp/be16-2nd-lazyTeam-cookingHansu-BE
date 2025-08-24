@@ -37,6 +37,7 @@ public class GoogleService implements OAuthService<GoogleProfileDto> {
         params.add("client_id", googleClientId);
         params.add("client_secret", googleClientSecret);
         params.add("redirect_uri", googleRedirectUri);
+        params.add("prompt", "select_account consent");
         params.add("grant_type", "authorization_code");
 
         ResponseEntity<CommonTokenDto> response = restClient.post()
