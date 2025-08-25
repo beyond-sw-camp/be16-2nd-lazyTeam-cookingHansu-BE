@@ -212,9 +212,10 @@ public class User extends BaseIdAndTimeEntity {
     }
 
     // 1단계 추가 정보 업데이트 (닉네임, 역할)
-    public void updateStep1Info(String nickname, Role role) {
+    public void updateStep1Info(String nickname, Role role, GeneralType generalType) {
         this.nickname = nickname;
         this.role = role;
+        this.generalType = generalType;
     }
 
     // 일반 회원 2단계 추가 정보 업데이트
@@ -225,5 +226,9 @@ public class User extends BaseIdAndTimeEntity {
     // 회원 가입 완료 메서드
     public void completeRegistration() {
         this.loginStatus = LoginStatus.ACTIVE; // 회원가입 완료 후 상태를 ACTIVE로 변경
+    }
+
+    public void updateRoleStatus(Role role){
+        this.role = role;
     }
 }
