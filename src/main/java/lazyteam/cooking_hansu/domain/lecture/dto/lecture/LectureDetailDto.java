@@ -35,6 +35,7 @@ public class LectureDetailDto {
     private Long likeCount; // 좋아요 수 추가
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
+    private UUID submittedById;
 
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
@@ -79,6 +80,7 @@ public class LectureDetailDto {
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
+                .submittedById(submittedBy.getId())
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
                 .lectureStepResDtoList(
