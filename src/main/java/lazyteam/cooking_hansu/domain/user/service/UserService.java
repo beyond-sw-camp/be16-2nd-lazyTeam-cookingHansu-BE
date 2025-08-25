@@ -11,6 +11,7 @@ import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
 import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
@@ -72,6 +73,7 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 셰프입니다. userId: " + userId);
             }
             chef.approve();
+            user.updateRoleStatus(Role.CHEF);
             // 역할은 이미 CHEF로 설정되어 있으므로 별도 변경 불필요
             return;
         }
@@ -83,6 +85,7 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
+            user.updateRoleStatus(Role.CHEF);
             // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
             return;
         }

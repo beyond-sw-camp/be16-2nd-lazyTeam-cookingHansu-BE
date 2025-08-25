@@ -226,4 +226,8 @@ public class User extends BaseIdAndTimeEntity {
     public void completeRegistration() {
         this.loginStatus = LoginStatus.ACTIVE; // 회원가입 완료 후 상태를 ACTIVE로 변경
     }
+
+    public void updateRoleStatus(Role role){
+        this.role = role;
+    }
 }
