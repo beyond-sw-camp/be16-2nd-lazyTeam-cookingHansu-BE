@@ -64,9 +64,12 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
+        log.info("서비스 시작");
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("유저 이메일 :" + userEmail);
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
         // 재료목록 저장
@@ -297,25 +300,21 @@ public class LectureService {
 
 
 // ====== 승인된 강의목록 조회 ======
-    public List<LectureResDto> findAllLecture(Pageable pageable) {
-        return lectureRepository.findAll(pageable).stream()
-                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .map(LectureResDto::fromEntity)
-                .toList();
-    }
+public Page<LectureResDto> findAllLecture(Pageable pageable) {
+    return lectureRepository.findAllByApprovalStatus(pageable,ApprovalStatus.APPROVED)
+            .map(LectureResDto::fromEntity);
+}
 
 
 
 // ====== 내 강의 목록 조회 ======
-    public List<LectureResDto> findAllMyLecture(Pageable pageable) {
+    public Page<LectureResDto> findAllMyLecture(Pageable pageable) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        return lectureRepository.findAllBySubmittedById(pageable, user.getId()).stream()
-                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .map(LectureResDto::fromEntity)
-                .toList();
+        return lectureRepository.findAllBySubmittedByIdAndApprovalStatus(user.getId(), ApprovalStatus.APPROVED, pageable)
+                .map(LectureResDto::fromEntity);
     }
 
 
@@ -370,5 +369,8 @@ public class LectureService {
 
         lecture.lectureDelete();
     }
+
+
+
 
 }

@@ -230,8 +230,10 @@ public class S3Uploader {
      */
     private boolean isAllowedExtension(String extension) {
         return extension.equals(".jpg") || extension.equals(".jpeg") ||
-               extension.equals(".png") || extension.equals(".gif") ||
-               extension.equals(".webp") || extension.equals(".pdf");
+                extension.equals(".png") || extension.equals(".gif") ||
+                extension.equals(".webp") || extension.equals(".pdf") ||
+                extension.equals(".mp4") || extension.equals(".mov") || //영상 확장자 허용(강의 업로드 시 필요)
+                extension.equals(".avi");
     }
 
     /**

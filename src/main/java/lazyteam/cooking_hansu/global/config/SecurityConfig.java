@@ -4,8 +4,11 @@ import lazyteam.cooking_hansu.global.auth.JwtAuthenticationHandler;
 import lazyteam.cooking_hansu.global.auth.JwtAuthorizationHandler;
 import lazyteam.cooking_hansu.global.auth.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,21 +19,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
 import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
+@EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final JwtTokenFilter jwtTokenFilter;
     private final JwtAuthenticationHandler jwtAuthenticationHandler;
     private final JwtAuthorizationHandler jwtAuthorizationHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        log.info("SecurityFilterChain 초기화됨 ✅");
         return httpSecurity
                 .cors(cors -> cors.configurationSource(configurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -52,10 +55,9 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
-                        "/api/my/**", // Mypage 관련 API
                         "/lecture/list", // 강의 목록조회 허용
                         "/lecture/detail/**", // 강의 상세 목록조회 허용
-                        "/lecture/qna/**/list", // 강의 qna 조회 허용
+                        "/lecture/qna/*/list", // 강의 qna 조회 허용
                         "/review/list/**", // 강의 리뷰 조회 허용
                         "/user/**",
                         "/chat/**",
@@ -68,6 +70,8 @@ public class SecurityConfig {
                         "/api/notifications/**" // 알림
                 ).permitAll().anyRequest().authenticated())
                 .build();
+
+
     }
 
     private CorsConfigurationSource configurationSource() {

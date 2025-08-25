@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.*;
 
 @Component // 스프링이 자동으로 Bean으로 등록해서 DI 주입 가능하게 함
 public class VideoUtil {
@@ -116,7 +117,7 @@ public class VideoUtil {
 
             var names = Arrays.stream(output.toLowerCase().split(","))
                     .map(String::trim).filter(s -> !s.isBlank())
-                    .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (names.contains("avi")) return "avi";
             boolean isMp4 = names.stream().anyMatch(mp4Family::contains);
@@ -191,7 +192,7 @@ public class VideoUtil {
         return Arrays.stream(out.toLowerCase().split(","))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
-                .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     } //fix
 
     private File convertToFileVideoValidated(MultipartFile multipartFile) throws IOException, InterruptedException { //fix
@@ -201,12 +202,12 @@ public class VideoUtil {
             boolean isAvi = names.contains("avi");
             boolean isMp4Family = names.stream().anyMatch(MP4_ALIASES::contains);
             if (!(isAvi || isMp4Family)) {
-                java.nio.file.Files.deleteIfExists(convFile.toPath());
+                Files.deleteIfExists(convFile.toPath());
                 throw new IllegalArgumentException("허용되지 않은 영상 포맷입니다. (허용: mp4, mov, avi) → " + names);
             }
             return convFile;
         } catch (RuntimeException | IOException | InterruptedException e) {
-            java.nio.file.Files.deleteIfExists(convFile.toPath());
+            Files.deleteIfExists(convFile.toPath());
             throw e;
         }
     } //fix
@@ -221,7 +222,7 @@ public class VideoUtil {
         }; //fix
         Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start(); //fix
         String out; //fix
-        try (var br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) { //fix
+        try (var br = new BufferedReader(new InputStreamReader(p.getInputStream()))) { //fix
             out = br.readLine(); //fix
         } //fix
         int exit = p.waitFor(); //fix

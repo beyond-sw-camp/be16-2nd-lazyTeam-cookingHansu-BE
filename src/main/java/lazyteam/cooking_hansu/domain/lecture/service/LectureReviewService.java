@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -46,6 +47,11 @@ public class LectureReviewService {
 
         Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
+
+        if(lecture.getSubmittedBy().getId().equals(user.getId())) {
+            throw new AccessDeniedException("본인 강의에는 리뷰를 작성할 수 없습니다.");
+        }
+
         Optional<LectureReview> lectureReview = lectureReviewRepository
                 .findByLectureIdAndWriterId(reviewCreateDto.getLectureId(),user.getId());
         System.out.println(lectureReview);
