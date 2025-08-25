@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebMvc
+
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
