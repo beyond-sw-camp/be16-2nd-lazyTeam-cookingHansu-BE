@@ -11,6 +11,7 @@ import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
+import lazyteam.cooking_hansu.domain.user.entity.common.GeneralType;
 import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -53,13 +54,23 @@ public class UserAdditionalInfoService {
         User user = findUserById(userId);
 
         // 기본 정보 업데이트
-        user.updateStep1Info(requestDto.getNickname(), requestDto.getRole());
+        // Chef나 Owner로 신청한 경우 role을 GENERAL로, generalType을 ETC로 강제 설정
+        Role finalRole = requestDto.getRole();
+        GeneralType finalGeneralType = requestDto.getGeneralType();
+        
+        if (requestDto.getRole() == Role.CHEF || requestDto.getRole() == Role.OWNER) {
+            finalRole = Role.GENERAL;
+            finalGeneralType = GeneralType.ETC;
+        }
+        
+        user.updateStep1Info(requestDto.getNickname(), finalRole, finalGeneralType);
 
         // 역할별 추가 정보 처리
         processRoleSpecificInfo(user, requestDto);
 
         // 회원가입 완료 처리
         user.completeRegistration();
+
         userRepository.save(user);
 
         log.info("회원 추가 정보 입력 완료 - userId: {}, role: {}", userId, requestDto.getRole());

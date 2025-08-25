@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -42,10 +43,10 @@ public class JwtTokenProvider {
     }
 
     public String createAtToken(User user) {
-        String email = user.getEmail();
+        UUID id = user.getId();
         String role = user.getRole().toString();
 
-        Claims claims = Jwts.claims().setSubject(email);
+        Claims claims = Jwts.claims().setSubject(id.toString());
         claims.put("role", role);
 
         Date now = new Date();
@@ -61,10 +62,10 @@ public class JwtTokenProvider {
 
     // RT 토큰 생성 메서드
     public String createRtToken(User user) {
-        String email = user.getEmail();
+        UUID id = user.getId();
         String role = user.getRole().toString();
 
-        Claims claims = Jwts.claims().setSubject(email);
+        Claims claims = Jwts.claims().setSubject(id.toString());
         claims.put("role", role);
 
         Date now = new Date();
@@ -97,7 +98,7 @@ public class JwtTokenProvider {
     }
 
     // AT 토큰에서 이메일 추출
-    public String getEmailFromAccessToken(String accessToken) {
+    public String getIdFromAccessToken(String accessToken) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secret_at_key)
@@ -111,7 +112,7 @@ public class JwtTokenProvider {
     }
 
     // RT 토큰에서 이메일 추출
-    public String getEmailFromRefreshToken(String refreshToken) {
+    public String getIdFromRefreshToken(String refreshToken) {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secret_rt_key)
