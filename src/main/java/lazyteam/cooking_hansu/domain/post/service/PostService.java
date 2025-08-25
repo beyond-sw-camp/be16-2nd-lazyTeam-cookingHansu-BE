@@ -15,6 +15,7 @@ import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -42,9 +43,10 @@ public class PostService {
     @Value("${my.test.user-id}")
     private String testUserIdStr;
 
+
     private User getCurrentUser() {
-        UUID testUserId = UUID.fromString(testUserIdStr);
-        return userRepository.findById(testUserId)
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
