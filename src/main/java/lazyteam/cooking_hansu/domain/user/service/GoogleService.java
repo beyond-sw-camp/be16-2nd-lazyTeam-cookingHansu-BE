@@ -54,14 +54,40 @@ public class GoogleService implements OAuthService<GoogleProfileDto> {
     @Override
     public GoogleProfileDto getProfile(String token) {
         RestClient restClient = RestClient.create();
-        ResponseEntity<GoogleProfileDto> response = restClient.get()
-                .uri("https://www.googleapis.com/oauth2/v2/userinfo")
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .toEntity(GoogleProfileDto.class);
+        
+        try {
+            ResponseEntity<GoogleProfileDto> response = restClient.get()
+                    .uri("https://www.googleapis.com/oauth2/v3/userinfo")
+                    .header("Authorization", "Bearer " + token)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        (request, errorResponse) -> {
+                            log.error("Google API error: status={}, body={}", 
+                                    errorResponse.getStatusCode(), errorResponse.getBody());
+                            throw new RuntimeException("Google API call failed: " + errorResponse.getStatusCode());
+                        })
+                    .toEntity(GoogleProfileDto.class);
 
-        log.info("Google profile JSON: {}", response.getBody());
-        return response.getBody();
+            if (response.getBody() == null) {
+                log.error("Google profile response body is null");
+                throw new RuntimeException("Google profile response is empty");
+            }
+
+            GoogleProfileDto profile = response.getBody();
+            log.info("Google profile received: sub={}, name={}, email={}", 
+                    profile.getSub(), profile.getName(), profile.getEmail());
+            
+            // sub 값 검증
+            if (profile.getSub() == null || profile.getSub().isEmpty()) {
+                log.error("Google profile sub is null or empty");
+                throw new RuntimeException("Google profile sub is missing");
+            }
+
+            return profile;
+        } catch (Exception e) {
+            log.error("Failed to get Google profile", e);
+            throw new RuntimeException("Google profile retrieval failed", e);
+        }
     }
 
 }

@@ -47,7 +47,7 @@ public class LoginController {
             GoogleProfileDto googleProfileDto = googleService.getProfile(commonTokenDto.getAccess_token());
 
             // 기존 사용자 조회
-            User originalUser = userService.getUserByEmail(googleProfileDto.getEmail());
+            User originalUser = userService.getUserBySocialIdAndOauthType(googleProfileDto.getSub(), OauthType.GOOGLE);
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
@@ -78,7 +78,7 @@ public class LoginController {
             KakaoProfileDto kakaoProfileDto = kakaoService.getProfile(commonTokenDto.getAccess_token());
 
             // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialId(kakaoProfileDto.getId());
+            User originalUser = userService.getUserBySocialIdAndOauthType(kakaoProfileDto.getId(), OauthType.KAKAO);
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
@@ -109,7 +109,7 @@ public class LoginController {
             NaverProfileDto naverProfileDto = naverService.getProfile(commonTokenDto.getAccess_token());
 
             // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialId(naverProfileDto.getResponse().getId());
+            User originalUser = userService.getUserBySocialIdAndOauthType(naverProfileDto.getResponse().getId(), OauthType.NAVER);
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -88,12 +90,12 @@ public class UserController {
             }
 
             // access token에서 이메일 추출
-            String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
-            if (email == null || email.isEmpty()) {
+            String id = jwtTokenProvider.getIdFromAccessToken(accessToken);
+            if (id == null || id.isEmpty()) {
                 return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "Invalid access token");
             }
             // 이메일로 사용자 조회
-            User user = userService.getUserByEmail(email);
+            User user = userService.getUserById(UUID.fromString(id));
             if (user == null) {
                 return ResponseDto.fail(HttpStatus.BAD_REQUEST, "User not found.");
             }
@@ -122,13 +124,13 @@ public class UserController {
             }
 
             // Access Token에서 이메일 추출
-            String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
-            if (email == null || email.isEmpty()) {
+            String id = jwtTokenProvider.getIdFromAccessToken(accessToken);
+            if (id == null || id.isEmpty()) {
                 return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access Token 입니다.");
             }
 
             // 이메일로 사용자 조회
-            User user = userService.getUserByEmail(email);
+            User user = userService.getUserById(UUID.fromString(id));
             if (user == null) {
                 return ResponseDto.fail(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
             }
@@ -155,20 +157,20 @@ public class UserController {
             }
 
             // Access Token에서 이메일 추출
-            String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
-            if (email == null || email.isEmpty()) {
+            String id = jwtTokenProvider.getIdFromAccessToken(accessToken);
+            if (id == null || id.isEmpty()) {
                 return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access Token입니다.");
             }
 
             // 이메일로 사용자 조회
-            User user = userService.getUserByEmail(email);
+            User user = userService.getUserById(UUID.fromString(id));
             if (user == null) {
                 return ResponseDto.fail(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
             }
 
             // Redis에서 해당 사용자의 Refresh Token 삭제
             refreshTokenService.deleteRefreshToken(user.getId().toString());
-            log.info("User logged out successfully: {}", email);
+            log.info("User logged out successfully: {}", id);
 
             Map<String, String> response = new HashMap<>();
             response.put("message", "로그아웃이 성공적으로 처리되었습니다.");
