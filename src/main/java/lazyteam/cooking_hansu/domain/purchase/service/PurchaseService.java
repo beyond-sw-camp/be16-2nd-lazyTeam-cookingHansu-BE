@@ -28,6 +28,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -68,10 +69,9 @@ public class PurchaseService {
     // 프론트엔드에서 결제창에서 확인을 누르면 Controller를 통해 dto로 정보를 받아서 이 로직 실행
     public JSONObject confirmPayment(TossPaymentConfirmDto tossPaymentConfirmDto) {
 
-        // 테스트용 유저 (로그인 기능이 붙으면 SecurityContextHolder로 대체)
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         JSONParser parser = new JSONParser();
 

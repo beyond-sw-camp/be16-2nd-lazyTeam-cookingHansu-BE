@@ -53,12 +53,12 @@ public class SecurityConfig {
                         "/admin/**", // Admin 관련 API
                         "/report/**", // Report 관련 API
                         "/api/my/**", // Mypage 관련 API
-                        "/lecture/**",
+                        "/lecture/list", // 강의 목록조회 허용
+                        "/lecture/detail/**", // 강의 상세 목록조회 허용
+                        "/lecture/qna/**/list", // 강의 qna 조회 허용
+                        "/review/list/**", // 강의 리뷰 조회 허용
                         "/user/**",
                         "/chat/**",
-                        "/cart/**",
-                        "/purchase/**",
-                        "/review/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
                         "/api/interactions/**", // 상호작용 API 모두 허용

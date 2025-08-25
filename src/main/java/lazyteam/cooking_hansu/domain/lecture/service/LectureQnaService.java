@@ -15,6 +15,7 @@ import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,8 +36,11 @@ public class LectureQnaService {
     // Q&A 등록
     public UUID createQna(UUID lectureId, LectureQnaCreateDto lectureQnaCreateDto) {
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 강의입니다. lectureId: " + lectureId));
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다. userId: " + userId));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+
         log.info(lectureQnaCreateDto.toString());
         if(lectureQnaCreateDto.getParentId() !=null){
             LectureQna parentQna = lectureQnaRepository.findById(lectureQnaCreateDto.getParentId()).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 부모 Q&A입니다. parentId: " + lectureQnaCreateDto.getParentId()));

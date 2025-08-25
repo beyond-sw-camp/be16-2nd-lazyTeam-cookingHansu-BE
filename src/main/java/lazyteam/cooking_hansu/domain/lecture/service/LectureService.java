@@ -64,15 +64,9 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-        //  테스트용 이메일 강제 세팅 (로그인 기능 없을 때만 사용!)
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("test@naver.com", null, List.of())
-        );
-
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
         // 재료목록 저장
@@ -139,9 +133,9 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-//  테스트용 UUID 유저 세팅
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
 
@@ -314,10 +308,11 @@ public class LectureService {
 
 // ====== 내 강의 목록 조회 ======
     public List<LectureResDto> findAllMyLecture(Pageable pageable) {
-        //        테스트용 UUID 유저 세팅, 로그인 기능 구현 후 강사 ID를 넣어야 함
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        return lectureRepository.findAllBySubmittedById(pageable, userId).stream()
+        return lectureRepository.findAllBySubmittedById(pageable, user.getId()).stream()
                 .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .map(LectureResDto::fromEntity)
                 .toList();
@@ -327,9 +322,6 @@ public class LectureService {
     
 // ====== 강의상세목록 조회 ======
     public LectureDetailDto findDetailLecture(UUID lectureId) {
-        //        테스트용 UUID 유저 세팅
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
 
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
