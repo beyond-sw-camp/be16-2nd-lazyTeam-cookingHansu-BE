@@ -33,6 +33,8 @@ public class NotificationService {
                 .build();
         notificationRepository.save(n);
 
+        // 저장된 알림의 ID를 SseMessageDto에 설정
+        sseMessageDto.setId(n.getId());
         notificationPublisher.publish(sseMessageDto);
         return n.getId();
     }
