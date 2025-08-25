@@ -246,49 +246,395 @@
 
 ## 🧾 화면 테스트 결과
 <details> 
-  <summary><b>화면 테스트 결과</b></summary>
+  <summary><b> 화면 테스트 결과</b></summary>
+  
   <details> 
-    <summary>관리자</summary> 
+    <summary>관리자</summary>
+    <details>
+      <summary>관리자 대시보드 조회</summary>
+      `GET /admin/dashboard`
+    </details>
+    <details>
+      <summary>승인 대기 강의 목록 조회</summary>
+      `GET /admin/lecture/list`
+    </details>
+    <details>
+      <summary>강의 승인</summary>
+      `PATCH /admin/lecture/approve/{lectureId}`
+    </details>
+    <details>
+      <summary>강의 반려</summary>
+      `PATCH /admin/lecture/reject/{lectureId}`
+    </details>
+    <details>
+      <summary>승인 대기 요리사 목록 조회</summary>
+      `GET /admin/user/waiting/chef`
+    </details>
+    <details>
+      <summary>승인 대기 자영업자 목록 조회</summary>
+      `GET /admin/user/waiting/business`
+    </details>
+    <details>
+      <summary>사용자 승인</summary>
+      `PATCH /admin/user/approve/{userId}`
+    </details>
+    <details>
+      <summary>사용자 거절</summary>
+      `PATCH /admin/user/reject/{userId}`
+    </details>
+    <details>
+      <summary>사용자 활성화</summary>
+      `PATCH /admin/user/active/{userId}`
+    </details>
+    <details>
+      <summary>사용자 비활성화</summary>
+      `PATCH /admin/user/inactive/{userId}`
+    </details>
+    <details>
+      <summary>사용자 전체 목록 조회</summary>
+      `GET /admin/user/list`
+    </details>
+    <details>
+      <summary>신고 목록 조회</summary>
+      `GET /admin/report/list`
+    </details>
+    <details>
+      <summary>신고 승인</summary>
+      `PATCH /admin/report/approve/{id}`
+    </details>
+    <details>
+      <summary>신고 반려</summary>
+      `PATCH /admin/report/reject/{id}`
+    </details>
+    <details>
+      <summary>공지사항 등록</summary>
+      `POST /admin/notice/create`
+    </details>
+    <details>
+      <summary>공지사항 수정</summary>
+      `PUT /admin/notice/update/{id}`
+    </details>
+    <details>
+      <summary>공지사항 삭제</summary>
+      `DELETE /admin/notice/delete/{id}`
+    </details>
   </details>
+  
   <details>
-    <summary>회원</summary> 
+    <summary>회원</summary>
+    <details>
+      <summary>구글 로그인</summary>
+      `POST /user/login/google`
+    </details>
+    <details>
+      <summary>카카오 로그인</summary>
+      `POST /user/login/kakao`
+    </details>
+    <details>
+      <summary>네이버 로그인</summary>
+      `POST /user/login/naver`
+    </details>
+    <details>
+      <summary>토큰 리프레시</summary>
+      `POST /user/refresh`
+    </details>
+    <details>
+      <summary>로그아웃</summary>
+      `POST /user/logout`
+    </details>
+    <details>
+      <summary>회원 추가 정보 입력</summary>
+      `POST /user/add-info`
+    </details>
+    <details>
+      <summary>프로필 조회</summary>
+      `GET /user/profile`
+    </details>
+    <details>
+      <summary>현재 사용자 정보 조회</summary>
+      `GET /user/me`
+    </details>
+    <details>
+      <summary>회원 탈퇴</summary>
+      `DELETE /user/delete`
+    </details>
   </details>
+  
   <details> 
     <summary>채팅</summary>
-  </details> 
-  <details>
-    <summary>댓글</summary> 
-  </details> 
-  <details> 
-    <summary>좋아요</summary> 
-  </details> 
-  <details> 
-    <summary>북마크</summary> 
-  </details> 
-  <details>
-    <summary>조회수</summary> 
-  </details> 
-  <details>
-    <summary>강의</summary> 
-  </details> 
-  <details> 
-    <summary>공지사항</summary> 
+    <details>
+      <summary>내 채팅방 목록 조회</summary>
+      `GET /chat/my/rooms`
+    </details>
+    <details>
+      <summary>채팅방 참여자 목록 조회</summary>
+      `GET /chat/room/{roomId}/participants`
+    </details>
+    <details>
+      <summary>채팅방 상세 메시지 조회</summary>
+      `GET /chat/room/{roomId}/history`
+    </details>
+    <details>
+      <summary>채팅방 생성</summary>
+      `POST /chat/room/create`
+    </details>
+    <details>
+      <summary>채팅방 이름 수정</summary>
+      `PATCH /chat/room/{roomId}/name`
+    </details>
+    <details>
+      <summary>채팅방 나가기</summary>
+      `DELETE /chat/room/{roomId}/leave`
+    </details>
+    <details>
+      <summary>파일 업로드</summary>
+      `POST /chat/room/{roomId}/upload`
+    </details>
+    <details>
+      <summary>실시간 메시지 전송</summary>
+      `/app/chat-rooms/{roomId}/chat-message`
+    </details>
+    <details>
+      <summary>온라인 상태 변경</summary>
+      `/app/chat-rooms/{roomId}/online`
+    </details>
+    <details>
+      <summary>오프라인 상태 변경</summary>
+      `/app/chat-rooms/{roomId}/offline`
+    </details>
   </details>
+  
+  <details>
+    <summary>댓글</summary>
+    <details>
+      <summary>댓글 생성</summary>
+      `POST /post/comment/create`
+    </details>
+    <details>
+      <summary>댓글 목록 조회</summary>
+      `GET /post/comment/list/{postId}`
+    </details>
+    <details>
+      <summary>댓글 수정</summary>
+      `PATCH /post/comment/update/{commentId}`
+    </details>
+    <details>
+      <summary>댓글 삭제</summary>
+      `DELETE /post/comment/delete/{commentId}`
+    </details>
+  </details>
+  
+  <details> 
+    <summary>좋아요</summary>
+    <details>
+      <summary>게시글 좋아요 토글</summary>
+      `POST /api/interactions/posts/{postId}/likes`
+    </details>
+    <details>
+      <summary>강의 좋아요 토글</summary>
+      `POST /api/interactions/lectures/{lectureId}/likes`
+    </details>
+  </details>
+  
+  <details>
+    <summary>북마크</summary>
+    <details>
+      <summary>게시글 북마크 토글</summary>
+      `POST /api/interactions/posts/{postId}/bookmarks`
+    </details>
+  </details>
+  
+  <details>
+    <summary>조회수</summary>
+    <details>
+      <summary>게시글 조회수 증가</summary>
+      `POST /api/interactions/posts/{postId}/views`
+    </details>
+  </details>
+  
+  <details>
+    <summary>강의</summary>
+    <details>
+      <summary>강의 등록</summary>
+      `POST /lecture/post`
+    </details>
+    <details>
+      <summary>강의 수정</summary>
+      `PATCH /lecture/update/{lectureId}`
+    </details>
+    <details>
+      <summary>강의 목록 조회</summary>
+      `GET /lecture/list`
+    </details>
+    <details>
+      <summary>강의 상세 조회</summary>
+      `GET /lecture/detail/{lectureId}`
+    </details>
+    <details>
+      <summary>내 강의 목록 조회</summary>
+      `GET /lecture/mylist`
+    </details>
+    <details>
+      <summary>강의 삭제</summary>
+      `DELETE /lecture/delete/{lectureId}`
+    </details>
+    <details>
+      <summary>리뷰 등록</summary>
+      `POST /review/post`
+    </details>
+    <details>
+      <summary>리뷰 목록 조회</summary>
+      `GET /review/list/{lectureId}`
+    </details>
+    <details>
+      <summary>리뷰 수정</summary>
+      `PATCH /review/modify`
+    </details>
+    <details>
+      <summary>리뷰 삭제</summary>
+      `DELETE /review/delete/{lectureId}`
+    </details>
+    <details>
+      <summary>Q&A 등록</summary>
+      `POST /lecture/qna/{lectureId}/create`
+    </details>
+    <details>
+      <summary>Q&A 목록 조회</summary>
+      `GET /lecture/qna/{lectureId}/list`
+    </details>
+    <details>
+      <summary>Q&A 수정</summary>
+      `PUT /lecture/qna/{qnaId}/update`
+    </details>
+    <details>
+      <summary>Q&A 삭제</summary>
+      `DELETE /lecture/qna/{qnaId}/delete`
+    </details>
+  </details>
+  
+  <details> 
+    <summary>공지사항</summary>
+    <details>
+      <summary>공지사항 목록 조회</summary>
+      `GET /notice/list`
+    </details>
+    <details>
+      <summary>공지사항 상세 조회</summary>
+      `GET /notice/detail/{id}`
+    </details>
+  </details>
+  
   <details> 
     <summary>마이페이지</summary>
-  </details> 
+    <details>
+      <summary>프로필 조회</summary>
+      `GET /api/my/profile`
+    </details>
+    <details>
+      <summary>프로필 수정</summary>
+      `PUT /api/my/profile`
+    </details>
+    <details>
+      <summary>프로필 이미지 업로드</summary>
+      `POST /api/my/profile/image`
+    </details>
+    <details>
+      <summary>내 게시글 목록 조회</summary>
+      `GET /api/my/posts`
+    </details>
+    <details>
+      <summary>내 강의 목록 조회</summary>
+      `GET /api/my/lectures`
+    </details>
+    <details>
+      <summary>내 북마크한 게시글 목록 조회</summary>
+      `GET /api/my/bookmarked-posts`
+    </details>
+    <details>
+      <summary>내가 좋아요한 게시글 목록 조회</summary>
+      `GET /api/my/liked-posts`
+    </details>
+  </details>
+  
   <details> 
     <summary>알림</summary>
+    <details>
+      <summary>실시간 알림 구독</summary>
+      `GET /api/notifications/subscribe`
+    </details>
+    <details>
+      <summary>알림 목록 조회</summary>
+      `GET /api/notifications`
+    </details>
+    <details>
+      <summary>알림 읽음 처리</summary>
+      `PATCH /api/notifications/{id}/read`
+    </details>
+    <details>
+      <summary>알림 삭제</summary>
+      `DELETE /api/notifications/{id}`
+    </details>
   </details>
+  
   <details> 
-    <summary>게시글</summary> 
-  </details> 
-  <details> 
+    <summary>게시글</summary>
+    <details>
+      <summary>게시글 생성</summary>
+      `POST /api/posts`
+    </details>
+    <details>
+      <summary>게시글 상세 조회</summary>
+      `GET /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 수정</summary>
+      `PUT /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 삭제</summary>
+      `DELETE /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 목록 조회</summary>
+      `GET /api/posts`
+    </details>
+  </details>
+  
+  <details>
     <summary>결제</summary>
+    <details>
+      <summary>결제 전 정보 저장</summary>
+      `POST /purchase/prepay`
+    </details>
+    <details>
+      <summary>결제 확인</summary>
+      `POST /purchase/confirm`
+    </details>
+    <details>
+      <summary>장바구니 담기</summary>
+      `POST /cart/add`
+    </details>
+    <details>
+      <summary>장바구니 목록 조회</summary>
+      `GET /cart/list/{id}`
+    </details>
+    <details>
+      <summary>장바구니 단건 삭제</summary>
+      `DELETE /cart/delete`
+    </details>
+    <details>
+      <summary>장바구니 전체 삭제</summary>
+      `DELETE /cart/deleteAll`
+    </details>
   </details>
+  
   <details>
     <summary>신고</summary>
-  </details> 
+    <details>
+      <summary>신고 생성</summary>
+      `POST /report/create`
+    </details>
+  </details>
 </details>
 
 ---
