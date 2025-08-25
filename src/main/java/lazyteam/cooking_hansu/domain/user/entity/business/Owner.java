@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.entity.business;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -16,11 +17,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Business extends BaseIdAndTimeAndApprovalEntity {
+public class Owner extends BaseIdAndTimeAndApprovalEntity {
 
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
+    // 양방향 관계에서 직렬화 방향 설정 => 순환 참조 해결
+    // 직렬화 되지 않도록 수행
+    @JsonBackReference
     private User user;
 
     @Column(nullable = false)
@@ -38,4 +42,13 @@ public class Business extends BaseIdAndTimeAndApprovalEntity {
     @Column(nullable = false)
     private String shopCategory; // 사업 업종
 
+    // Business 정보 업데이트 메서드
+    public void updateBusinessInfo(String businessNumber, String businessUrl, String businessName,
+                                  String businessAddress, String shopCategory) {
+        this.businessNumber = businessNumber;
+        this.businessUrl = businessUrl;
+        this.businessName = businessName;
+        this.businessAddress = businessAddress;
+        this.shopCategory = shopCategory;
+    }
 }

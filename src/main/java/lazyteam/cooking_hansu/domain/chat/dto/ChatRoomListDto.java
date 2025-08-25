@@ -35,7 +35,7 @@ public class ChatRoomListDto {
                 .customRoomName(chatRoom.getName())
                 .otherUserName(otherUser.getName())
                 .otherUserNickname(otherUser.getNickname())
-                .otherUserProfileImage(otherUser.getProfileImageUrl())
+                .otherUserProfileImage(otherUser.getPicture())
                 .lastMessage(lastMessage)
                 .newMessageCount(unreadCount)
                 .lastMessageTime(chatRoom.getMessages().isEmpty() ? null : chatRoom.getMessages().get(chatRoom.getMessages().size() - 1).getCreatedAt())

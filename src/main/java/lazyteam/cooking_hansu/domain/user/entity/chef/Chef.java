@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.user.entity.chef;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,9 @@ public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
+    // 양방향 관계에서 직렬화 방향 설정 => 순환 참조 해결
+    // 직렬화 되지 않도록 수행
+    @JsonBackReference
     private User user;
 
     @Column(nullable = false)
@@ -31,4 +35,11 @@ public class Chef extends BaseIdAndTimeAndApprovalEntity {
 
     @Column(length = 512, nullable = false)
     private String licenseUrl; // 자격증 이미지 url
+
+    // Chef 정보 업데이트 메서드
+    public void updateChefInfo(String licenseNumber, CuisineType cuisineType, String licenseUrl) {
+        this.licenseNumber = licenseNumber;
+        this.cuisineType = cuisineType;
+        this.licenseUrl = licenseUrl;
+    }
 }

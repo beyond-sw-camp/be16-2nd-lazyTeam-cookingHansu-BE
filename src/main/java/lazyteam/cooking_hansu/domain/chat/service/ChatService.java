@@ -142,7 +142,7 @@ public class ChatService {
 
             // S3에 파일 업로드
             String fileUrl = s3Uploader.upload(file, "chat-files/" + roomId);
-
+            
             // 파일 정보 생성
             ChatFileUploadResDto.FileInfo fileInfo = ChatFileUploadResDto.FileInfo.builder()
                     .fileUrl(fileUrl)
@@ -184,13 +184,13 @@ public class ChatService {
                 pageIndex = 0;
             }
         }
-        
+
         // Pageable 생성
         PageRequest pageRequest = PageRequest.of(pageIndex, size);
-        
+
         // Slice로 채팅방 참여자 조회
         Slice<ChatParticipant> chatParticipantsSlice = chatParticipantRepository.findMyActiveParticipantsOrderByLastMessageSlice(user, pageRequest);
-        
+
         // ChatParticipant를 ChatRoomListDto로 변환
         List<ChatRoomListDto> result = chatParticipantsSlice.getContent().stream().map(participant -> {
             User otherUser = chatParticipantRepository.findByChatRoom(participant.getChatRoom()).stream()
@@ -220,7 +220,7 @@ public class ChatService {
 
             return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount);
         }).collect(Collectors.toList());
-        
+
         // 커스텀 응답 DTO 반환
         return PaginatedResponseDto.<ChatRoomListDto>builder()
                 .data(result)
@@ -263,9 +263,9 @@ public class ChatService {
         }
 
         PageRequest pageRequest = PageRequest.of(pageIndex, size);
-        
+
         Slice<ChatMessage> chatMessagesSlice;
-        
+
         if (participant.getLeftAt() != null) {
             // 채팅방을 나갔다가 다시 들어온 경우, 나간 시간 이후 메시지만 조회
             // 이 경우는 기존 List 방식 사용 (pagination 적용 어려움)
@@ -276,7 +276,7 @@ public class ChatService {
             // 인덱스 기반 pagination 사용
             chatMessagesSlice = chatMessageRepository.findByChatRoomOrderByCreatedAtDesc(chatRoom, pageRequest);
         }
-        
+
         // Slice를 ChatMessageResDto로 변환
         List<ChatMessageResDto> result = new ArrayList<>();
         for (ChatMessage cm : chatMessagesSlice.getContent()) {
@@ -308,7 +308,7 @@ public class ChatService {
         }
 
 
-        
+
         // 커스텀 응답 DTO 반환
         return PaginatedResponseDto.<ChatMessageResDto>builder()
                 .data(result)

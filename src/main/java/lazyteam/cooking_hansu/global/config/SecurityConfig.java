@@ -16,11 +16,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableWebMvc
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -41,8 +43,7 @@ public class SecurityConfig {
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
                 .authorizeHttpRequests(a -> a.requestMatchers(
-                        "/user/create",
-                        "/user/login",
+                        "/user/**", // Google OAuth 로그인
                         "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
                         "/api-docs/**",       // OpenAPI JSON
@@ -55,7 +56,7 @@ public class SecurityConfig {
                         "/lecture/**",
                         "/user/**",
                         "/chat/**",
-                        "cart/**",
+                        "/cart/**",
                         "/purchase/**",
                         "/review/**",
                         "/api/recipes/**",

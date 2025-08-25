@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lazyteam.cooking_hansu.global.dto.CommonErrorDto;
+import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,10 @@ public class JwtAuthenticationHandler implements AuthenticationEntryPoint {
         log.error("Error: " + authException.getMessage());
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
+        response.setContentType("multipart/form-data");
         response.setCharacterEncoding("UTF-8");
 
-        CommonErrorDto dto = new CommonErrorDto(401, "token이 없거나, 유효하지 않습니다.");
+        ResponseDto<?> dto = ResponseDto.fail(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.");
 
         PrintWriter printWriter = response.getWriter();
 

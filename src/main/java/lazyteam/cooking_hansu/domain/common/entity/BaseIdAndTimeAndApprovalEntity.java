@@ -46,12 +46,21 @@ public class BaseIdAndTimeAndApprovalEntity{
         this.approvalStatus = ApprovalStatus.APPROVED;
         this.approvalTime = LocalDateTime.now();
         this.rejectionReason = null; // 승인 시 반려 사유 초기화
-        this.rejectionTime = null; // 승인 시 반려 일자 초기화
+        this.rejectionTime = null; // 승인 시 반료 일자 초기화
     }
+
     public void reject(String reason){
         this.approvalStatus = ApprovalStatus.REJECTED;
         this.rejectionReason = reason;
         this.rejectionTime = LocalDateTime.now();
         this.approvalTime = null; // 반려 시 승인 일자 초기화
+    }
+
+    // 대기 상태로 설정하는 메서드
+    public void setPending(){
+        this.approvalStatus = ApprovalStatus.PENDING;
+        this.approvalTime = null; // 대기 상태에서는 승인 일자 초기화
+        this.rejectionTime = null; // 대기 상태에서는 반려 일자 초기화
+        this.rejectionReason = null; // 대기 상태에서는 반려 사유 초기화
     }
 }

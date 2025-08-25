@@ -2,10 +2,11 @@ package lazyteam.cooking_hansu.domain.user.entity.common;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 //import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
-import lazyteam.cooking_hansu.domain.user.entity.business.Business;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
 
@@ -23,34 +24,34 @@ import java.util.List;
 @Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = {"oauthType", "email"}))
 public class User extends BaseIdAndTimeEntity {
 
-    @NotBlank(message = "이름은 필수입니다")
-    @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
-    @Column(nullable = false)
-    private String name; // 이름
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private OauthType oauthType; // 소셜 로그인 유형 (KAKAO, GOOGLE, NAVER)
-
-    @NotBlank(message = "닉네임은 필수입니다")
-    @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
-    @Column(nullable = false)
-    private String nickname; // 닉네임
-
     @NotBlank(message = "이메일은 필수입니다")
     @Email(message = "유효한 이메일 형식이 아닙니다")
     @Column(nullable = false)
     private String email; // 이메일
 
-    @NotBlank(message = "비밀번호는 필수입니다")
+    @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
+//    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
+    private String name; // 이름
+
+    @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
+    @Column(length = 512, nullable = true)
+    private String picture; // 프로필 이미지 URL
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private OauthType oauthType; // 소셜 로그인 유형 (KAKAO, GOOGLE, NAVER)
+
+    @Column(nullable = true) // 일반 회원가입시에는 null
+    private String socialId; // 소셜 로그인 ID (KAKAO, GOOGLE, NAVER 등에서 제공하는 고유 ID)
+
+    @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
+    @Column(nullable = true) // OAuth 사용자는 처음에 null일 수 있음
+    private String nickname; // 닉네임
+
+    /*@NotBlank(message = "비밀번호는 필수입니다")
     @Size(min = 8, max = 100, message = "비밀번호는 8자 이상 100자 이하여야 합니다")
     @Column(nullable = false)
-    private String password; // 비밀번호
-
-    @NotBlank(message = "프로필 이미지 URL은 필수입니다")
-    @Size(max = 512, message = "프로필 이미지 URL은 512자 이하여야 합니다")
-    @Column(length = 512, nullable = false)
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String password; // 비밀번호*/
 
     @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
     @Column(length = 200)
@@ -73,14 +74,18 @@ public class User extends BaseIdAndTimeEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false)
-    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (LOGGED_IN, LOGGED_OUT, WITHDRAWN, BANNED)
+    private LoginStatus loginStatus = LoginStatus.ACTIVE; // 로그인 상태 (ACTIVE, INACTIVE, SUSPENDED)
 
     // 관계 설정은 추후 협의해서 추가 예정
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    // 양방향 관계에서 직렬화 방향 설정 => 순환 참조 해결
+    // 정상적으로 직렬화 수행
+    @JsonManagedReference
     private Chef chef; // 요식업 종사자 1:1 관계
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Business business; // 요식업 자영업자 1:1 관계
+    @JsonManagedReference
+    private Owner owner; // 요식업 자영업자 1:1 관계
 
     // 관리자(Administrator) 테이블에 FK admin_id로 1:1 연관 관계 (단방향)
     /*@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
@@ -180,15 +185,45 @@ public class User extends BaseIdAndTimeEntity {
     }
 
     // 프로필 업데이트 메서드 추가
-    public void updateProfile(String nickname, String info, String profileImageUrl) {
+    public void updateProfile(String nickname, String info, String picture) {
         this.nickname = nickname;
         this.info = info;
-        if (profileImageUrl != null) {
-            this.profileImageUrl = profileImageUrl;
+        if (picture != null) {
+            this.picture = picture;
         }
     }
 
-    public void updateProfileImage(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
+    public void updateProfileImage(String picture) {
+        this.picture = picture;
+    }
+
+    // 추가 정보 업데이트 메서드
+    public void updateAdditionalInfo(String name, String nickname, String picture) {
+        this.name = name;
+        this.nickname = nickname;
+        if (picture != null) {
+            this.picture = picture;
+        }
+    }
+
+    // 첫 회원 여부 확인 (닉네임이 없으면 첫 회원으로 간주)
+    public boolean isNewUser() {
+        return nickname == null || nickname.isEmpty();
+    }
+
+    // 1단계 추가 정보 업데이트 (닉네임, 역할)
+    public void updateStep1Info(String nickname, Role role) {
+        this.nickname = nickname;
+        this.role = role;
+    }
+
+    // 일반 회원 2단계 추가 정보 업데이트
+    public void updateGeneralType(GeneralType generalType) {
+        this.generalType = generalType;
+    }
+
+    // 회원 가입 완료 메서드
+    public void completeRegistration() {
+        this.loginStatus = LoginStatus.ACTIVE; // 회원가입 완료 후 상태를 ACTIVE로 변경
     }
 }
