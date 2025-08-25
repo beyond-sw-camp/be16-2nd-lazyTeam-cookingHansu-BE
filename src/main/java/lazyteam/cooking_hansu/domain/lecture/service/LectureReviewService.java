@@ -12,6 +12,7 @@ import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureReviewRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -36,8 +37,8 @@ public class LectureReviewService {
 //    리뷰 작성 : 리뷰 쓸 강의의 ID와 작성자(강의를 구매한 일반 회원)의 ID를 매개변수로 받아 toEntity
     public void create(ReviewCreateDto reviewCreateDto) {
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         if(reviewCreateDto.getRating()<1 || reviewCreateDto.getRating()>5) {
@@ -89,8 +90,8 @@ public class LectureReviewService {
 //    강의 리뷰 수정
     public void reviewModify(ReviewModifyDto reviewModifyDto) {
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         if(reviewModifyDto.getRating()!=null) {
             if(reviewModifyDto.getRating()<1 || reviewModifyDto.getRating()>5) {
@@ -118,8 +119,8 @@ public class LectureReviewService {
 
 //    리뷰 삭제
     public void reviewDelete(UUID lectureId) {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lectureId,user.getId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));

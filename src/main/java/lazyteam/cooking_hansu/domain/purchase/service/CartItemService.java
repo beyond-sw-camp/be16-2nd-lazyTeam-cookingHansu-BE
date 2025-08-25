@@ -11,6 +11,7 @@ import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.purchase.repository.CartItemRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,8 @@ public class CartItemService {
     public void addCart(CartItemAddDto dto) {
 
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         for(UUID id : dto.getLectureIds()) {
@@ -52,9 +53,8 @@ public class CartItemService {
     }
 
     public List<CartItemListDto> findList() {
-
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         return cartItemRepository.findAllByUser(user).stream().map(CartItemListDto::fromEntity).toList();
@@ -64,8 +64,8 @@ public class CartItemService {
 
     public void deleteOne(CartDeleteOneDto cartDeleteOneDto) {
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         Lecture lecture = lectureRepository.findById(cartDeleteOneDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의 없음"));
@@ -78,8 +78,8 @@ public class CartItemService {
 
 
     public void deleteAll() {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         cartItemRepository.deleteAllByUser(user);
     }

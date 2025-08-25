@@ -13,6 +13,7 @@ import lazyteam.cooking_hansu.domain.purchase.entity.*;
 import lazyteam.cooking_hansu.domain.purchase.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -216,9 +217,9 @@ public class MyPageService {
 
     // 현재 로그인한 사용자 조회 (테스트용)
     private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(()->new EntityNotFoundException("사용자가 존재하지 않습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        return  userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
     }
 
     // 역할명을 한글로 변환하는 메서드

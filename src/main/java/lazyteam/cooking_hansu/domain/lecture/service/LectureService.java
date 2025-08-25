@@ -10,9 +10,11 @@ import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.interaction.service.RedisInteractionService;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.util.UtilClassLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,10 +66,8 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-        log.info("서비스 시작");
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("유저 이메일 :" + userEmail);
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
@@ -136,8 +136,8 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
@@ -309,8 +309,8 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
 
 // ====== 내 강의 목록 조회 ======
     public Page<LectureResDto> findAllMyLecture(Pageable pageable) {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(userEmail)
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         return lectureRepository.findAllBySubmittedByIdAndApprovalStatus(user.getId(), ApprovalStatus.APPROVED, pageable)
