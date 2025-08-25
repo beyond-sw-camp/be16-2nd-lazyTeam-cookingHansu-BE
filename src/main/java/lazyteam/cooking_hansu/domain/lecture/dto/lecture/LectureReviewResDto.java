@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +21,7 @@ public class LectureReviewResDto {
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
+    private UUID reviewerId;
 
     public static LectureReviewResDto fromEntity(LectureReview lectureReview) {
         return LectureReviewResDto.builder()
@@ -28,6 +30,7 @@ public class LectureReviewResDto {
                 .content(lectureReview.getContent())
                 .createAt(lectureReview.getCreatedAt())
                 .updateAt(lectureReview.getUpdatedAt())
+                .reviewerId(lectureReview.getWriter().getId())
                 .build();
     }
 }
