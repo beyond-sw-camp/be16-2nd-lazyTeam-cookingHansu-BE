@@ -224,24 +224,23 @@
 
 <br>
 
-## 📝 프로젝트 기획서
+## 📝 프로젝트 노션(프로젝트 기획서 및 API 명세서)
 
 <div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://www.notion.so/2297cd1f5ed98003aaa9e1ac5ed8f705?source=copy_link' style="text-decoration: none; color: inherit;">
-    프로젝트 기획서 바로가기
+  <a href='https://tranquil-fuchsia-64e.notion.site/25a7cd1f5ed980b9ab40e6897bc980e1?source=copy_link' style="text-decoration: none; color: inherit;">
+    프로젝트 바로가기
   </a>
 </div>
 <br>
 
 ## 🎨 피그마
 <div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://www.erdcloud.com/d/25tEnmWT48D4MufsZ](https://www.figma.com/design/0r1vmACeBTegtlH9OHZaMn/%EC%9A%94%EB%A6%AC%ED%95%9C%EC%88%98?node-id=0-1&p=f&t=NJOrncqdhdRnxdh6-0)' style="text-decoration: none; color: inherit;">
+  <a href='https://www.figma.com/design/0r1vmACeBTegtlH9OHZaMn/%EC%9A%94%EB%A6%AC%ED%95%9C%EC%88%98?node-id=0-1&t=D6hqNiudFHl0XVsu-1' style="text-decoration: none; color: inherit;">
     피그마 바로가기
   </a>
 </div>
 
 <br>
-
 
 ---
 
