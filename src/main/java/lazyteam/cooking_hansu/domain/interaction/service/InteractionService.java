@@ -15,7 +15,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +35,12 @@ public class InteractionService {
     private final UserRepository userRepository;
     private final RedisInteractionService redisInteractionService;
 
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
-
     // ========== 게시글 좋아요 ==========
     public String togglePostLike(UUID postId) {
-        UUID userId = getCurrentUserId();
+        User user = getCurrentUser();
+        UUID userId = user.getId();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
-        User user = getCurrentUser();
 
         try {
             // Redis에서 좋아요 상태 확인 (먼저 Redis 체크)
@@ -99,10 +96,10 @@ public class InteractionService {
 
     // ========== 게시글 북마크 ==========
     public String toggleBookmark(UUID postId) {
-        UUID userId = getCurrentUserId();
+        User user = getCurrentUser();
+        UUID userId = user.getId();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postId));
-        User user = getCurrentUser();
 
         try {
             // Redis에서 북마크 상태 확인 (먼저 Redis 체크)
@@ -158,10 +155,10 @@ public class InteractionService {
 
     // ========== 강의 좋아요 ==========
     public String toggleLectureLike(UUID lectureId) {
-        UUID userId = getCurrentUserId();
+        User user = getCurrentUser();
+        UUID userId = user.getId();
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. ID: " + lectureId));
-        User user = getCurrentUser();
 
         try {
             // Redis에서 좋아요 상태 확인 (먼저 Redis 체크)
@@ -254,8 +251,8 @@ public class InteractionService {
     }
 
     public boolean incrementViewCountWithCheck(UUID postId) {
-        UUID userId = getCurrentUserId();
-
+        User user = getCurrentUser();
+        UUID userId = user.getId();
         // 이미 조회한 사용자인지 Redis에서 확인
         if (redisInteractionService.hasUserViewedPost(postId, userId)) {
             log.debug("이미 조회한 게시글 - postId: {}, userId: {}", postId, userId);
@@ -270,28 +267,9 @@ public class InteractionService {
 
 
     // ========== 유틸리티 메서드 ==========
-    private UUID getCurrentUserId() {
-        try {
-            return UUID.fromString(testUserIdStr);
-        } catch (IllegalArgumentException e) {
-            log.warn("잘못된 UUID 형식: {}, 기본값 사용", testUserIdStr);
-            // 기본 UUID 생성 (테스트용)
-            return UUID.randomUUID();
-        }
-    }
-
     private User getCurrentUser() {
-        UUID userId = getCurrentUserId();
-        return userRepository.findById(userId)
-                .orElseGet(() -> {
-                    log.info("사용자를 찾을 수 없어 기본 사용자 생성 - userId: {}", userId);
-                    User testUser = User.builder()
-                            .name("기본사용자")
-                            .email("default@test.com")
-                            .nickname("기본사용자")
-                            .picture("https://via.placeholder.com/150")
-                            .build();
-                    return userRepository.save(testUser);
-                });
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }

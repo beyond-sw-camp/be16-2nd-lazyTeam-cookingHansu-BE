@@ -222,34 +222,12 @@ public class PostService {
     public Page<PostListResponseDto> getPostList(Role role, CategoryEnum category,
                                                  FilterSort filterSort, Pageable pageable) {
 
-        // filterSort 기반으로 정렬 재정의
-        Sort customSort = switch (filterSort) {
-            case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
-            case LIKES -> Sort.by(Sort.Direction.DESC, "likeCount");
-            case BOOKMARKS -> Sort.by(Sort.Direction.DESC, "bookmarkCount");
-            case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
-        };
+        Page<Post> postsPage =postRepository.findPostsByFilters(role,category,pageable);
 
-        Pageable customPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                customSort
-        );
-        // 기본 조회
-        Page<Post> postsPage;
-        if (category != null) {
-            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrueAndCategory(category, pageable);
-        } else {
-            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrue(pageable);
-        }
-        return new PageImpl<>(
-            postsPage.getContent().stream()
-                    .filter(post -> role == null || post.getUser().getRole().name().equalsIgnoreCase(String.valueOf(role)))
-                    .map(PostListResponseDto::fromEntity)
-                    .toList(),
-            customPageable,
-            postsPage.getTotalElements()
-        );
+        log.info("Post 목록 조회 - role: {}, category: {}, filterSort: {}, page: {}, totalElements: {}",
+                role, category, filterSort, pageable.getPageNumber(), postsPage.getTotalElements());
+
+        return postsPage.map(PostListResponseDto::fromEntity);
     }
 
     // ========== 유틸리티 메서드 ==========

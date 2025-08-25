@@ -12,6 +12,7 @@ import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +31,7 @@ public class PostCommentService {
     public UUID createComment(PostCommentCreateDto postCommentCreateDto) {
 
         // 유저가 존재하는지 확인
-        UUID userId =UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+        User user = getCurrentUser();
         Post post = postRepository.findById(postCommentCreateDto.getPostId()).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
 
         PostComment postComment;
@@ -116,5 +116,11 @@ public class PostCommentService {
         else{
             postComment.deleteComment();
         }
+    }
+    // 클래스 하단에 이 메서드만 추가
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
