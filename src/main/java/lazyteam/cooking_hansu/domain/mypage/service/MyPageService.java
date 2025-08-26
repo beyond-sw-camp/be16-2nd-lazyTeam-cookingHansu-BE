@@ -14,6 +14,7 @@ import lazyteam.cooking_hansu.domain.purchase.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
 import lazyteam.cooking_hansu.global.service.*;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
@@ -51,7 +52,7 @@ public class MyPageService {
         return ProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-//                .info(user.getInfo())
+                .info(user.getInfo())
                 .profileImageUrl(user.getPicture())
                 .userType(getUserTypeDisplayName(user.getRole()))
                 .build();
@@ -213,10 +214,10 @@ public class MyPageService {
 
     // ===== 공통 메서드 =====
 
-    // 현재 로그인한 사용자 조회 (테스트용)
+    // 현재 로그인한 사용자 조회
     private User getCurrentUser() {
-        UUID testUserId = UUID.fromString(testUserIdStr);
-        return userRepository.findById(testUserId)
+        UUID currentUserId = AuthUtils.getCurrentUserId();
+        return userRepository.findById(currentUserId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
