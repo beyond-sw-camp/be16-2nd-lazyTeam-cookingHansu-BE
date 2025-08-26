@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RequestMapping("/purchase")
 @RestController
@@ -40,6 +42,11 @@ public class PurchaseController {
         JSONObject paymentResult = purchaseService.confirmPayment(tossPaymentConfirmDto);
 
         return paymentResult;
+    }
+
+    @GetMapping("/history/{lectureId}")
+    public ResponseEntity<?> payHistory (@PathVariable UUID lectureId) {
+        return new ResponseEntity<>(ResponseDto.ok(purchaseService.payHistory(lectureId),HttpStatus.OK),HttpStatus.OK);
     }
 
 

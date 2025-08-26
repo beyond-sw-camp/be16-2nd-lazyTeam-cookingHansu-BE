@@ -29,6 +29,7 @@ public class QnaResDto {
     private LocalDateTime answerCreatedAt;
     private LocalDateTime answerUpdatedAt;
     private UUID answerId;
+    private UUID qnaId;
 
     public static QnaResDto fromEntity(LectureQna lectureQna) {
 
@@ -44,6 +45,7 @@ public class QnaResDto {
                 .parentCreatedAt(parent.getCreatedAt())
                 .questionUpdatedAt(parent.getUpdatedAt())
                 .parentId(parent.getUser().getId())
+                .qnaId(parent.getId())
 
                 // 답변
                 .answerName(answer != null && answer.getUser() != null ? answer.getUser().getName() : null)

@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.common.enums.PaymentStatus;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
+import lazyteam.cooking_hansu.domain.purchase.dto.PurchasedLectureHistoryDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.PurchasedLectureResDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPaymentConfirmDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPrepayDto;
@@ -223,6 +224,16 @@ public class PurchaseService {
         }
 
         cartItemRepository.deleteAll(items);
+    }
+
+//    결제정보 조회
+    public PurchasedLectureHistoryDto payHistory(UUID lectureId) {
+        UUID userId = AuthUtils.getCurrentUserId();
+        log.info("유저 아이디 : " + userId);
+        PurchasedLecture purchasedLecture = purchasedLectureRepository.findByUser_IdAndLecture_Id(userId,lectureId)
+                .orElseThrow(()-> new EntityNotFoundException("결제된 강의가 없습니다."));
+        log.info("결제된 강의 정보 : " + purchasedLecture.toString());
+        return PurchasedLectureHistoryDto.fromEntity(purchasedLecture);
     }
 
 

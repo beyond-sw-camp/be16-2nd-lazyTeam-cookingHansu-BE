@@ -71,7 +71,7 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok(detailDto,HttpStatus.OK),HttpStatus.OK);
     }
 
-//    내가 업로드 한 강의목록 조회
+//    내가 업로드 한 강의목록 조회(판매자)
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @GetMapping("/mylist")
     public ResponseEntity<?> findAllMyLecture(@PageableDefault(size = 8, sort = "createdAt",
@@ -88,6 +88,7 @@ public class LectureController {
         lectureService.deleteLecture(lectureId);
         return new ResponseEntity<>(ResponseDto.ok("강의가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
     }
+
 
 
 }
