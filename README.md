@@ -429,30 +429,36 @@
     <details>
       <summary>댓글 생성</summary>
       `POST /post/comment/create`
+      <img src="https://github.com/user-attachments/assets/8c3fd6cf-2bd5-4973-8a5a-9ecbed3d8344" alt="댓글 생성" width="600"/>
     </details>
     <details>
       <summary>댓글 목록 조회</summary>
       `GET /post/comment/list/{postId}`
+      <img src="https://github.com/user-attachments/assets/282aa1ea-27da-4d72-8c7b-baf4a1e7f640" alt="댓글 목록조회" width="600"/>
     </details>
     <details>
       <summary>댓글 수정</summary>
       `PATCH /post/comment/update/{commentId}`
+      <img src="https://github.com/user-attachments/assets/f19424e0-cc6f-47fc-887a-c43f51c8d39f" alt="댓글 수정" width="600"/>
     </details>
     <details>
       <summary>댓글 삭제</summary>
       `DELETE /post/comment/delete/{commentId}`
+      <img src="https://github.com/user-attachments/assets/0dce6c2d-61f2-4193-8513-af899ed68f78" alt="댓글 삭제" width="600"/>
     </details>
   </details>
-  
+
   <details> 
     <summary>좋아요</summary>
     <details>
       <summary>게시글 좋아요 토글</summary>
       `POST /api/interactions/posts/{postId}/likes`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="게시글 좋아요 토글" width="600"/>
     </details>
     <details>
       <summary>강의 좋아요 토글</summary>
       `POST /api/interactions/lectures/{lectureId}/likes`
+      <img src="https://github.com/user-attachments/assets/6dc33e26-2a78-4480-9681-9c08551ea55a" alt="강의 좋아요 토글" width="600"/>
     </details>
   </details>
   
@@ -461,6 +467,7 @@
     <details>
       <summary>게시글 북마크 토글</summary>
       `POST /api/interactions/posts/{postId}/bookmarks`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="북마크 토글" width="600"/>
     </details>
   </details>
   
@@ -469,6 +476,7 @@
     <details>
       <summary>게시글 조회수 증가</summary>
       `POST /api/interactions/posts/{postId}/views`
+      <img src="https://github.com/user-attachments/assets/45a56af0-831c-4965-abe8-45bc5a7927c9" alt="조회수 증가" width="600"/>
     </details>
   </details>
   
@@ -510,29 +518,9 @@
       `POST /review/post`
     </details>
     <details>
-      <summary>리뷰 목록 조회</summary>
-      `GET /review/list/{lectureId}`
-    </details>
-    <details>
-      <summary>리뷰 수정</summary>
-      `PATCH /review/modify`
-    </details>
-    <details>
-      <summary>리뷰 삭제</summary>
-      `DELETE /review/delete/{lectureId}`
-    </details>
-    <details>
       <summary>Q&A 등록</summary>
       `POST /lecture/qna/{lectureId}/create`
       <img src="https://github.com/user-attachments/assets/76af1270-2b5c-473f-b62e-8560b5ad600f" alt="Q&A 기능" width="600"/>
-    </details>
-    <details>
-      <summary>Q&A 목록 조회</summary>
-      `GET /lecture/qna/{lectureId}/list`
-    </details>
-    <details>
-      <summary>Q&A 수정</summary>
-      `PUT /lecture/qna/{qnaId}/update`
     </details>
     <details>
       <summary>Q&A 삭제</summary>
@@ -613,7 +601,7 @@
     <details>
       <summary>게시글 상세 조회</summary>
       `GET /api/posts/{postId}`
-      <img src="https://github.com/user-attachments/assets/f3a2669e-4f38-4469-bc02-01780de23031" alt="게시글상세조회" width="800"/>
+      <img src="https://github.com/user-attachments/assets/abd90174-9b2f-4d0f-a9f7-04d348de09a2" alt="게시글상세조회" width="800"/>
     </details>
     <details>
       <summary>게시글 수정</summary>
@@ -634,10 +622,6 @@
   <details>
     <summary>결제</summary>
     <details>
-      <summary>결제 전 정보 저장</summary>
-      `POST /purchase/prepay`
-    </details>
-    <details>
       <summary>결제 확인</summary>
       `POST /purchase/confirm`
       <img src="https://github.com/user-attachments/assets/26226052-dd93-40d1-885b-720fb0242a2f" alt="강의 결제" width="800"/>
@@ -646,18 +630,6 @@
       <summary>장바구니 담기</summary>
       `POST /cart/add`
       <img src="https://github.com/user-attachments/assets/644610c8-4cd9-4b6d-af57-6b95c410941e" alt="장바구니 기능" width="800"/>
-    </details>
-    <details>
-      <summary>장바구니 목록 조회</summary>
-      `GET /cart/list/{id}`
-    </details>
-    <details>
-      <summary>장바구니 단건 삭제</summary>
-      `DELETE /cart/delete`
-    </details>
-    <details>
-      <summary>장바구니 전체 삭제</summary>
-      `DELETE /cart/deleteAll`
     </details>
   </details>
   <details>
