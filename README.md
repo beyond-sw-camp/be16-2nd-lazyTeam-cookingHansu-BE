@@ -250,8 +250,8 @@
 </details>
 
 <details>
-  <summary><b>프로젝트 기획서</b></summary>
-  <a href='https://www.notion.so/2297cd1f5ed98003aaa9e1ac5ed8f705?source=copy_link' style="text-decoration: none; color: inherit;">📄 프로젝트 기획서 바로가기</a>
+  <summary><b>프로젝트 기획서 및 API명세서</b></summary>
+  <a href='https://tranquil-fuchsia-64e.notion.site/25a7cd1f5ed980b9ab40e6897bc980e1?source=copy_link' style="text-decoration: none; color: inherit;">📄 프로젝트 기획서 바로가기</a>
 </details>
 
 <details>
