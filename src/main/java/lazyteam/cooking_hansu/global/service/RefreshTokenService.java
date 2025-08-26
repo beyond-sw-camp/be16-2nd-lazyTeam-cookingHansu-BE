@@ -54,17 +54,17 @@ public class RefreshTokenService {
                 return null;
             }
 
-            // 토큰에서 이메일 추출
-            String email = jwtTokenProvider.getEmailFromRefreshToken(refreshToken);
-            if (email == null) {
+            // 토큰에서 아이디 추출
+            String id = jwtTokenProvider.getIdFromRefreshToken(refreshToken);
+            if (id == null) {
                 log.warn("Failed to extract email from refresh token");
                 return null;
             }
 
             // 사용자 조회
-            User user = userRepository.findByEmail(email).orElse(null);
+            User user = userRepository.findById(UUID.fromString(id)).orElse(null);
             if (user == null) {
-                log.warn("User not found for email: {}", email);
+                log.warn("User not found for email: {}", id);
                 return null;
             }
 

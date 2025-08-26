@@ -11,10 +11,12 @@ import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
 import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +73,7 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 셰프입니다. userId: " + userId);
             }
             chef.approve();
+            user.updateRoleStatus(Role.CHEF);
             // 역할은 이미 CHEF로 설정되어 있으므로 별도 변경 불필요
             return;
         }
@@ -82,6 +85,7 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
+            user.updateRoleStatus(Role.CHEF);
             // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
             return;
         }
@@ -141,10 +145,6 @@ public class UserService {
         user.updateStatus(LoginStatus.INACTIVE);
     }
 
-    public User getUserBySocialId(String socialId) {
-        return userRepository.findBySocialId(socialId).orElse(null);
-    }
-
     // 구글 OAuth 사용자 생성
     public User createGoogleOauth(String sub, String name, String email, String picture, OauthType oauthType) {
         return createOauthUser(sub, name, email, picture, oauthType);
@@ -187,20 +187,18 @@ public class UserService {
         return user;
     }
 
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+    public User getUserBySocialIdAndOauthType(String email, OauthType oauthType) {
+        return userRepository.findBySocialIdAndOauthType(email, oauthType).orElse(null);
     }
 
-    // 로그인 전 테스트 요
-    private User getCurrentUser() {
-        UUID testUserId = UUID.fromString(testUserIdStr);
-        return userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    public User getUserById(UUID userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
 
     // 회원탈퇴
     public void deleteUser() {
-        User currentUser = getCurrentUser();
+        UUID userId = AuthUtils.getCurrentUserId();
+        User currentUser = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
         // 프로필 이미지가 S3에 있으면 같이 삭제
         if (currentUser.getPicture() != null) {
