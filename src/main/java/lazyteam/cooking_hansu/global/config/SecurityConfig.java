@@ -56,7 +56,6 @@ public class SecurityConfig {
                         "/api/my/**", // Mypage 관련 API
                         "/lecture/**",
                         "/user/**",
-                        "/chat/**",
                         "/cart/**",
                         "/purchase/**",
                         "/review/**",

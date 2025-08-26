@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.chat.repository.ChatRoomRepository;
 import lazyteam.cooking_hansu.domain.chat.util.ChatFileValidator;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,7 +124,7 @@ public class ChatService {
         chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
         // 현재 사용자가 채팅방 참여자인지 확인
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        UUID userId = AuthUtils.getCurrentUserId();
         if (!isRoomParticipant(userId, roomId)) {
             throw new IllegalArgumentException("채팅방 참여자가 아닙니다.");
         }
@@ -171,7 +172,7 @@ public class ChatService {
     //    내 채팅방 목록 조회
     @Transactional(readOnly = true)
     public PaginatedResponseDto<ChatRoomListDto> getMyChatRooms(int size, String cursor) {
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        UUID userId = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 인덱스 기반 cursor pagination
@@ -233,7 +234,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<ChatMessageResDto> getChatHistory(Long roomId, int size, String cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        UUID userId = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
         // 현재 사용자가 채팅방 참여자인지 확인
@@ -366,7 +367,7 @@ public class ChatService {
     //    채팅방 나가기
     public void leaveChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        UUID userId = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         ChatParticipant chatParticipant = chatParticipantRepository.findByChatRoomAndUser(chatRoom, user).orElseThrow(() -> new EntityNotFoundException("채팅방 참여자를 찾을 수 없습니다."));
         chatParticipant.leaveChatRoom();
@@ -383,7 +384,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));
 
         // 현재 사용자가 채팅방 참여자인지 확인
-        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        UUID userId = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         if (!isRoomParticipant(user.getId(), roomId)) {
