@@ -600,22 +600,27 @@
     <details>
       <summary>게시글 생성</summary>
       `POST /api/posts`
+      <img src="https://github.com/user-attachments/assets/dfa394b0-0d95-491f-b4bd-238a97563e20" alt="게시글생성" width="800"/>
     </details>
     <details>
       <summary>게시글 상세 조회</summary>
       `GET /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/f3a2669e-4f38-4469-bc02-01780de23031" alt="게시글상세조회" width="800"/>
     </details>
     <details>
       <summary>게시글 수정</summary>
       `PUT /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/0ca89557-ed4e-40af-a0a1-e33e2e54cfad" alt="게시글수정" width="800"/>
     </details>
     <details>
       <summary>게시글 삭제</summary>
       `DELETE /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/b636eb09-fe96-4647-99f4-236d68843ab5" alt="게시글삭제" width="800"/>
     </details>
     <details>
       <summary>게시글 목록 조회</summary>
       `GET /api/posts`
+      <img src="https://github.com/user-attachments/assets/07e1155c-6686-4cfd-86d9-13ad7acc095b" alt="게시글삭제" width="800"/>
     </details>
   </details>
   <details>
