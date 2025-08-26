@@ -379,49 +379,36 @@
       `DELETE /user/delete`
     </details>
   </details>
-  
+
   <details> 
     <summary>채팅</summary>
     <details>
-      <summary>내 채팅방 목록 조회</summary>
-      `GET /chat/my/rooms`
-    </details>
-    <details>
-      <summary>채팅방 참여자 목록 조회</summary>
-      `GET /chat/room/{roomId}/participants`
-    </details>
-    <details>
-      <summary>채팅방 상세 메시지 조회</summary>
-      `GET /chat/room/{roomId}/history`
-    </details>
-    <details>
-      <summary>채팅방 생성</summary>
+      <summary>채팅방 생성 및 채팅방 목록 이동</summary>
       `POST /chat/room/create`
-    </details>
-    <details>
-      <summary>채팅방 이름 수정</summary>
-      `PATCH /chat/room/{roomId}/name`
-    </details>
-    <details>
-      <summary>채팅방 나가기</summary>
-      `DELETE /chat/room/{roomId}/leave`
-    </details>
-    <details>
-      <summary>파일 업로드</summary>
-      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/22d5a80e-4f88-4b0e-81e7-bbaf0352ba47" alt="채팅방 생성" width="1000"/>
     </details>
     <details>
       <summary>실시간 메시지 전송</summary>
       `/app/chat-rooms/{roomId}/chat-message`
+      <img src="https://github.com/user-attachments/assets/fdeb4c3b-a8ad-48f2-9e7b-ef26c3a4af2f" alt="실시간 메시지 전송" width="1000"/>
     </details>
     <details>
-      <summary>온라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/online`
+      <summary>파일 업로드</summary>
+      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/47f59838-b70c-49ae-9be2-46e7c58e1354" alt="파일 업로드" width="1000"/>
     </details>
     <details>
-      <summary>오프라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/offline`
+      <summary>채팅방 이름 수정</summary>
+      `PATCH /chat/room/{roomId}/name`
+      <img src="https://github.com/user-attachments/assets/b8eaec8d-d50e-4e64-a7ec-da7c61e90d1f" alt="채팅방 이름 수정" width="1000"/>
     </details>
+    <details>
+      <summary>채팅방 나가기</summary>
+      `DELETE /chat/room/{roomId}/leave`
+      <img src="https://github.com/user-attachments/assets/34649cb5-9d89-4c25-9bab-e7dc0f6e2880" alt="채팅방 나가기" width="1000"/>
+    </details>
+
+
   </details>
   
   <details>
