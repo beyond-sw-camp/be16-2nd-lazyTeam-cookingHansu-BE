@@ -92,6 +92,18 @@ public class RefreshTokenService {
         }
     }
 
+    // 관리자용: 저장된 Refresh Token 문자열 직접 조회
+    public String getStoredRefreshToken(String userId) {
+        try {
+            String storedToken = redisTemplate.opsForValue().get("refresh_token:" + userId);
+            log.info("Retrieved refresh token for user: {}", userId);
+            return storedToken;
+        } catch (Exception e) {
+            log.error("Failed to get stored refresh token for user: {}", userId, e);
+            return null;
+        }
+    }
+
     // 새로운 Refresh Token으로 갱신
     public void updateRefreshToken(String userId, String newRefreshToken) {
         try {

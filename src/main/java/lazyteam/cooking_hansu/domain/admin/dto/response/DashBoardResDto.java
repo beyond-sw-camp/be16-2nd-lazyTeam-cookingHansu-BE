@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.admin.dto;
+package lazyteam.cooking_hansu.domain.admin.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
