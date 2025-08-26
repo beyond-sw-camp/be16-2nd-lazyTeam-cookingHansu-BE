@@ -5,6 +5,7 @@ import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
 import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
@@ -64,6 +65,7 @@ public class PostResponseDto {
         private UUID id;
         private Integer stepSequence;
         private String content;
+        private String description;
 
         public static RecipeStepDto fromEntity(RecipeStep step) {
             if (step == null) return null;
@@ -71,6 +73,7 @@ public class PostResponseDto {
                     .id(step.getId())
                     .stepSequence(step.getStepSequence())
                     .content(step.getContent())
+                    .description(step.getDescription())
                     .build();
         }
     }
@@ -84,14 +87,14 @@ public class PostResponseDto {
         private UUID id;
         private String nickname;
         private String profileImageUrl;
-        private String role; //이넘으로바꾸고
+        private Role role;
 
         public static UserInfoDto fromEntity(User user) {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
                     .profileImageUrl(user.getPicture())
-                    .role(user.getRole() != null ? user.getRole().name() : "GENERAL")
+                    .role(user.getRole())
                     .build();
         }
     }

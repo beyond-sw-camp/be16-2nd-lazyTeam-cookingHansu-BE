@@ -72,5 +72,8 @@ public class PostUpdateRequestDto {
         @NotBlank(message = "단계 설명은 필수입니다.")
         @Size(max = 255, message = "단계 설명은 255자 이하여야 합니다.")
         private String content;
+
+        @Size(max = 255, message = "추가설명은 1000자 이하여야 합니다.")
+        private String description;
     }
 }

@@ -13,7 +13,6 @@ import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -39,10 +38,6 @@ public class PostService {
     private final IngredientsRepository ingredientsRepository;
     private final RecipeStepRepository recipeStepRepository;
     private final S3Uploader s3Uploader;
-
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
-
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -268,14 +263,18 @@ public class PostService {
                 .map(dto -> {
                     Integer stepSequence;
                     String content;
+                    String description;
 
                     // 타입 확인해서 필드 추출
                     if (dto instanceof PostCreateRequestDto.RecipeStepRequestDto createDto) {
                         stepSequence = createDto.getStepSequence();
                         content = createDto.getContent();
+                        description = createDto.getDescription();
                     } else if (dto instanceof PostUpdateRequestDto.RecipeStepUpdateDto updateDto) {
                         stepSequence = updateDto.getStepSequence();
                         content = updateDto.getContent();
+                        description = updateDto.getDescription(); // 추가
+
                     } else {
                         throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
                     }
@@ -284,6 +283,7 @@ public class PostService {
                             .post(post)
                             .stepSequence(stepSequence)
                             .content(content)
+                            .description(description)
                             .build();
                 })
                 .toList();
