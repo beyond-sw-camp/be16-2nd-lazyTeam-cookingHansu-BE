@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.global.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -67,6 +68,46 @@ public class JwtTokenProvider {
 
         Claims claims = Jwts.claims().setSubject(id.toString());
         claims.put("role", role);
+
+        Date now = new Date();
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + expirationRt * 60 * 1000L))
+                .signWith(secret_rt_key)
+                .compact();
+
+        return token;
+    }
+
+    // 관리자 AT 토큰 생성
+    public String createAdminAtToken(Admin admin) {
+        UUID id = admin.getId();
+        String email = admin.getEmail();
+
+        Claims claims = Jwts.claims().setSubject(id.toString());
+        claims.put("email", email);
+        claims.put("role", "ADMIN"); // 관리자 role 추가
+
+        Date now = new Date();
+        String token = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + expirationAt * 60 * 1000L))
+                .signWith(secret_at_key)
+                .compact();
+
+        return token;
+    }
+
+    // 관리자 RT 토큰 생성
+    public String createAdminRtToken(Admin admin) {
+        UUID id = admin.getId();
+        String email = admin.getEmail();
+
+        Claims claims = Jwts.claims().setSubject(id.toString());
+        claims.put("email", email);
+        claims.put("role", "ADMIN"); // 관리자 role 추가
 
         Date now = new Date();
         String token = Jwts.builder()
