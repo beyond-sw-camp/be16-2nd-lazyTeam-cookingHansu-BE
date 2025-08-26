@@ -13,9 +13,9 @@ import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -230,14 +230,12 @@ public class InteractionService {
                 // Redis에서 증가
                 newViewCount = redisInteractionService.incrementPostViewCount(postId);
 
-                // 주기적으로 DB 동기화 (10의 배수마다)
-                if (newViewCount % 10 == 0) {
-                    Post post = postRepository.findById(postId).orElse(null);
-                    if (post != null) {
-                        post.setViewCount(newViewCount);
-                        postRepository.save(post);
-                        log.debug("게시글 조회수 DB 동기화 완료 - postId: {}, count: {}", postId, newViewCount);
-                    }
+                // 매번 DB 동기화
+                Post post = postRepository.findById(postId).orElse(null);
+                if (post != null) {
+                    post.setViewCount(newViewCount);
+                    postRepository.save(post);
+                    log.debug("게시글 조회수 DB 동기화 완료 - postId: {}, count: {}", postId, newViewCount);
                 }
             }
 
@@ -268,8 +266,8 @@ public class InteractionService {
 
     // ========== 유틸리티 메서드 ==========
     private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
+        UUID userId = AuthUtils.getCurrentUserId();
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
