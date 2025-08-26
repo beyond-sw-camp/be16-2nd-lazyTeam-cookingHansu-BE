@@ -325,6 +325,7 @@
     <details>
       <summary>구글 로그인</summary>
       `POST /user/login/google`
+      https://github.com/user-attachments/assets/23a15885-a23b-494a-b01a-697d4c354fa5
     </details>
     <details>
       <summary>카카오 로그인</summary>
