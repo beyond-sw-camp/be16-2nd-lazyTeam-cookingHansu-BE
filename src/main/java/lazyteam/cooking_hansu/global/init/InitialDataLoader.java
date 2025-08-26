@@ -26,7 +26,7 @@ public class InitialDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 관리자 초기 데이터
-        if(adminRepository.findByEmail("admin@naver.com").isEmpty()){
+        if(adminRepository.findByEmail(adminEmail).isEmpty()){
             Admin admin = Admin.builder()
                     .email(adminEmail)
                     .name(adminName)

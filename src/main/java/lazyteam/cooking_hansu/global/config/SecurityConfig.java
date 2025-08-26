@@ -51,7 +51,8 @@ public class SecurityConfig {
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
                         "/notice/**",
-                        "/admin/**", // Admin 관련 API
+                        "/admin/login", // 관리자 로그인만 허용
+                        "/admin/refresh", // 관리자 토큰 갱신만 허용
                         "/report/**", // Report 관련 API
                         "/api/my/**", // Mypage 관련 API
                         "/lecture/**",

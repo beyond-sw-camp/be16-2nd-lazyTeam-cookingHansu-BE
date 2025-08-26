@@ -1,10 +1,8 @@
-# 🍳 요리한수 (Cooking Hansu)
-
-> **누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼**  
+**누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼**  
 > 레시피 공유부터 요리 전문가 강의까지, 한 수 배워보세요!
 
+# 🍳 요리한수 (Cooking Hansu) --> 추후 이미지와 움짤로 변경 예정
 ---
-
 ## 👨‍👩‍👧‍👦 Team Members
 
 <table>
@@ -72,71 +70,114 @@
 </table>
 
 ---
+## 🎬 프로젝트 개요
+<details>
+  <summary><b>프로젝트 개요</b></summary>
+  <details>
+  <summary><b>01. 프로젝트 주제</b></summary>
+&nbsp;&nbsp;🌟 **[누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼]**  
+&nbsp;&nbsp;레시피 공유, 요리 강의, 커뮤니티를 결합하여  
+&nbsp;&nbsp;**자취생·직장인·주부 모두가 즐길 수 있는 요리 생태계 구축**  
+</details>
 
-## 🎬🎞️ 프로젝트 개요
+<details>
+  <summary><b>02. 프로젝트 소개</b></summary>
 
-<h3>01_프로젝트 주제</h3>
+&nbsp;&nbsp;🍳 집밥을 하고 싶어도, 막상 “뭘 먹지?”라는 고민은 늘 따라옵니다.  
+&nbsp;&nbsp;요리법을 몰라 배달에 의존하거나, 새로운 음식을 배우고 싶지만 접근성이 부족해 포기하는 경우도 많습니다.  
 
-&nbsp;누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼
- 
+&nbsp;&nbsp;**요리한수**는 이러한 문제를 해결하기 위해 기획된 **All-in-One 요리 플랫폼**입니다.  
+&nbsp;&nbsp;- 사용자는 자신만의 레시피를 등록하고, 다른 사람의 레시피를 탐색할 수 있습니다.  
+&nbsp;&nbsp;- 검증된 **요리사·자영업자**가 올리는 강의를 통해 체계적인 학습과 실습이 가능합니다.  
+&nbsp;&nbsp;- 댓글, 좋아요, 북마크, 채팅과 같은 커뮤니티 기능으로 **요리를 매개로 한 소통**이 활성화됩니다.  
 
-<h3>02_프로젝트 소개</h3>
+&nbsp;&nbsp;즉, 단순한 레시피 모음이 아니라  
+&nbsp;&nbsp;**“배움–공유–수익화”가 선순환되는 플랫폼**으로 자리매김합니다.  
 
-&nbsp;1인가구가 점점 증가하며 물가가 비싸지고 수입원이 줄어들면서 점점 배달음식을 축소하고 집에서 밥을 해먹는 경우가 많이 생기고있다. 이처럼 각종 재료를 구입하여 레시피를 통해 요리를 제작하고 요리를 배우는 방향에서 좋은 플랫폼이다.
+</details>
 
-<h3>03_프로젝트 필요성</h3>
+<details>
+  <summary><b>03. 프로젝트 배경 및 필요성</b></summary>
 
-1. 증가하는 1인가구 <br>
- 최근 1인가구가 빠르게 증가하고 있습니다. 1인가구의 증가는 혼인율 감소와 초혼연령 지체에 따른 미혼 독신가구의 증가, 이혼이나 별거에 따른 단독가구의 증가, 그리고 고령화에 따른 노인 단독가구의 증가 등에 기인한다. 1인가구는 2000년대 들어 크게 늘어났으며, 1인가구의 비율은 2000년 15.5%에서 2024년 36.1%로 증가하였다. 같은 기간 4인가구의 비율이 31.1%에서 12.7%로 감소한 것과 대비된다.
+&nbsp;&nbsp;**3-1. 1인가구 증가**  
+&nbsp;&nbsp;&nbsp;&nbsp;통계청(KOSIS)에 따르면 한국의 1인가구 비율은 2000년 15.5%에서 2024년 36.1%로 급격히 증가했습니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;이는 전통적인 4인가구 중심의 식생활 패턴이 약화되고, **개인 맞춤형 식생활·요리 서비스** 수요가 커지고 있음을 보여줍니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;특히 자취생, 신입 직장인 등은 ‘간단하지만 건강한 집밥’을 필요로 하며, 자연스럽게 온라인 기반 요리 플랫폼에 대한 수요가 폭발적으로 증가하고 있습니다.  
 
-<div>
-<img width="1479" height="871" alt="스크린샷 2025-08-25 오후 12 49 36" src="https://github.com/user-attachments/assets/fffbca24-d1e5-4283-8ef4-7140b1ccb147" />
-<img width="1467" height="846" alt="스크린샷 2025-08-25 오후 12 49 58" src="https://github.com/user-attachments/assets/f87eb6ee-9c19-419b-9d29-11fbacc474cb" />
+<img src="https://github.com/user-attachments/assets/fffbca24-d1e5-4283-8ef4-7140b1ccb147" width="600"/><br>
+출처: [KOSIS](https://kosis.kr)  
 
-</div>
-출처: 국가통계포털 KOSIS (https://kosis.kr/index/index.do;jsessionid=uZZkLgK_xo68xieli1emTFq9xiwt-muOyYkIx90C.esvwas3_S31)
+---
 
-<br><br>
-2. 체감되는 물가 상승 및 소득 동결<br>
-&nbsp;통계청이 지난 7월 발표한 '2025년 5월 경제활동인구조사 청년층 부가조사 결과'에 따르면, 청년층 취업자의 첫 일자리 임금은 월 200만∼300만원이 39.7%로 가장 많았다. 이어 150만∼200만원(28.3%), 100만∼150만원(11.1%) 등이 뒤를 이었다. 지난해와 비교하면 200만∼300만원(4.5%포인트), 300만원 이상(1.7%포인트) 등 고임금 구간 비중이 상승하면서 임금 수준이 다소 개선됐다.
-매년 상승하는 물가에 비해 연봉이 대부분 동결되는 부분이 가장 크다는점이 문제이다. 아래의 정보와같이 대부분의 첫 일자리 임금이 300만원 이하이다. 요즘 월세, 저축, 식비, 등등 기본 지출을 제외하고나면 즐길 여유가 부족한것이 사실이다. 이런점에서 청년들이 돈을 아끼기위해 집에서 요리를 해먹는 현상이 많이 생기고있으며 요리가 새로운 취미가 되어가고있다.
+&nbsp;&nbsp;**3-2. 물가 상승 및 소득 정체**  
+&nbsp;&nbsp;&nbsp;&nbsp;최근 청년층 초임 임금은 200만~300만 원 구간이 전체의 39.7%를 차지합니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;반면 외식비·배달비는 꾸준히 상승하며 ‘배달 한 끼 2만 원 시대’가 도래했습니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;따라서 **“가성비 있으면서도 맛있고 건강한 집밥”**을 찾는 수요가 높아지고 있고, 이를 지원하는 **레시피·강의 플랫폼**의 필요성이 커지고 있습니다.  
 
-<img width="1680" height="860" alt="스크린샷 2025-08-25 오후 2 06 17" src="https://github.com/user-attachments/assets/231ef3d5-b476-4a09-b272-0ba3d88ec40f" />
-출처 : 아시아경제 (https://www.asiae.co.kr/article/2025080721464360883)
+<img src="https://github.com/user-attachments/assets/231ef3d5-b476-4a09-b272-0ba3d88ec40f" width="600"/><br>
+출처: [아시아경제](https://www.asiae.co.kr/article/2025080721464360883)  
 
-<br><br>
-3. 취업시장의 어려움<br>
-&nbsp; 통계청 경제활동인구조사에 따르면 2019년 36만 명이던 ‘쉬었음’ 청년은 2020년 코로나19 영향으로 44만8000명까지 급증했다가 2022년 39만 명으로 줄었지만, 2023년 다시 40만1000명으로 증가했다. 같은 기간 청년 인구가 966만 명에서 879만 명으로 줄어든 것과 대조적으로 나타났다. 청년들의 '쉬었음' 통계가 이렇게 나온 이유중 하나가 경기침체라고 볼 수 있으며 개개인의 경제가 힘들어진것을 의미한다. 이런점에서 청년들 뿐만 아니라 모두가 식비를 아끼려고하는 추세이다. 또한 저렴한 가격의 강의를 요리사, 자영업자 등등이 강의를 올리고 일반적인 주부들도 레시피를 공유하면서 커뮤니티도 활성화 될것이다.
+---
 
-<img width="1710" height="873" alt="스크린샷 2025-08-25 오후 2 12 59" src="https://github.com/user-attachments/assets/2a9e8766-58df-42f3-b729-a11ebd5b515b" />
+&nbsp;&nbsp;**3-3. 취업난과 라이프스타일 변화**  
+&nbsp;&nbsp;&nbsp;&nbsp;청년층 취업난으로 인한 불안정한 소득 구조는 외식·고급 강의보다는 **저렴하고 실용적인 자기개발 활동**을 선호하게 만듭니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;‘요리’는 혼자서도 시작할 수 있고, 결과물이 바로 일상생활에 도움이 된다는 점에서 **취미와 생활을 동시에 충족**할 수 있는 최적의 선택지입니다.  
 
+<img src="https://github.com/user-attachments/assets/2a9e8766-58df-42f3-b729-a11ebd5b515b" width="600"/><br>
 
-<h3>04_프로젝트 주요 기능</h3>
+---
 
-- **소셜 로그인**: 네이버, 카카오, 구글 소셜로그인을 통해 손쉽게 회원가입을 진행 할 수 있다.
-- **비회원 열람**: 전체의 서비스는 아니지만 회원가입이 바탕이 되는 서비스가 아닌 특정 조회서비스는 비회원이여도 가능하다.
-- **관리자 승인**: 등록된 강의와 사용자 승인을 진행 할 수 있다.
-- **커뮤니티 기능**: 강의를 구매한 사람끼리 소통이 가능하고 레시피 공유 게시글을 통해 댓글로 소통할 수 있으며 프로필을 통해 1:1채팅하기가 가능하다.
+&nbsp;&nbsp;**3-4. 소통과 커뮤니티에 대한 갈증**  
+&nbsp;&nbsp;&nbsp;&nbsp;Z세대와 MZ세대는 ‘혼밥’과 ‘혼술’을 즐기면서도 동시에 **온라인 소통과 정보 공유**에 적극적입니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;단순히 요리를 배우는 것을 넘어, **레시피를 공유하고 댓글·채팅을 통해 공감하는 과정**이 하나의 즐거움이 됩니다.  
+&nbsp;&nbsp;&nbsp;&nbsp;요리한수는 단순한 레시피 DB가 아니라, **사람을 연결하는 플랫폼**으로서 커뮤니티적 가치를 극대화합니다.  
 
-### 05. 서비스 차별화 전략
-- **비회원, 회원도 모두 즐길 수 있는 서비스**
-- **검증된 요리사와 자영업자가 강의를 올리는 신뢰성 있는 서비스**
+</details>
 
-### 06. 기대효과
-- **다양한 유저층 유입: 자취생, 전문가, 자영업자 등 폭넓은 참여**
-- **지속 가능한 수익 모델: 강의 판매 및 추가 서비스 수익화**
-- **커뮤니티 활성화: 구매자·레시피 공유 기반의 소통 확장**
-- **콘텐츠 생태계 강화: 꾸준한 레시피 업로드와 강의 확장**
+<details>
+  <summary><b>04. 프로젝트 주요 기능</b></summary>
 
-### 07. 향후 계획
-- **모바일 최적화: PWA 기반 반응형 대응**
-- **실시간 라이브 요리 강의: 쌍방향 소통 기능 제공**
-- **AI 기반 레시피 추천: 개인 맞춤형 요리 가이드 강화**
+&nbsp;&nbsp;- 소셜 로그인 (네이버·카카오·구글)  
+&nbsp;&nbsp;- 비회원도 열람 가능 (접근성 확대)  
+&nbsp;&nbsp;- 강의 등록 시 **관리자 승인제**로 신뢰성 확보  
+&nbsp;&nbsp;- 커뮤니티 기능 (댓글, 좋아요, 북마크, 채팅)  
+
+</details>
+
+<details>
+  <summary><b>05. 서비스 차별화 전략</b></summary>
+
+&nbsp;&nbsp;- 비회원·회원 모두 접근 가능  
+&nbsp;&nbsp;- 검증된 요리사/자영업자 중심의 신뢰성 있는 강의  
+
+</details>
+
+<details>
+  <summary><b>06. 기대효과</b></summary>
+
+&nbsp;&nbsp;- 다양한 유저층 유입  
+&nbsp;&nbsp;- 지속 가능한 수익 모델  
+&nbsp;&nbsp;- 커뮤니티 활성화  
+&nbsp;&nbsp;- 콘텐츠 생태계 강화  
+
+</details>
+
+<details>
+  <summary><b>07. 향후 계획</b></summary>
+
+&nbsp;&nbsp;- PWA 기반 모바일 최적화  
+&nbsp;&nbsp;- 실시간 라이브 강의  
+&nbsp;&nbsp;- AI 기반 레시피 추천  
+
+</details>
+
+</details>
+
 
 <br>
 
 ## ⚙️🛠️ Technical Stack
-
+  
 ### 🎯 Frontend
 
 <a href="https://vuejs.org/" target="_blank"><img src="https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white"/></a>
@@ -177,70 +218,46 @@
   <a href="https://www.erdcloud.com" target="_blank"> <img src="https://img.shields.io/badge/ERD%20Cloud-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white"/> </a> 
   <a href="https://www.postman.com/" target="_blank"> <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white"/> </a> 
 </div>
-
-<br>
-
-
-## 🗓️ WBS
-
-<details>
-  <summary>WBS 보기</summary>
-   <img width="1710" height="873" alt="스크린샷 2025-08-25 오후 2 28 50" src="https://github.com/user-attachments/assets/40727227-3e5f-4da2-adfc-abd5e5f11bea" />
-</details>
-<div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://docs.google.com/spreadsheets/d/1UsaqCAM9-1V2rr0dIufYZtAmWtn-mnH4Uthqad71YM8/edit?gid=1345536888#gid=1345536888' style="text-decoration: none; color: inherit;">
-    WBS 바로가기
-  </a>
-</div>
-
-<br>
-
-## 🧾 요구사항 명세서
-
-<details>
-  <summary>요구사항 명세서 보기</summary>
-<img width="1708" height="869" alt="스크린샷 2025-08-25 오후 2 30 20" src="https://github.com/user-attachments/assets/ff3ab3dd-7685-4c48-b3dc-b0429a650ebc" />
 </details>
 
-<div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://docs.google.com/spreadsheets/d/1UsaqCAM9-1V2rr0dIufYZtAmWtn-mnH4Uthqad71YM8/edit?gid=2045131748#gid=2045131748' style="text-decoration: none; color: inherit;">
-    요구사항 명세서 바로가기
-  </a>
-</div>
 
 <br>
 
-## 🧱 ERD
+
+
+## 📂 산출물
+<details>
+  <summary><b>WBS</b></summary>
+  <a href='https://docs.google.com/spreadsheets/d/1UsaqCAM9-1V2rr0dIufYZtAmWtn-mnH4Uthqad71YM8/edit?gid=1345536888#gid=1345536888' style="text-decoration: none; color: inherit;">📄 WBS 바로가기</a>
+  <br>
+  <img width="1710" height="873" alt="스크린샷 2025-08-25 오후 2 28 50" src="https://github.com/user-attachments/assets/40727227-3e5f-4da2-adfc-abd5e5f11bea" />
+</details>
 
 <details>
-  <summary>ERD 보기</summary>
-   <img width="1254" height="792" alt="스크린샷 2025-08-25 오후 2 33 14" src="https://github.com/user-attachments/assets/a8ae440d-08c1-4038-879a-0b063fde7c24" />
+  <summary><b>요구사항 명세서</b></summary>
+  <a href='https://docs.google.com/spreadsheets/d/1UsaqCAM9-1V2rr0dIufYZtAmWtn-mnH4Uthqad71YM8/edit?gid=2045131748#gid=2045131748' style="text-decoration: none; color: inherit;">📄 요구사항 명세서 바로가기</a>
+  <br>
+  <img width="1708" height="869" alt="스크린샷 2025-08-25 오후 2 30 20" src="https://github.com/user-attachments/assets/ff3ab3dd-7685-4c48-b3dc-b0429a650ebc" />
 </details>
-<div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://www.erdcloud.com/d/25tEnmWT48D4MufsZ' style="text-decoration: none; color: inherit;">
-    ERD 바로가기
-  </a>
-</div>
 
-<br>
+<details>
+  <summary><b>ERD</b></summary>
+  <a href='https://www.erdcloud.com/d/25tEnmWT48D4MufsZ' style="text-decoration: none; color: inherit;">📄 ERD 바로가기</a>
+  <br>
+  <img width="1254" height="792" alt="스크린샷 2025-08-25 오후 2 33 14" src="https://github.com/user-attachments/assets/a8ae440d-08c1-4038-879a-0b063fde7c24" />
 
-## 📝 프로젝트 노션(프로젝트 기획서 및 API 명세서)
+  <a href="https://www.erdcloud.com/...">
+</details>
 
-<div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://tranquil-fuchsia-64e.notion.site/25a7cd1f5ed980b9ab40e6897bc980e1?source=copy_link' style="text-decoration: none; color: inherit;">
-    프로젝트 바로가기
-  </a>
-</div>
-<br>
+<details>
+  <summary><b>프로젝트 기획서 및 API명세서</b></summary>
+  <a href='https://tranquil-fuchsia-64e.notion.site/25a7cd1f5ed980b9ab40e6897bc980e1?source=copy_link' style="text-decoration: none; color: inherit;">📄 프로젝트 기획서 바로가기</a>
+</details>
 
-## 🎨 피그마
-<div style="font-size: 1.5em; font-weight: bold; margin-top: 20px;">
-  <a href='https://www.figma.com/design/0r1vmACeBTegtlH9OHZaMn/%EC%9A%94%EB%A6%AC%ED%95%9C%EC%88%98?node-id=0-1&t=D6hqNiudFHl0XVsu-1' style="text-decoration: none; color: inherit;">
-    피그마 바로가기
-  </a>
-</div>
-
-<br>
+<details>
+  <summary><b>피그마</b></summary>
+  <a href='https://www.erdcloud.com/d/25tEnmWT48D4MufsZ](https://www.figma.com/design/0r1vmACeBTegtlH9OHZaMn/%EC%9A%94%EB%A6%AC%ED%95%9C%EC%88%98?node-id=0-1&p=f&t=NJOrncqdhdRnxdh6-0)' style="text-decoration: none; color: inherit;">🎨 피그마 바로가기</a>
+</details>
 
 ---
 
@@ -325,14 +342,17 @@
     <details>
       <summary>구글 로그인</summary>
       `POST /user/login/google`
+      <img src="https://github.com/user-attachments/assets/9b3e00f5-db75-4f99-9765-e24e29ef7ed5" alt="구글 로그인" width="800"/>
     </details>
     <details>
       <summary>카카오 로그인</summary>
       `POST /user/login/kakao`
+      <img src="https://github.com/user-attachments/assets/1da92211-524d-4757-85b9-df36ac299762" alt="카카오 로그인" width="800"/>
     </details>
     <details>
       <summary>네이버 로그인</summary>
       `POST /user/login/naver`
+      <img src="https://github.com/user-attachments/assets/60be89d0-6816-46db-b573-c7824336f93b" alt="네이버 로그인" width="800"/>
     </details>
     <details>
       <summary>토큰 리프레시</summary>
@@ -359,49 +379,36 @@
       `DELETE /user/delete`
     </details>
   </details>
-  
+
   <details> 
     <summary>채팅</summary>
     <details>
-      <summary>내 채팅방 목록 조회</summary>
-      `GET /chat/my/rooms`
-    </details>
-    <details>
-      <summary>채팅방 참여자 목록 조회</summary>
-      `GET /chat/room/{roomId}/participants`
-    </details>
-    <details>
-      <summary>채팅방 상세 메시지 조회</summary>
-      `GET /chat/room/{roomId}/history`
-    </details>
-    <details>
-      <summary>채팅방 생성</summary>
+      <summary>채팅방 생성 및 채팅방 목록 이동</summary>
       `POST /chat/room/create`
-    </details>
-    <details>
-      <summary>채팅방 이름 수정</summary>
-      `PATCH /chat/room/{roomId}/name`
-    </details>
-    <details>
-      <summary>채팅방 나가기</summary>
-      `DELETE /chat/room/{roomId}/leave`
-    </details>
-    <details>
-      <summary>파일 업로드</summary>
-      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/22d5a80e-4f88-4b0e-81e7-bbaf0352ba47" alt="채팅방 생성" width="1000"/>
     </details>
     <details>
       <summary>실시간 메시지 전송</summary>
       `/app/chat-rooms/{roomId}/chat-message`
+      <img src="https://github.com/user-attachments/assets/fdeb4c3b-a8ad-48f2-9e7b-ef26c3a4af2f" alt="실시간 메시지 전송" width="1000"/>
     </details>
     <details>
-      <summary>온라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/online`
+      <summary>파일 업로드</summary>
+      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/47f59838-b70c-49ae-9be2-46e7c58e1354" alt="파일 업로드" width="1000"/>
     </details>
     <details>
-      <summary>오프라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/offline`
+      <summary>채팅방 이름 수정</summary>
+      `PATCH /chat/room/{roomId}/name`
+      <img src="https://github.com/user-attachments/assets/b8eaec8d-d50e-4e64-a7ec-da7c61e90d1f" alt="채팅방 이름 수정" width="1000"/>
     </details>
+    <details>
+      <summary>채팅방 나가기</summary>
+      `DELETE /chat/room/{roomId}/leave`
+      <img src="https://github.com/user-attachments/assets/34649cb5-9d89-4c25-9bab-e7dc0f6e2880" alt="채팅방 나가기" width="1000"/>
+    </details>
+
+
   </details>
   
   <details>
@@ -409,30 +416,36 @@
     <details>
       <summary>댓글 생성</summary>
       `POST /post/comment/create`
+      <img src="https://github.com/user-attachments/assets/8c3fd6cf-2bd5-4973-8a5a-9ecbed3d8344" alt="댓글 생성" width="600"/>
     </details>
     <details>
       <summary>댓글 목록 조회</summary>
       `GET /post/comment/list/{postId}`
+      <img src="https://github.com/user-attachments/assets/282aa1ea-27da-4d72-8c7b-baf4a1e7f640" alt="댓글 목록조회" width="600"/>
     </details>
     <details>
       <summary>댓글 수정</summary>
       `PATCH /post/comment/update/{commentId}`
+      <img src="https://github.com/user-attachments/assets/f19424e0-cc6f-47fc-887a-c43f51c8d39f" alt="댓글 수정" width="600"/>
     </details>
     <details>
       <summary>댓글 삭제</summary>
       `DELETE /post/comment/delete/{commentId}`
+      <img src="https://github.com/user-attachments/assets/0dce6c2d-61f2-4193-8513-af899ed68f78" alt="댓글 삭제" width="600"/>
     </details>
   </details>
-  
+
   <details> 
     <summary>좋아요</summary>
     <details>
       <summary>게시글 좋아요 토글</summary>
       `POST /api/interactions/posts/{postId}/likes`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="게시글 좋아요 토글" width="600"/>
     </details>
     <details>
       <summary>강의 좋아요 토글</summary>
       `POST /api/interactions/lectures/{lectureId}/likes`
+      <img src="https://github.com/user-attachments/assets/6dc33e26-2a78-4480-9681-9c08551ea55a" alt="강의 좋아요 토글" width="600"/>
     </details>
   </details>
   
@@ -441,6 +454,7 @@
     <details>
       <summary>게시글 북마크 토글</summary>
       `POST /api/interactions/posts/{postId}/bookmarks`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="북마크 토글" width="600"/>
     </details>
   </details>
   
@@ -449,6 +463,7 @@
     <details>
       <summary>게시글 조회수 증가</summary>
       `POST /api/interactions/posts/{postId}/views`
+      <img src="https://github.com/user-attachments/assets/45a56af0-831c-4965-abe8-45bc5a7927c9" alt="조회수 증가" width="600"/>
     </details>
   </details>
   
@@ -457,18 +472,23 @@
     <details>
       <summary>강의 등록</summary>
       `POST /lecture/post`
+      <img src="https://github.com/user-attachments/assets/11af95c1-de26-42ad-b0ba-20a412e64e8e" alt="강의 등록" width="600"/>
     </details>
     <details>
       <summary>강의 수정</summary>
       `PATCH /lecture/update/{lectureId}`
+      <img src="https://github.com/user-attachments/assets/7aa176e0-dce7-4758-bd75-4be53f4aaaec" alt="강의 수정" width="600"/>
     </details>
     <details>
       <summary>강의 목록 조회</summary>
       `GET /lecture/list`
+      <img width="1069" height="1631" alt="localhost_3000_lectures (2)" src="https://github.com/user-attachments/assets/8bca739d-608d-4d52-8de3-f3b66174901f" />
     </details>
     <details>
       <summary>강의 상세 조회</summary>
       `GET /lecture/detail/{lectureId}`
+      <img width="1069" height="3411" alt="localhost_3000_lectures_db09a8db-b186-48b1-8f86-489f9a249fa1" src="https://github.com/user-attachments/assets/ca737063-d3f9-40c1-8b37-43203d84d938" />
+      <img src="https://github.com/user-attachments/assets/ad7f5a2c-a8b3-4450-9e41-032c79c8a206" alt="공유하기" width="600"/>
     </details>
     <details>
       <summary>내 강의 목록 조회</summary>
@@ -477,34 +497,17 @@
     <details>
       <summary>강의 삭제</summary>
       `DELETE /lecture/delete/{lectureId}`
+      <img src="https://github.com/user-attachments/assets/bbd82053-d8d5-482d-9ddf-b938c2a263ca" alt="강의 삭제" width="600"/>
     </details>
     <details>
       <summary>리뷰 등록</summary>
+      <img src="https://github.com/user-attachments/assets/1e3f9f39-038e-446f-a234-14203b385a8f" alt="리뷰 기능" width="600"/>
       `POST /review/post`
-    </details>
-    <details>
-      <summary>리뷰 목록 조회</summary>
-      `GET /review/list/{lectureId}`
-    </details>
-    <details>
-      <summary>리뷰 수정</summary>
-      `PATCH /review/modify`
-    </details>
-    <details>
-      <summary>리뷰 삭제</summary>
-      `DELETE /review/delete/{lectureId}`
     </details>
     <details>
       <summary>Q&A 등록</summary>
       `POST /lecture/qna/{lectureId}/create`
-    </details>
-    <details>
-      <summary>Q&A 목록 조회</summary>
-      `GET /lecture/qna/{lectureId}/list`
-    </details>
-    <details>
-      <summary>Q&A 수정</summary>
-      `PUT /lecture/qna/{qnaId}/update`
+      <img src="https://github.com/user-attachments/assets/76af1270-2b5c-473f-b62e-8560b5ad600f" alt="Q&A 기능" width="600"/>
     </details>
     <details>
       <summary>Q&A 삭제</summary>
@@ -559,11 +562,11 @@
   <details> 
     <summary>알림</summary>
     <details>
-      <summary>실시간 알림 구독</summary>
-      `GET /api/notifications/subscribe`
+      <summary>공지사항 등록 시 알림</summary>
+      <img src="https://github.com/user-attachments/assets/aa8c5ff0-1a99-4b1d-a390-2adab4abb086" alt="공지사항-작성-시-알림" width="600"/>
     </details>
     <details>
-      <summary>알림 목록 조회</summary>
+      <summary>게시글 댓글 시 알림</summary>
       `GET /api/notifications`
     </details>
     <details>
@@ -575,59 +578,47 @@
       `DELETE /api/notifications/{id}`
     </details>
   </details>
-  
   <details> 
     <summary>게시글</summary>
     <details>
       <summary>게시글 생성</summary>
       `POST /api/posts`
+      <img src="https://github.com/user-attachments/assets/dfa394b0-0d95-491f-b4bd-238a97563e20" alt="게시글생성" width="800"/>
     </details>
     <details>
       <summary>게시글 상세 조회</summary>
       `GET /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/abd90174-9b2f-4d0f-a9f7-04d348de09a2" alt="게시글상세조회" width="800"/>
     </details>
     <details>
       <summary>게시글 수정</summary>
       `PUT /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/0ca89557-ed4e-40af-a0a1-e33e2e54cfad" alt="게시글수정" width="800"/>
     </details>
     <details>
       <summary>게시글 삭제</summary>
       `DELETE /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/b636eb09-fe96-4647-99f4-236d68843ab5" alt="게시글삭제" width="800"/>
     </details>
     <details>
       <summary>게시글 목록 조회</summary>
       `GET /api/posts`
+      <img src="https://github.com/user-attachments/assets/07e1155c-6686-4cfd-86d9-13ad7acc095b" alt="게시글삭제" width="800"/>
     </details>
   </details>
-  
   <details>
     <summary>결제</summary>
     <details>
-      <summary>결제 전 정보 저장</summary>
-      `POST /purchase/prepay`
-    </details>
-    <details>
       <summary>결제 확인</summary>
       `POST /purchase/confirm`
+      <img src="https://github.com/user-attachments/assets/26226052-dd93-40d1-885b-720fb0242a2f" alt="강의 결제" width="800"/>
     </details>
     <details>
       <summary>장바구니 담기</summary>
       `POST /cart/add`
-    </details>
-    <details>
-      <summary>장바구니 목록 조회</summary>
-      `GET /cart/list/{id}`
-    </details>
-    <details>
-      <summary>장바구니 단건 삭제</summary>
-      `DELETE /cart/delete`
-    </details>
-    <details>
-      <summary>장바구니 전체 삭제</summary>
-      `DELETE /cart/deleteAll`
+      <img src="https://github.com/user-attachments/assets/644610c8-4cd9-4b6d-af57-6b95c410941e" alt="장바구니 기능" width="800"/>
     </details>
   </details>
-  
   <details>
     <summary>신고</summary>
     <details>
@@ -639,17 +630,37 @@
 
 ---
 
-## 📄 Commit Convention
+## 🛠️ 트러블 슈팅
+<details>
+  <summary><b>트러블 슈팅</b></summary>
 
-| 태그       | 설명 |
-|------------|------|
-| `feat`     | 새로운 기능 추가 |
-| `fix`      | 버그 수정 |
-| `refactor` | 리팩토링 (기능 변경 없음) |
-| `style`    | 코드 포맷, 공백, 세미콜론 등 비즈니스 로직 변화 없는 수정 |
-| `docs`     | 문서 작성/수정 |
-| `test`     | 테스트 코드 작성 |
-| `chore`    | 빌드 업무, 패키지 매니저 설정 등 |
-| `ci`       | CI/CD 설정 관련 변경 |
+### 🔎 발생 이슈
+- [ ] (예: 소셜 로그인 시 OAuth Redirect 오류 발생)  
+- [ ] (예: WebSocket 연결이 불안정하여 채팅 메시지 누락)  
+
+### 🧩 원인 분석
+- (예: 카카오 개발자 콘솔 Redirect URI 설정 누락)  
+- (예: 서버 Keep-Alive 설정 미흡으로 인한 연결 끊김)  
+
+### 🛠️ 해결 방법
+- (예: 올바른 Redirect URI 등록 후 정상 동작 확인)  
+- (예: Spring WebSocket Heartbeat Interval 조정 및 Redis Pub/Sub 적용)  
+
+### ✅ 최종 결과
+- (예: 로그인 정상 처리 및 사용자 프로필 연동 성공)  
+
+</details>
 
 ---
+
+## 📝 프로젝트 회고
+
+| 팀원 | 회고 내용 |
+|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 김건동 |  |
+| 이승지 |  |
+| 최재혁 | |
+| 조민형 | |
+| 김상환 | |
+
+
