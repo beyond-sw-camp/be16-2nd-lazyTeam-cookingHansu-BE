@@ -142,7 +142,7 @@ public class ChatService {
             FileType fileType = fileTypes.get(i);
 
             // S3에 파일 업로드
-            String fileUrl = s3Uploader.upload(file, "chat-files/" + roomId);
+            String fileUrl = s3Uploader.uploadForChat(file, "chat-files/" + roomId);
             
             // 파일 정보 생성
             ChatFileUploadResDto.FileInfo fileInfo = ChatFileUploadResDto.FileInfo.builder()
@@ -219,7 +219,7 @@ public class ChatService {
                     })
                     .count();
 
-            return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount);
+            return ChatRoomListDto.fromEntity(room, otherUser, newMessageCount, participant);
         }).collect(Collectors.toList());
 
         // 커스텀 응답 DTO 반환

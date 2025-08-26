@@ -52,6 +52,27 @@ public class S3Uploader {
         }
     }
 
+    public String uploadForChat(MultipartFile file, String dirName) {
+        // 파일 유효성 검증 및 난수화 파일명 생성
+        String randomFileName = generateRandomFileName(file.getOriginalFilename());
+        String key = dirName + randomFileName;
+
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(getContentTypeFromFile(file))
+                    .build();
+
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+
+            return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException("S3 업로드 실패", e);
+        }
+    }
+
     /**
      * S3에서 파일 삭제 (기존 메서드 - 수정하지 않음)
      */
