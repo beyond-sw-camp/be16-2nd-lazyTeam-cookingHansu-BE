@@ -560,11 +560,12 @@
   <details> 
     <summary>알림</summary>
     <details>
-      <summary>실시간 알림 구독</summary>
-      `GET /api/notifications/subscribe`
+      <summary>공지사항 등록 시 알림</summary>
+      <img src="https://github.com/user-attachments/assets/aa8c5ff0-1a99-4b1d-a390-2adab4abb086" alt="공지사항-작성-시-알림" width="600"/>
+
     </details>
     <details>
-      <summary>알림 목록 조회</summary>
+      <summary>게시글 댓글 시 알림</summary>
       `GET /api/notifications`
     </details>
     <details>
