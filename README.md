@@ -634,22 +634,55 @@
 <details>
   <summary><b>트러블 슈팅</b></summary>
 
-### 🔎 발생 이슈
-- [ ] (예: 소셜 로그인 시 OAuth Redirect 오류 발생)  
-- [ ] (예: WebSocket 연결이 불안정하여 채팅 메시지 누락)  
+  <details>
+    <summary><b>강의 등록 시 순환참조 이슈</b></summary>
 
-### 🧩 원인 분석
-- (예: 카카오 개발자 콘솔 Redirect URI 설정 누락)  
-- (예: 서버 Keep-Alive 설정 미흡으로 인한 연결 끊김)  
+  ### 🔎 발생 이슈
+  - 강의 등록 시 `Lecture`와 `ingredients`, `steps`를 DTO → Entity로 변환하는 과정에서 **순환참조 오류** 발생  
 
-### 🛠️ 해결 방법
-- (예: 올바른 Redirect URI 등록 후 정상 동작 확인)  
-- (예: Spring WebSocket Heartbeat Interval 조정 및 Redis Pub/Sub 적용)  
+  ### 🧩 원인 분석
+  - `Lecture.builder()` 안에서 아직 완전히 생성되지 않은 `Lecture`를 `ingredients`, `steps`에 동시에 넣으려다 보니 JPA가 순환 구조로 인식  
 
-### ✅ 최종 결과
-- (예: 로그인 정상 처리 및 사용자 프로필 연동 성공)  
+  ### 🛠️ 해결 방법
+  - Controller에서 multipart 요청을 분리 처리  
+  - Service 계층에서 순차적으로 저장 흐름 적용  
+    1. `Lecture` 엔티티 먼저 저장  
+    2. 저장된 `Lecture`를 기반으로 `ingredients` 목록 변환 후 저장  
+    3. `steps` 목록 변환 후 저장  
+    4. 썸네일 이미지는 S3 업로드 후 `Lecture`에 업데이트  
+
+  ### ✅ 최종 결과
+  - 순환참조 문제 제거  
+  - 엔티티 저장 책임이 명확하게 분리되어 구조가 깔끔해짐  
+
+  </details>
+
+  <details>
+    <summary><b>토스 결제 연동 시 흐름 정리</b></summary>
+
+  ### 🔎 발생 이슈
+  - 결제 시 주문 등록 → 결제창 호출 → 결제 승인 과정이 불명확해 구현 중 오류 발생  
+
+  ### 🧩 원인 분석
+  - 프론트에서 결제 요청 시 `orderId`, `amount`, `lectureIds`를 백엔드로 전달하는 로직 혼동  
+  - 결제 승인(confirm) 단계에서 토스 API 호출 구조가 직관적이지 않음  
+
+  ### 🛠️ 해결 방법
+  1. **사전 주문 저장** (`POST /purchase/prepay`)  
+     - `orderId`, `amount`, `lectureIds`를 DB에 저장  
+  2. **토스 결제창 호출** (프론트)  
+     - `TossPayments.requestPayment()` 사용  
+  3. **결제 승인 요청** (`POST /purchase/confirm`)  
+     - 성공 시 전달되는 `paymentKey`, `orderId`, `amount`를 이용해 백엔드에서 토스 API 호출 → 승인 처리  
+
+  ### ✅ 최종 결과
+  - 결제 흐름이 `사전 저장 → 결제창 호출 → 승인`으로 명확하게 정리됨  
+  - 프론트/백엔드 역할이 분리되어 유지보수성과 가독성이 개선됨  
+
+  </details>
 
 </details>
+
 
 ---
 
