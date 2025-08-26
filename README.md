@@ -1,10 +1,8 @@
-# 🍳 요리한수 (Cooking Hansu) --> 추후 이미지와 움짤로 변경 예정
-
 > **누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼**  
 > 레시피 공유부터 요리 전문가 강의까지, 한 수 배워보세요!
 
+# 🍳 요리한수 (Cooking Hansu) --> 추후 이미지와 움짤로 변경 예정
 ---
-
 ## 👨‍👩‍👧‍👦 Team Members
 
 <table>
@@ -72,29 +70,34 @@
 </table>
 
 ---
-
 ## 🎬 프로젝트 개요
+<details>
+  <summary><b>프로젝트 개요</b></summary>
+  <details>
+  <summary><b>01. 프로젝트 주제</b></summary>
+&nbsp;&nbsp;🌟 **[누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼]**  
+&nbsp;&nbsp;레시피 공유, 요리 강의, 커뮤니티를 결합하여  
+&nbsp;&nbsp;**자취생·직장인·주부 모두가 즐길 수 있는 요리 생태계 구축**  
+</details>
 
-### 01. 프로젝트 주제  
-**[누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼]**  
-레시피 공유, 요리 강의, 커뮤니티를 결합하여 **자취생·직장인·주부 모두가 즐길 수 있는 요리 생태계 구축**  
+<details>
+  <summary><b>02. 프로젝트 소개</b></summary>
 
----
+&nbsp;&nbsp;🍳 집밥을 하고 싶어도, 막상 “뭘 먹지?”라는 고민은 늘 따라옵니다.  
+&nbsp;&nbsp;요리법을 몰라 배달에 의존하거나, 새로운 음식을 배우고 싶지만 접근성이 부족해 포기하는 경우도 많습니다.  
 
-### 02. 프로젝트 소개  
-🍳 집밥을 하고 싶어도, 막상 “뭘 먹지?”라는 고민은 늘 따라옵니다.  
-요리법을 몰라 배달에 의존하거나, 새로운 음식을 배우고 싶지만 접근성이 부족해 포기하는 경우도 많습니다.  
+&nbsp;&nbsp;**요리한수**는 이러한 문제를 해결하기 위해 기획된 **All-in-One 요리 플랫폼**입니다.  
+&nbsp;&nbsp;- 사용자는 자신만의 레시피를 등록하고, 다른 사람의 레시피를 탐색할 수 있습니다.  
+&nbsp;&nbsp;- 검증된 **요리사·자영업자**가 올리는 강의를 통해 체계적인 학습과 실습이 가능합니다.  
+&nbsp;&nbsp;- 댓글, 좋아요, 북마크, 채팅과 같은 커뮤니티 기능으로 **요리를 매개로 한 소통**이 활성화됩니다.  
 
-**요리한수**는 이러한 문제를 해결하기 위해 기획된 **All-in-One 요리 플랫폼**입니다.  
-- 사용자는 자신만의 레시피를 등록하고, 다른 사람의 레시피를 탐색할 수 있습니다.  
-- 검증된 **요리사·자영업자**가 올리는 강의를 통해 체계적인 학습과 실습이 가능합니다.  
-- 댓글, 좋아요, 북마크, 채팅과 같은 커뮤니티 기능으로 **요리를 매개로 한 소통**이 활성화됩니다.  
+&nbsp;&nbsp;즉, 단순한 레시피 모음이 아니라  
+&nbsp;&nbsp;**“배움–공유–수익화”가 선순환되는 플랫폼**으로 자리매김합니다.  
 
-즉, 단순한 레시피 모음이 아니라 **“배움–공유–수익화”가 선순환되는 플랫폼**으로 자리매김합니다.  
+</details>
 
----
-
-### 03. 프로젝트 배경 및 필요성  
+<details>
+  <summary><b>03. 프로젝트 배경 및 필요성</b></summary>
 
 &nbsp;&nbsp;**3-1. 1인가구 증가**  
 &nbsp;&nbsp;&nbsp;&nbsp;통계청(KOSIS)에 따르면 한국의 1인가구 비율은 2000년 15.5%에서 2024년 36.1%로 급격히 증가했습니다.  
@@ -129,35 +132,51 @@
 &nbsp;&nbsp;&nbsp;&nbsp;단순히 요리를 배우는 것을 넘어, **레시피를 공유하고 댓글·채팅을 통해 공감하는 과정**이 하나의 즐거움이 됩니다.  
 &nbsp;&nbsp;&nbsp;&nbsp;요리한수는 단순한 레시피 DB가 아니라, **사람을 연결하는 플랫폼**으로서 커뮤니티적 가치를 극대화합니다.  
 
----
-### 04. 프로젝트 주요 기능  
-- 소셜 로그인 (네이버·카카오·구글)  
-- 비회원도 열람 가능 (접근성 확대)  
-- 강의 등록 시 **관리자 승인제**로 신뢰성 확보  
-- 커뮤니티 기능 (댓글, 좋아요, 북마크, 채팅)  
+</details>
 
-### 05. 서비스 차별화 전략
-- 비회원·회원 모두 접근 가능  
-- 검증된 요리사/자영업자 중심의 신뢰성 있는 강의  
+<details>
+  <summary><b>04. 프로젝트 주요 기능</b></summary>
 
-### 06. 기대효과
-- 다양한 유저층 유입
-- 지속 가능한 수익 모델
-- 커뮤니티 활성화
-- 콘텐츠 생태계 강화
+&nbsp;&nbsp;- 소셜 로그인 (네이버·카카오·구글)  
+&nbsp;&nbsp;- 비회원도 열람 가능 (접근성 확대)  
+&nbsp;&nbsp;- 강의 등록 시 **관리자 승인제**로 신뢰성 확보  
+&nbsp;&nbsp;- 커뮤니티 기능 (댓글, 좋아요, 북마크, 채팅)  
 
-### 07. 향후 계획
-- PWA 기반 모바일 최적화
-- 실시간 라이브 강의
-- AI 기반 레시피 추천
+</details>
 
+<details>
+  <summary><b>05. 서비스 차별화 전략</b></summary>
+
+&nbsp;&nbsp;- 비회원·회원 모두 접근 가능  
+&nbsp;&nbsp;- 검증된 요리사/자영업자 중심의 신뢰성 있는 강의  
+
+</details>
+
+<details>
+  <summary><b>06. 기대효과</b></summary>
+
+&nbsp;&nbsp;- 다양한 유저층 유입  
+&nbsp;&nbsp;- 지속 가능한 수익 모델  
+&nbsp;&nbsp;- 커뮤니티 활성화  
+&nbsp;&nbsp;- 콘텐츠 생태계 강화  
+
+</details>
+
+<details>
+  <summary><b>07. 향후 계획</b></summary>
+
+&nbsp;&nbsp;- PWA 기반 모바일 최적화  
+&nbsp;&nbsp;- 실시간 라이브 강의  
+&nbsp;&nbsp;- AI 기반 레시피 추천  
+
+</details>
+
+</details>
 
 
 <br>
 
 ## ⚙️🛠️ Technical Stack
-<details>
-<summary><b>Tech Stack</b></summary>
   
 ### 🎯 Frontend
 
@@ -204,6 +223,8 @@
 
 <br>
 
+
+
 ## 📂 산출물
 <details>
   <summary><b>WBS</b></summary>
@@ -242,64 +263,430 @@
 
 ## 🧾 화면 테스트 결과
 <details> 
-  <summary><b>화면 테스트 결과</b></summary>
+  <summary><b> 화면 테스트 결과</b></summary>
+  
   <details> 
-    <summary>관리자</summary> 
+    <summary>관리자</summary>
+    <details>
+      <summary>관리자 대시보드 조회</summary>
+      `GET /admin/dashboard`
+    </details>
+    <details>
+      <summary>승인 대기 강의 목록 조회</summary>
+      `GET /admin/lecture/list`
+    </details>
+    <details>
+      <summary>강의 승인</summary>
+      `PATCH /admin/lecture/approve/{lectureId}`
+    </details>
+    <details>
+      <summary>강의 반려</summary>
+      `PATCH /admin/lecture/reject/{lectureId}`
+    </details>
+    <details>
+      <summary>승인 대기 요리사 목록 조회</summary>
+      `GET /admin/user/waiting/chef`
+    </details>
+    <details>
+      <summary>승인 대기 자영업자 목록 조회</summary>
+      `GET /admin/user/waiting/business`
+    </details>
+    <details>
+      <summary>사용자 승인</summary>
+      `PATCH /admin/user/approve/{userId}`
+    </details>
+    <details>
+      <summary>사용자 거절</summary>
+      `PATCH /admin/user/reject/{userId}`
+    </details>
+    <details>
+      <summary>사용자 활성화</summary>
+      `PATCH /admin/user/active/{userId}`
+    </details>
+    <details>
+      <summary>사용자 비활성화</summary>
+      `PATCH /admin/user/inactive/{userId}`
+    </details>
+    <details>
+      <summary>사용자 전체 목록 조회</summary>
+      `GET /admin/user/list`
+    </details>
+    <details>
+      <summary>신고 목록 조회</summary>
+      `GET /admin/report/list`
+    </details>
+    <details>
+      <summary>신고 승인</summary>
+      `PATCH /admin/report/approve/{id}`
+    </details>
+    <details>
+      <summary>신고 반려</summary>
+      `PATCH /admin/report/reject/{id}`
+    </details>
+    <details>
+      <summary>공지사항 등록</summary>
+      `POST /admin/notice/create`
+    </details>
+    <details>
+      <summary>공지사항 수정</summary>
+      `PUT /admin/notice/update/{id}`
+    </details>
+    <details>
+      <summary>공지사항 삭제</summary>
+      `DELETE /admin/notice/delete/{id}`
+    </details>
   </details>
+  
   <details>
-    <summary>회원</summary> 
+    <summary>회원</summary>
+    <details>
+      <summary>구글 로그인</summary>
+      `POST /user/login/google`
+      <img src="https://github.com/user-attachments/assets/9b3e00f5-db75-4f99-9765-e24e29ef7ed5" alt="구글 로그인" width="800"/>
+    </details>
+    <details>
+      <summary>카카오 로그인</summary>
+      `POST /user/login/kakao`
+      <img src="https://github.com/user-attachments/assets/1da92211-524d-4757-85b9-df36ac299762" alt="카카오 로그인" width="800"/>
+    </details>
+    <details>
+      <summary>네이버 로그인</summary>
+      `POST /user/login/naver`
+      <img src="https://github.com/user-attachments/assets/60be89d0-6816-46db-b573-c7824336f93b" alt="네이버 로그인" width="800"/>
+    </details>
+    <details>
+      <summary>토큰 리프레시</summary>
+      `POST /user/refresh`
+    </details>
+    <details>
+      <summary>로그아웃</summary>
+      `POST /user/logout`
+    </details>
+    <details>
+      <summary>회원 추가 정보 입력</summary>
+      `POST /user/add-info`
+    </details>
+    <details>
+      <summary>프로필 조회</summary>
+      `GET /user/profile`
+    </details>
+    <details>
+      <summary>현재 사용자 정보 조회</summary>
+      `GET /user/me`
+    </details>
+    <details>
+      <summary>회원 탈퇴</summary>
+      `DELETE /user/delete`
+    </details>
   </details>
+  
   <details> 
     <summary>채팅</summary>
-  </details> 
-  <details>
-    <summary>댓글</summary> 
-  </details> 
-  <details> 
-    <summary>좋아요</summary> 
-  </details> 
-  <details> 
-    <summary>북마크</summary> 
-  </details> 
-  <details>
-    <summary>조회수</summary> 
-  </details> 
-  <details>
-    <summary>강의</summary> 
-  </details> 
-  <details> 
-    <summary>공지사항</summary> 
+    <details>
+      <summary>내 채팅방 목록 조회</summary>
+      `GET /chat/my/rooms`
+    </details>
+    <details>
+      <summary>채팅방 참여자 목록 조회</summary>
+      `GET /chat/room/{roomId}/participants`
+    </details>
+    <details>
+      <summary>채팅방 상세 메시지 조회</summary>
+      `GET /chat/room/{roomId}/history`
+    </details>
+    <details>
+      <summary>채팅방 생성</summary>
+      `POST /chat/room/create`
+    </details>
+    <details>
+      <summary>채팅방 이름 수정</summary>
+      `PATCH /chat/room/{roomId}/name`
+    </details>
+    <details>
+      <summary>채팅방 나가기</summary>
+      `DELETE /chat/room/{roomId}/leave`
+    </details>
+    <details>
+      <summary>파일 업로드</summary>
+      `POST /chat/room/{roomId}/upload`
+    </details>
+    <details>
+      <summary>실시간 메시지 전송</summary>
+      `/app/chat-rooms/{roomId}/chat-message`
+    </details>
+    <details>
+      <summary>온라인 상태 변경</summary>
+      `/app/chat-rooms/{roomId}/online`
+    </details>
+    <details>
+      <summary>오프라인 상태 변경</summary>
+      `/app/chat-rooms/{roomId}/offline`
+    </details>
   </details>
+  
+  <details>
+    <summary>댓글</summary>
+    <details>
+      <summary>댓글 생성</summary>
+      `POST /post/comment/create`
+    </details>
+    <details>
+      <summary>댓글 목록 조회</summary>
+      `GET /post/comment/list/{postId}`
+    </details>
+    <details>
+      <summary>댓글 수정</summary>
+      `PATCH /post/comment/update/{commentId}`
+    </details>
+    <details>
+      <summary>댓글 삭제</summary>
+      `DELETE /post/comment/delete/{commentId}`
+    </details>
+  </details>
+  
+  <details> 
+    <summary>좋아요</summary>
+    <details>
+      <summary>게시글 좋아요 토글</summary>
+      `POST /api/interactions/posts/{postId}/likes`
+    </details>
+    <details>
+      <summary>강의 좋아요 토글</summary>
+      `POST /api/interactions/lectures/{lectureId}/likes`
+    </details>
+  </details>
+  
+  <details>
+    <summary>북마크</summary>
+    <details>
+      <summary>게시글 북마크 토글</summary>
+      `POST /api/interactions/posts/{postId}/bookmarks`
+    </details>
+  </details>
+  
+  <details>
+    <summary>조회수</summary>
+    <details>
+      <summary>게시글 조회수 증가</summary>
+      `POST /api/interactions/posts/{postId}/views`
+    </details>
+  </details>
+  
+  <details>
+    <summary>강의</summary>
+    <details>
+      <summary>강의 등록</summary>
+      `POST /lecture/post`
+    </details>
+    <details>
+      <summary>강의 수정</summary>
+      `PATCH /lecture/update/{lectureId}`
+    </details>
+    <details>
+      <summary>강의 목록 조회</summary>
+      `GET /lecture/list`
+    </details>
+    <details>
+      <summary>강의 상세 조회</summary>
+      `GET /lecture/detail/{lectureId}`
+    </details>
+    <details>
+      <summary>내 강의 목록 조회</summary>
+      `GET /lecture/mylist`
+    </details>
+    <details>
+      <summary>강의 삭제</summary>
+      `DELETE /lecture/delete/{lectureId}`
+    </details>
+    <details>
+      <summary>리뷰 등록</summary>
+      `POST /review/post`
+    </details>
+    <details>
+      <summary>리뷰 목록 조회</summary>
+      `GET /review/list/{lectureId}`
+    </details>
+    <details>
+      <summary>리뷰 수정</summary>
+      `PATCH /review/modify`
+    </details>
+    <details>
+      <summary>리뷰 삭제</summary>
+      `DELETE /review/delete/{lectureId}`
+    </details>
+    <details>
+      <summary>Q&A 등록</summary>
+      `POST /lecture/qna/{lectureId}/create`
+    </details>
+    <details>
+      <summary>Q&A 목록 조회</summary>
+      `GET /lecture/qna/{lectureId}/list`
+    </details>
+    <details>
+      <summary>Q&A 수정</summary>
+      `PUT /lecture/qna/{qnaId}/update`
+    </details>
+    <details>
+      <summary>Q&A 삭제</summary>
+      `DELETE /lecture/qna/{qnaId}/delete`
+    </details>
+  </details>
+  
+  <details> 
+    <summary>공지사항</summary>
+    <details>
+      <summary>공지사항 목록 조회</summary>
+      `GET /notice/list`
+    </details>
+    <details>
+      <summary>공지사항 상세 조회</summary>
+      `GET /notice/detail/{id}`
+    </details>
+  </details>
+  
   <details> 
     <summary>마이페이지</summary>
-  </details> 
+    <details>
+      <summary>프로필 조회</summary>
+      `GET /api/my/profile`
+    </details>
+    <details>
+      <summary>프로필 수정</summary>
+      `PUT /api/my/profile`
+    </details>
+    <details>
+      <summary>프로필 이미지 업로드</summary>
+      `POST /api/my/profile/image`
+    </details>
+    <details>
+      <summary>내 게시글 목록 조회</summary>
+      `GET /api/my/posts`
+    </details>
+    <details>
+      <summary>내 강의 목록 조회</summary>
+      `GET /api/my/lectures`
+    </details>
+    <details>
+      <summary>내 북마크한 게시글 목록 조회</summary>
+      `GET /api/my/bookmarked-posts`
+    </details>
+    <details>
+      <summary>내가 좋아요한 게시글 목록 조회</summary>
+      `GET /api/my/liked-posts`
+    </details>
+  </details>
+  
   <details> 
     <summary>알림</summary>
+    <details>
+      <summary>공지사항 등록 시 알림</summary>
+      <img src="https://github.com/user-attachments/assets/aa8c5ff0-1a99-4b1d-a390-2adab4abb086" alt="공지사항-작성-시-알림" width="600"/>
+    </details>
+    <details>
+      <summary>게시글 댓글 시 알림</summary>
+      `GET /api/notifications`
+    </details>
+    <details>
+      <summary>알림 읽음 처리</summary>
+      `PATCH /api/notifications/{id}/read`
+    </details>
+    <details>
+      <summary>알림 삭제</summary>
+      `DELETE /api/notifications/{id}`
+    </details>
   </details>
   <details> 
-    <summary>게시글</summary> 
-  </details> 
-  <details> 
+    <summary>게시글</summary>
+    <details>
+      <summary>게시글 생성</summary>
+      `POST /api/posts`
+    </details>
+    <details>
+      <summary>게시글 상세 조회</summary>
+      `GET /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 수정</summary>
+      `PUT /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 삭제</summary>
+      `DELETE /api/posts/{postId}`
+    </details>
+    <details>
+      <summary>게시글 목록 조회</summary>
+      `GET /api/posts`
+    </details>
+  </details>
+  <details>
     <summary>결제</summary>
+    <details>
+      <summary>결제 전 정보 저장</summary>
+      `POST /purchase/prepay`
+    </details>
+    <details>
+      <summary>결제 확인</summary>
+      `POST /purchase/confirm`
+    </details>
+    <details>
+      <summary>장바구니 담기</summary>
+      `POST /cart/add`
+    </details>
+    <details>
+      <summary>장바구니 목록 조회</summary>
+      `GET /cart/list/{id}`
+    </details>
+    <details>
+      <summary>장바구니 단건 삭제</summary>
+      `DELETE /cart/delete`
+    </details>
+    <details>
+      <summary>장바구니 전체 삭제</summary>
+      `DELETE /cart/deleteAll`
+    </details>
   </details>
   <details>
     <summary>신고</summary>
-  </details> 
+    <details>
+      <summary>신고 생성</summary>
+      `POST /report/create`
+    </details>
+  </details>
 </details>
 
 ---
 
-## 📄 Commit Convention
+## 🛠️ 트러블 슈팅
+<details>
+  <summary><b>트러블 슈팅</b></summary>
 
-| 태그       | 설명 |
-|------------|------|
-| `feat`     | 새로운 기능 추가 |
-| `fix`      | 버그 수정 |
-| `refactor` | 리팩토링 (기능 변경 없음) |
-| `style`    | 코드 포맷, 공백, 세미콜론 등 비즈니스 로직 변화 없는 수정 |
-| `docs`     | 문서 작성/수정 |
-| `test`     | 테스트 코드 작성 |
-| `chore`    | 빌드 업무, 패키지 매니저 설정 등 |
-| `ci`       | CI/CD 설정 관련 변경 |
+### 🔎 발생 이슈
+- [ ] (예: 소셜 로그인 시 OAuth Redirect 오류 발생)  
+- [ ] (예: WebSocket 연결이 불안정하여 채팅 메시지 누락)  
+
+### 🧩 원인 분석
+- (예: 카카오 개발자 콘솔 Redirect URI 설정 누락)  
+- (예: 서버 Keep-Alive 설정 미흡으로 인한 연결 끊김)  
+
+### 🛠️ 해결 방법
+- (예: 올바른 Redirect URI 등록 후 정상 동작 확인)  
+- (예: Spring WebSocket Heartbeat Interval 조정 및 Redis Pub/Sub 적용)  
+
+### ✅ 최종 결과
+- (예: 로그인 정상 처리 및 사용자 프로필 연동 성공)  
+
+</details>
 
 ---
+
+## 📝 프로젝트 회고
+
+| 팀원 | 회고 내용 |
+|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 김건동 |  |
+| 이승지 |  |
+| 최재혁 | |
+| 조민형 | |
+| 김상환 | |
+
+
