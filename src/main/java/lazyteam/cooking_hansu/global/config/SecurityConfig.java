@@ -43,6 +43,7 @@ public class SecurityConfig {
                 )
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
                 .authorizeHttpRequests(a -> a.requestMatchers(
+                        "/connect/**",
                         "/user/**", // Google OAuth 로그인
                         "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
