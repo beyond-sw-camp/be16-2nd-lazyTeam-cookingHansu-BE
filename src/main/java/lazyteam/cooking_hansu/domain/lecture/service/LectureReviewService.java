@@ -131,7 +131,6 @@ public class LectureReviewService {
         int s = lectureReview.getRating();
         lecture.setReviewSum( (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum()) - s );
         lecture.setReviewCount( Math.max(0, (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount()) - 1) );
-        lecture.setReviewCount(Math.max(0, lecture.getReviewCount() - 1));
         lectureRepository.save(lecture);
     }
 

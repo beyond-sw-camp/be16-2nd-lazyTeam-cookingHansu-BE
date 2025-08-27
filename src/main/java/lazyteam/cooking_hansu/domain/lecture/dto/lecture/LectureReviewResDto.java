@@ -22,6 +22,7 @@ public class LectureReviewResDto {
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private UUID reviewerId;
+    private String profileUrl;
 
     public static LectureReviewResDto fromEntity(LectureReview lectureReview) {
         return LectureReviewResDto.builder()
@@ -31,6 +32,7 @@ public class LectureReviewResDto {
                 .createAt(lectureReview.getCreatedAt())
                 .updateAt(lectureReview.getUpdatedAt())
                 .reviewerId(lectureReview.getWriter().getId())
+                .profileUrl(lectureReview.getWriter().getPicture())
                 .build();
     }
 }
