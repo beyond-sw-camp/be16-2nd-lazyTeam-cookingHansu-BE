@@ -405,6 +405,7 @@ public class ChatService {
         chatParticipant.read(chatRoom.getMessages().get(chatRoom.getMessages().size() - 1));
     }
 
+
     public List<UUID> getReactivatedParticipants(Long roomId, UUID senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다."));

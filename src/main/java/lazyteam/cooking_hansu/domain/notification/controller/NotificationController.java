@@ -2,8 +2,6 @@ package lazyteam.cooking_hansu.domain.notification.controller;
 
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
-import lazyteam.cooking_hansu.domain.notification.sse.SseEmitterRegistry;
-import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -24,8 +21,7 @@ public class NotificationController {
 
     @GetMapping("/subscribe")
     public SseEmitter subscribe() {
-        UUID userId = AuthUtils.getCurrentUserId();
-        return notificationService.subscribeToNotifications(userId);
+        return notificationService.subscribeToNotifications();
     }
 
     // 목록 조회

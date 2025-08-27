@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
 import lazyteam.cooking_hansu.domain.notification.entity.Notification;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
 import lazyteam.cooking_hansu.domain.notification.pubsub.NotificationPublisher;
 import lazyteam.cooking_hansu.domain.notification.repository.NotificationRepository;
 import lazyteam.cooking_hansu.domain.notification.sse.SseEmitterRegistry;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lazyteam.cooking_hansu.domain.notification.dto.ChatNotificationDto;
 
 @Service
 @Transactional
@@ -89,7 +91,40 @@ public class NotificationService {
         n.markDeleted();
     }
 
-    public SseEmitter subscribeToNotifications(UUID userId) {
+     // SSE 연결 및 알림 구독
+    public SseEmitter subscribeToNotifications() {
+        UUID userId = AuthUtils.getCurrentUserId();
         return sseEmitterRegistry.connect(userId);
+    }
+
+     // 채팅방 온라인 참여 시 해당 채팅방의 알림들을 읽음 처리
+    public void markChatNotificationsAsRead(UUID userId, Long chatRoomId) {
+        // 채팅 관련 알림 중 해당 채팅방의 알림들을 읽음 처리
+        List<Notification> chatNotifications = notificationRepository
+            .findByRecipient_IdAndTargetTypeAndIsReadFalse(userId, lazyteam.cooking_hansu.domain.notification.entity.TargetType.CHAT);
+        
+        for (Notification notification : chatNotifications) {
+            // targetId가 chatRoomId와 일치하는지 확인 (UUID를 String으로 변환하여 비교)
+            if (notification.getTargetId().toString().equals(chatRoomId.toString())) {
+                notification.markRead();
+            }
+        }
+    }
+
+     // 채팅 알림 생성 및 발송
+    public void createAndDispatchChatNotification(ChatNotificationDto chatNotificationDto) {
+        User recipient = userRepository.findById(chatNotificationDto.getRecipientId())
+                .orElseThrow(() -> new EntityNotFoundException("recipient"));
+
+        Notification notification = Notification.builder()
+                .recipient(recipient)
+                .content(chatNotificationDto.getContent())
+                .targetType(chatNotificationDto.getTargetType())
+                .targetId(chatNotificationDto.getTargetId())
+                .roomId(chatNotificationDto.getChatRoomId())
+                .build();
+        
+        notificationRepository.save(notification);
+        notificationPublisher.publishChatNotification(chatNotificationDto);
     }
 }
