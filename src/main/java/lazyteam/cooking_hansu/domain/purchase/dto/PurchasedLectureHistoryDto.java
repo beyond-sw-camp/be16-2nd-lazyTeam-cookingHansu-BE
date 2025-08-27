@@ -19,10 +19,11 @@ import java.util.UUID;
 @Data
 @Builder
 public class PurchasedLectureHistoryDto {
-    private UUID id; // 강의 ID
+    private UUID id; //결제한 강의 ID
     private String title; // 강의 제목
     private Integer price; // 강의 가격
     private String thumbUrl; // 강의 썸네일
+    private UUID lectureId; // 강의상세보기용 ID
 
 //    payment 엔티티
     private LocalDateTime createdAt; // 결제 시각
@@ -36,6 +37,7 @@ public class PurchasedLectureHistoryDto {
         Lecture lecture = purchasedLecture.getLecture();
         Payment payment = purchasedLecture.getPayment();
         return PurchasedLectureHistoryDto.builder()
+                .lectureId(lecture.getId())
                 .id(purchasedLecture.getId())
                 .title(purchasedLecture.getLectureTitleSnapshot())
                 .price(lecture.getPrice())
