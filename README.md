@@ -269,47 +269,15 @@
     <summary>관리자</summary>
     <details>
       <summary>관리자 대시보드 조회</summary>
-      `GET /admin/dashboard`
+      <img src="https://github.com/user-attachments/assets/41ff8758-e02d-4b51-87f0-a9613e561fa3" alt="대시보드 조회" width="800"/>
     </details>
     <details>
-      <summary>승인 대기 강의 목록 조회</summary>
-      `GET /admin/lecture/list`
+      <summary>강의 관리</summary>
+      <img src="https://github.com/user-attachments/assets/5d3477b6-0e37-483d-95be-41b61f83dcd8" alt="강의 승인" width="800"/>
     </details>
     <details>
-      <summary>강의 승인</summary>
-      `PATCH /admin/lecture/approve/{lectureId}`
-    </details>
-    <details>
-      <summary>강의 반려</summary>
-      `PATCH /admin/lecture/reject/{lectureId}`
-    </details>
-    <details>
-      <summary>승인 대기 요리사 목록 조회</summary>
-      `GET /admin/user/waiting/chef`
-    </details>
-    <details>
-      <summary>승인 대기 자영업자 목록 조회</summary>
-      `GET /admin/user/waiting/business`
-    </details>
-    <details>
-      <summary>사용자 승인</summary>
-      `PATCH /admin/user/approve/{userId}`
-    </details>
-    <details>
-      <summary>사용자 거절</summary>
-      `PATCH /admin/user/reject/{userId}`
-    </details>
-    <details>
-      <summary>사용자 활성화</summary>
-      `PATCH /admin/user/active/{userId}`
-    </details>
-    <details>
-      <summary>사용자 비활성화</summary>
-      `PATCH /admin/user/inactive/{userId}`
-    </details>
-    <details>
-      <summary>사용자 전체 목록 조회</summary>
-      `GET /admin/user/list`
+      <summary>사용자 관리</summary>
+      <img src="https://github.com/user-attachments/assets/45791e70-42db-4afe-bd7f-c6ea1ce7d148" alt="사용자 관리" width="800"/>
     </details>
     <details>
       <summary>신고 목록 조회</summary>
@@ -325,15 +293,15 @@
     </details>
     <details>
       <summary>공지사항 등록</summary>
-      `POST /admin/notice/create`
+      <img src="https://github.com/user-attachments/assets/80aed914-6a5e-4a38-9529-4f2e426443fd" alt="공지사항 등록" width="800"/>
     </details>
     <details>
       <summary>공지사항 수정</summary>
-      `PUT /admin/notice/update/{id}`
+      <img src="https://github.com/user-attachments/assets/9be9ae10-6985-4e9d-ab7e-c02cc662ba4f" alt="공지사항 수정" width="800"/>
     </details>
     <details>
       <summary>공지사항 삭제</summary>
-      `DELETE /admin/notice/delete/{id}`
+      <img src="https://github.com/user-attachments/assets/42c943cb-b560-4b7d-8652-28fb4f49879f" alt="공지사항 삭제" width="800"/>
     </details>
   </details>
   
@@ -471,59 +439,32 @@
     <summary>강의</summary>
     <details>
       <summary>강의 등록</summary>
-      `POST /lecture/post`
       <img src="https://github.com/user-attachments/assets/11af95c1-de26-42ad-b0ba-20a412e64e8e" alt="강의 등록" width="600"/>
     </details>
     <details>
       <summary>강의 수정</summary>
-      `PATCH /lecture/update/{lectureId}`
       <img src="https://github.com/user-attachments/assets/7aa176e0-dce7-4758-bd75-4be53f4aaaec" alt="강의 수정" width="600"/>
     </details>
     <details>
       <summary>강의 목록 조회</summary>
-      `GET /lecture/list`
       <img width="1069" height="1631" alt="localhost_3000_lectures (2)" src="https://github.com/user-attachments/assets/8bca739d-608d-4d52-8de3-f3b66174901f" />
     </details>
     <details>
       <summary>강의 상세 조회</summary>
-      `GET /lecture/detail/{lectureId}`
       <img width="1069" height="3411" alt="localhost_3000_lectures_db09a8db-b186-48b1-8f86-489f9a249fa1" src="https://github.com/user-attachments/assets/ca737063-d3f9-40c1-8b37-43203d84d938" />
       <img src="https://github.com/user-attachments/assets/ad7f5a2c-a8b3-4450-9e41-032c79c8a206" alt="공유하기" width="600"/>
     </details>
     <details>
-      <summary>내 강의 목록 조회</summary>
-      `GET /lecture/mylist`
-    </details>
-    <details>
       <summary>강의 삭제</summary>
-      `DELETE /lecture/delete/{lectureId}`
       <img src="https://github.com/user-attachments/assets/bbd82053-d8d5-482d-9ddf-b938c2a263ca" alt="강의 삭제" width="600"/>
     </details>
     <details>
-      <summary>리뷰 등록</summary>
+      <summary>리뷰 기능</summary>
       <img src="https://github.com/user-attachments/assets/1e3f9f39-038e-446f-a234-14203b385a8f" alt="리뷰 기능" width="600"/>
-      `POST /review/post`
     </details>
     <details>
-      <summary>Q&A 등록</summary>
-      `POST /lecture/qna/{lectureId}/create`
+      <summary>Q&A 기능</summary>
       <img src="https://github.com/user-attachments/assets/76af1270-2b5c-473f-b62e-8560b5ad600f" alt="Q&A 기능" width="600"/>
-    </details>
-    <details>
-      <summary>Q&A 삭제</summary>
-      `DELETE /lecture/qna/{qnaId}/delete`
-    </details>
-  </details>
-  
-  <details> 
-    <summary>공지사항</summary>
-    <details>
-      <summary>공지사항 목록 조회</summary>
-      `GET /notice/list`
-    </details>
-    <details>
-      <summary>공지사항 상세 조회</summary>
-      `GET /notice/detail/{id}`
     </details>
   </details>
   
@@ -547,7 +488,7 @@
     </details>
     <details>
       <summary>내 강의 목록 조회</summary>
-      `GET /api/my/lectures`
+      <img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/57809314-68af-4e0d-9f00-12b1674e631f" />
     </details>
     <details>
       <summary>내 북마크한 게시글 목록 조회</summary>
@@ -610,12 +551,10 @@
     <summary>결제</summary>
     <details>
       <summary>결제 확인</summary>
-      `POST /purchase/confirm`
       <img src="https://github.com/user-attachments/assets/26226052-dd93-40d1-885b-720fb0242a2f" alt="강의 결제" width="800"/>
     </details>
     <details>
       <summary>장바구니 담기</summary>
-      `POST /cart/add`
       <img src="https://github.com/user-attachments/assets/644610c8-4cd9-4b6d-af57-6b95c410941e" alt="장바구니 기능" width="800"/>
     </details>
   </details>
