@@ -4,8 +4,6 @@ import lazyteam.cooking_hansu.global.auth.JwtAuthenticationHandler;
 import lazyteam.cooking_hansu.global.auth.JwtAuthorizationHandler;
 import lazyteam.cooking_hansu.global.auth.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -19,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.Arrays;
 
 @Configuration
@@ -26,14 +25,12 @@ import java.util.Arrays;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
     private final JwtTokenFilter jwtTokenFilter;
     private final JwtAuthenticationHandler jwtAuthenticationHandler;
     private final JwtAuthorizationHandler jwtAuthorizationHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        log.info("SecurityFilterChain 초기화됨 ✅");
         return httpSecurity
                 .cors(cors -> cors.configurationSource(configurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -53,26 +50,19 @@ public class SecurityConfig {
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
                         "/notice/**",
-                        "/admin/**", // Admin 관련 API
+                        "/admin/login", // 관리자 로그인만 허용
+                        "/admin/refresh", // 관리자 토큰 갱신만 허용
                         "/report/**", // Report 관련 API
-                        "/lecture/list", // 강의 목록조회 허용
-                        "/lecture/detail/**", // 강의 상세 목록조회 허용
-                        "/lecture/qna/*/list", // 강의 qna 조회 허용
-                        "/review/list/**", // 강의 리뷰 조회 허용
+                        "/api/my/**", // Mypage 관련 API
+                        "/lecture/**",
                         "/user/**",
                         "/chat/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
                         "/api/interactions/**", // 상호작용 API 모두 허용
-                        "/connect/**", // WebSocket 연결 엔드포인트
-                        "/topic/**", // WebSocket 토픽
-                        "/publish/**", // WebSocket 메시지 발행
-                        "/api/notifications/**", // 알림
-                        "/api/my/**" // Mypage 관련 API
+                        "/api/notifications/**" // 알림
                 ).permitAll().anyRequest().authenticated())
                 .build();
-
-
     }
 
     private CorsConfigurationSource configurationSource() {
