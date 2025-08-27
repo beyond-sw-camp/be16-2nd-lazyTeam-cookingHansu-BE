@@ -1,8 +1,9 @@
 # 🍳 요리한수 (Cooking Hansu) - 레시피 공유 및 강의 커뮤니티 서비스
 <img width="800" height="1000" alt="요리한수" src="https://github.com/user-attachments/assets/67175952-18b8-463f-b010-65395f81e1c0" />
 <br>
----
-## 👨‍👩‍👧‍👦 Team Members
+
+
+## 🙋🏻 팀원 소개
 
 <table>
   <tr>
