@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.purchase.dto;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.enums.PayMethod;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.purchase.entity.Payment;
 import lazyteam.cooking_hansu.domain.purchase.entity.PurchasedLecture;
 import lombok.AllArgsConstructor;
@@ -32,11 +33,12 @@ public class PurchasedLectureHistoryDto {
 
     public static PurchasedLectureHistoryDto fromEntity(PurchasedLecture purchasedLecture) {
 
+        Lecture lecture = purchasedLecture.getLecture();
         Payment payment = purchasedLecture.getPayment();
         return PurchasedLectureHistoryDto.builder()
                 .id(purchasedLecture.getId())
                 .title(purchasedLecture.getLectureTitleSnapshot())
-                .price(purchasedLecture.getPriceSnapshot())
+                .price(lecture.getPrice())
                 .thumbUrl(purchasedLecture.getLecture().getThumbUrl())
                 .createdAt(payment.getCreatedAt())
                 .orderId(payment.getOrderId())
