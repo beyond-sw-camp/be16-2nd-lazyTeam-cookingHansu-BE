@@ -30,27 +30,26 @@ public class StompHandler implements ChannelInterceptor {
         // 테스팅을 위해 토큰 검증 주석처리
         if(StompCommand.CONNECT == accessor.getCommand()){
             System.out.println("connect요청시 토큰 유효성 검증 (테스팅 모드 - 검증 생략)");
-            // String bearerToken = accessor.getFirstNativeHeader("Authorization");
-            // String token = bearerToken.substring(7);
-            // Jwts.parserBuilder()
-            //         .setSigningKey(secretKey)
-            //         .build()
-            //         .parseClaimsJws(token)
-            //         .getBody();
+             String bearerToken = accessor.getFirstNativeHeader("Authorization");
+             String token = bearerToken.substring(7);
+             Jwts.parserBuilder()
+                     .setSigningKey(secretKey)
+                     .build()
+                     .parseClaimsJws(token)
+                     .getBody();
             System.out.println("토큰 유효성 검증 성공 (테스팅 모드)");
         }
         if(StompCommand.SUBSCRIBE == accessor.getCommand()){
             System.out.println("Subscribe 검증 (테스팅 모드 - 검증 생략)");
-            // String bearerToken = accessor.getFirstNativeHeader("Authorization");
-            // String token = bearerToken.substring(7);
-            // Claims claims = Jwts.parserBuilder()
-            //         .setSigningKey(secretKey)
-            //         .build()
-            //         .parseClaimsJws(token)
-            //         .getBody();
-            // UUID userId = UUID.fromString(claims.getSubject());
-            UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
-            Long roomId = Long.parseLong(accessor.getDestination().split("/")[3]);
+             String bearerToken = accessor.getFirstNativeHeader("Authorization");
+             String token = bearerToken.substring(7);
+             Claims claims = Jwts.parserBuilder()
+                     .setSigningKey(secretKey)
+                     .build()
+                     .parseClaimsJws(token)
+                     .getBody();
+             UUID userId = UUID.fromString(claims.getSubject());
+             Long roomId = Long.parseLong(accessor.getDestination().split("/")[3]);
             if(!chatService.isRoomParticipant(userId, roomId)){
                 throw new AuthenticationServiceException("해당 room에 권한이 없습니다.");
             }
