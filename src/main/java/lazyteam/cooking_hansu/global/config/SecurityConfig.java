@@ -57,7 +57,6 @@ public class SecurityConfig {
                         "/api/my/**", // Mypage 관련 API
                         "/lecture/**",
                         "/user/**",
-                        "/chat/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
                         "/api/interactions/**" // 상호작용 API 모두 허용
