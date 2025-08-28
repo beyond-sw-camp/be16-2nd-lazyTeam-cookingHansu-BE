@@ -147,7 +147,14 @@ public class LectureService {
         }
 
         // 강의 정보 수정
+
+        if(lecture.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
+            lecture.setPending();
+            log.info("강의상태가 변경되었습니다." + lecture.getApprovalStatus());
+        }
         lecture.updateInfo(lectureUpdateDto);
+
+
 
         // 강의 재료 리스트 수정
         if (lectureIngredientsListDto != null && !lectureIngredientsListDto.isEmpty()) { // [FIX] NPE 방지
