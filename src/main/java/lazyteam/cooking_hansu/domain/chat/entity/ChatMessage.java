@@ -53,10 +53,6 @@ public class ChatMessage {
     @Column(name = "is_deleted", nullable = false)
     private String isDeleted = "N"; // 메시지 삭제 여부, 기본값은 "N" (삭제되지 않음)
 
-//    @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<ReadStatus> readStatuses = new ArrayList<>(); // 읽음 상태
-
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatFile> files = new ArrayList<>();

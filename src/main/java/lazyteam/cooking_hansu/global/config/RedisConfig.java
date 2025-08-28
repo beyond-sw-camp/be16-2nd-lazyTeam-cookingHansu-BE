@@ -218,12 +218,12 @@ public class RedisConfig {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
 
-
-        // 알림 채널 구독
+        // 하나의 알림 채널만 구독 (일반 알림 + 채팅 알림 모두 처리)
         container.addMessageListener(
                 notificationSubscriber,
                 new ChannelTopic(NotificationPublisher.CHANNEL)
         );
+        
         return container;
     }
 }

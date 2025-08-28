@@ -1,9 +1,8 @@
 package lazyteam.cooking_hansu.domain.notification.controller;
 
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
+import lazyteam.cooking_hansu.domain.notification.dto.NotificationListResponseDto;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
-import lazyteam.cooking_hansu.domain.notification.sse.SseEmitterRegistry;
-import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -24,15 +22,23 @@ public class NotificationController {
 
     @GetMapping("/subscribe")
     public SseEmitter subscribe() {
-        UUID userId = AuthUtils.getCurrentUserId();
-        return notificationService.subscribeToNotifications(userId);
+        return notificationService.subscribeToNotifications();
     }
 
-    // 목록 조회
+    // 목록 조회 (Cursor pagination)
     @GetMapping
-    public ResponseEntity<?> list() {
-        List<NotificationDto> notificationList = notificationService.getNotificationList();
-        return ResponseEntity.ok(ResponseDto.ok(notificationList, HttpStatus.OK));
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "8") int size) {
+        NotificationListResponseDto notificationResponse = notificationService.getNotificationList(cursor, size);
+        return ResponseEntity.ok(ResponseDto.ok(notificationResponse, HttpStatus.OK));
+    }
+
+    // 안 읽음 개수 조회
+    @GetMapping("/unread/count")
+    public ResponseEntity<?> unreadCount() {
+        Long count = notificationService.getUnreadCount();
+        return ResponseEntity.ok(ResponseDto.ok(count, HttpStatus.OK));
     }
 
     // 읽음 처리
@@ -49,3 +55,4 @@ public class NotificationController {
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
 }
+
