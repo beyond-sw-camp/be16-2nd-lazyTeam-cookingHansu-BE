@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,15 +53,16 @@ public class NotificationService {
     public NotificationListResponseDto getNotificationList(String cursor, int size) {
         UUID userId = AuthUtils.getCurrentUserId();
         List<Notification> notifications;
-        
+
         if (cursor != null && !cursor.isEmpty()) {
-            // cursor가 있으면 해당 cursor 이후부터 조회
+            // cursor가 있으면 해당 cursor 이후부터 조회 (시간 기준)
+            LocalDateTime cursorTime = LocalDateTime.parse(cursor);
             notifications = notificationRepository.findNextNotifications(
-                userId, UUID.fromString(cursor), size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
+                    userId, cursorTime, size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
         } else {
             // cursor가 없으면 처음부터 조회
             notifications = notificationRepository.findFirstNotifications(
-                userId, size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
+                    userId, size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
         }
 
         boolean hasNext = notifications.size() > size;
@@ -69,24 +71,25 @@ public class NotificationService {
         }
 
         List<NotificationDto> notificationDtos = notifications.stream()
-            .map(n -> NotificationDto.builder()
-                .id(n.getId())
-                .recipientId(n.getRecipient().getId())
-                .content(n.getContent())
-                .targetType(n.getTargetType())
-                .targetId(n.getTargetId())
-                .isRead(n.getIsRead())
-                .createdAt(n.getCreatedAt())
-                .build())
-            .collect(Collectors.toList());
+                .map(n -> NotificationDto.builder()
+                        .id(n.getId())
+                        .recipientId(n.getRecipient().getId())
+                        .content(n.getContent())
+                        .targetType(n.getTargetType())
+                        .targetId(n.getTargetId())
+                        .isRead(n.getIsRead())
+                        .createdAt(n.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
 
-        String nextCursor = hasNext ? notifications.get(notifications.size() - 1).getId().toString() : null;
+        // 다음 커서는 마지막 알림의 생성 시간
+        String nextCursor = hasNext ? notifications.get(notifications.size() - 1).getCreatedAt().toString() : null;
 
         return NotificationListResponseDto.builder()
-            .notifications(notificationDtos)
-            .nextCursor(nextCursor)
-            .hasNext(hasNext)
-            .build();
+                .notifications(notificationDtos)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .build();
     }
 
     @Transactional(readOnly = true)
