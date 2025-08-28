@@ -18,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 import java.util.Arrays;
 
 @Configuration
@@ -58,9 +57,7 @@ public class SecurityConfig {
 //                        "/api/my/**", // Mypage 관련 API
                         "/lecture/**",
                         "/user/**",
-                        "/cart/**",
-                        "/purchase/**",
-                        "/review/**",
+                        "/chat/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
                         "/api/interactions/**" // 상호작용 API 모두 허용

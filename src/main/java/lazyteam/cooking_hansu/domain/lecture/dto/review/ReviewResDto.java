@@ -21,9 +21,11 @@ public class ReviewResDto {
     private String writerNickname;
     private Integer rating;
     private String content;
+    private UUID writerId;
 
     public static ReviewResDto fromEntity(User writer, Integer rating, String content) {
         return ReviewResDto.builder()
+                .writerId(writer.getId())
                 .writerNickname(writer.getNickname())
                 .rating(rating)
                 .content(content)
