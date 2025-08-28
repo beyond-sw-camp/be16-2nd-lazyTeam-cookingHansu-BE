@@ -65,14 +65,19 @@ public class PostService {
         String thumbnailUrl = null;
         if (thumbnail != null && !thumbnail.isEmpty()) {
             try {
+                log.info("S3 업로드 시작 - 파일명: {}, 크기: {} bytes", thumbnail.getOriginalFilename(), thumbnail.getSize());
                 thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
                 log.info("Post 썸네일 업로드 성공: {}", thumbnailUrl);
             } catch (Exception e) {
-                log.error("Post 썸네일 업로드 실패: {}", e.getMessage());
+                log.error("Post 썸네일 업로드 실패: {}", e.getMessage(), e);
                 throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
             }
         } else if (requestDto.getThumbnailUrl() != null) {
             thumbnailUrl = requestDto.getThumbnailUrl();
+            log.info("기존 썸네일 URL 사용: {}", thumbnailUrl);
+        } else {
+            log.warn("썸네일이 제공되지 않음 - thumbnail: {}, requestDto.thumbnailUrl: {}",
+                    thumbnail, requestDto.getThumbnailUrl());
         }
 
         // Post 엔티티 생성
@@ -101,32 +106,29 @@ public class PostService {
             saveRecipeSteps(savedPost, requestDto.getSteps());
         }
 
-        log.info("통합 Post 작성 완료. 사용자: {}, Post ID: {}, 인분: {}인분", 
+        log.info("통합 Post 작성 완료. 사용자: {}, Post ID: {}, 인분: {}인분",
                 currentUser.getEmail(), savedPost.getId(), savedPost.getServing());
         return savedPost.getId();
     }
 
     /**
-     * Post 상세 조회 (재료, 조리순서 포함)
+     * Post 상세 조회 (재료, 조리순서 포함) - 비회원도 접근 가능
      */
     @Transactional(readOnly = true)
     public PostResponseDto getPost(UUID postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 게시글입니다."));
 
-        if (post.isDeleted()) {
-            throw new EntityNotFoundException("삭제된 게시글입니다.");
-        }
-
-        User currentUser = getCurrentUser();
-        if (!post.getIsOpen() && !post.isOwnedBy(currentUser)) {
-            throw new IllegalArgumentException("비공개 게시글에 대한 권한이 없습니다.");
+        // 삭제되었거나 비공개 게시글인 경우 접근 차단
+        if (post.isDeleted() || !post.getIsOpen()) {
+            throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
         }
 
         // 연관 데이터 조회
         List<Ingredients> ingredients = ingredientsRepository.findByPost(post);
         List<RecipeStep> steps = recipeStepRepository.findByPostOrderByStepSequence(post);
 
+        log.info("Post 상세 조회 완료 - Post ID: {}, 제목: {}", postId, post.getTitle());
         return PostResponseDto.fromEntity(post, ingredients, steps);
     }
 
@@ -162,19 +164,6 @@ public class PostService {
 
         post.updatePost(updateData);
 
-//        재료 요리순서 굳
-        if (requestDto.getIngredients() != null) {
-            ingredientsRepository.deleteByPost(post);
-            saveIngredients(post, requestDto.getIngredients());
-        }
-
-        if (requestDto.getSteps() != null) {
-            recipeStepRepository.deleteByPost(post);
-            saveRecipeSteps(post, requestDto.getSteps());
-        }
-
-        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
-
         // 재료 정보 갱신
         if (requestDto.getIngredients() != null) {
             ingredientsRepository.deleteByPost(post);
@@ -201,7 +190,7 @@ public class PostService {
         // 연관 데이터 삭제 (Cascade 설정으로 자동 삭제되지만 명시적으로)
         ingredientsRepository.deleteByPost(post);
         recipeStepRepository.deleteByPost(post);
-        
+
         // Soft Delete
         post.softDelete();
         postRepository.save(post);
@@ -212,12 +201,11 @@ public class PostService {
     /**
      * Post 목록 조회
      */
-    // 서비스도 Pageable로 변경
     @Transactional(readOnly = true)
     public Page<PostListResponseDto> getPostList(Role role, CategoryEnum category,
                                                  FilterSort filterSort, Pageable pageable) {
 
-        Page<Post> postsPage =postRepository.findPostsByFilters(role,category,pageable);
+        Page<Post> postsPage = postRepository.findPostsByFilters(role, category, pageable);
 
         log.info("Post 목록 조회 - role: {}, category: {}, filterSort: {}, page: {}, totalElements: {}",
                 role, category, filterSort, pageable.getPageNumber(), postsPage.getTotalElements());
@@ -273,8 +261,7 @@ public class PostService {
                     } else if (dto instanceof PostUpdateRequestDto.RecipeStepUpdateDto updateDto) {
                         stepSequence = updateDto.getStepSequence();
                         content = updateDto.getContent();
-                        description = updateDto.getDescription(); // 추가
-
+                        description = updateDto.getDescription();
                     } else {
                         throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
                     }
