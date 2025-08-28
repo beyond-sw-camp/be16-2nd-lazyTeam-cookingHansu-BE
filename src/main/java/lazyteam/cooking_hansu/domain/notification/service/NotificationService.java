@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.notification.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
+import lazyteam.cooking_hansu.domain.notification.dto.NotificationListResponseDto;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
 import lazyteam.cooking_hansu.domain.notification.entity.Notification;
 import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
@@ -31,7 +32,6 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final NotificationPublisher notificationPublisher;
 
-    @Transactional
     public UUID createAndDispatch(SseMessageDto sseMessageDto) {
         User recipient = userRepository.findById(sseMessageDto.getRecipientId())
                 .orElseThrow(() -> new EntityNotFoundException("recipient"));
@@ -49,22 +49,50 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<NotificationDto> getNotificationList() {
+    public NotificationListResponseDto getNotificationList(String cursor, int size) {
         UUID userId = AuthUtils.getCurrentUserId();
-        List<Notification> notificationList = notificationRepository.findByRecipient_IdAndIsDeletedFalseOrderByCreatedAtDesc(userId);
+        List<Notification> notifications;
+        
+        if (cursor != null && !cursor.isEmpty()) {
+            // cursor가 있으면 해당 cursor 이후부터 조회
+            notifications = notificationRepository.findNextNotifications(
+                userId, UUID.fromString(cursor), size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
+        } else {
+            // cursor가 없으면 처음부터 조회
+            notifications = notificationRepository.findFirstNotifications(
+                userId, size + 1); // 다음 페이지 존재 여부 확인을 위해 +1
+        }
 
+        boolean hasNext = notifications.size() > size;
+        if (hasNext) {
+            notifications = notifications.subList(0, size); // 마지막 하나는 제거
+        }
 
-        return notificationList.stream()
-                .map(n -> NotificationDto.builder()
-                        .id(n.getId())
-                        .recipientId(n.getRecipient().getId())
-                        .content(n.getContent())
-                        .targetType(n.getTargetType())
-                        .targetId(n.getTargetId())
-                        .isRead(n.getIsRead())
-                        .createdAt(n.getCreatedAt())
-                        .build()
-                ).collect(Collectors.toList());
+        List<NotificationDto> notificationDtos = notifications.stream()
+            .map(n -> NotificationDto.builder()
+                .id(n.getId())
+                .recipientId(n.getRecipient().getId())
+                .content(n.getContent())
+                .targetType(n.getTargetType())
+                .targetId(n.getTargetId())
+                .isRead(n.getIsRead())
+                .createdAt(n.getCreatedAt())
+                .build())
+            .collect(Collectors.toList());
+
+        String nextCursor = hasNext ? notifications.get(notifications.size() - 1).getId().toString() : null;
+
+        return NotificationListResponseDto.builder()
+            .notifications(notificationDtos)
+            .nextCursor(nextCursor)
+            .hasNext(hasNext)
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Long getUnreadCount() {
+        UUID userId = AuthUtils.getCurrentUserId();
+        return notificationRepository.countByRecipient_IdAndIsReadFalseAndIsDeletedFalse(userId);
     }
 
     public void markRead(UUID notificationId) {

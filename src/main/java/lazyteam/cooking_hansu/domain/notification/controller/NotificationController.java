@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.notification.controller;
 
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
+import lazyteam.cooking_hansu.domain.notification.dto.NotificationListResponseDto;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,20 @@ public class NotificationController {
         return notificationService.subscribeToNotifications();
     }
 
-    // 목록 조회
+    // 목록 조회 (Cursor pagination)
     @GetMapping
-    public ResponseEntity<?> list() {
-        List<NotificationDto> notificationList = notificationService.getNotificationList();
-        return ResponseEntity.ok(ResponseDto.ok(notificationList, HttpStatus.OK));
+    public ResponseEntity<?> list(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "8") int size) {
+        NotificationListResponseDto notificationResponse = notificationService.getNotificationList(cursor, size);
+        return ResponseEntity.ok(ResponseDto.ok(notificationResponse, HttpStatus.OK));
+    }
+
+    // 안 읽음 개수 조회
+    @GetMapping("/unread/count")
+    public ResponseEntity<?> unreadCount() {
+        Long count = notificationService.getUnreadCount();
+        return ResponseEntity.ok(ResponseDto.ok(count, HttpStatus.OK));
     }
 
     // 읽음 처리
