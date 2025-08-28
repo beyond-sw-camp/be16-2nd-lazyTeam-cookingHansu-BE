@@ -325,18 +325,25 @@
     <details>
       <summary>토큰 리프레시</summary>
       `POST /user/refresh`
+      <img src="https://github.com/user-attachments/assets/fcf6f11b-1f5d-48e2-8227-e8cce13be663" alt="토큰 리프레시(새로고침)" width="800"/>
     </details>
     <details>
       <summary>로그아웃</summary>
       `POST /user/logout`
+      <img src="https://github.com/user-attachments/assets/2cb3cc94-2dee-4314-a10c-84a47ca13d98" alt="로그아웃" width="800" />
     </details>
     <details>
       <summary>회원 추가 정보 입력</summary>
       `POST /user/add-info`
+      <img src="https://github.com/user-attachments/assets/494d9bde-83ec-4e76-8386-8f100fdad71c" alt="추가 정보 입력 (일반)" width="800" />
+      <img src="https://github.com/user-attachments/assets/7838734c-e129-45da-98de-7f23cc1435ff" alt="추가 정보 입력 (종사자)" width="800" />
+      <img src="https://github.com/user-attachments/assets/a483bbc9-0f81-47f4-8d89-74af612b9bfd" alt="추가 정보 입력 (자영업자)" width="800" />
     </details>
     <details>
       <summary>프로필 조회</summary>
       `GET /user/profile`
+      <img width="1435" height="73" alt="헤더 프로필 조회" src="https://github.com/user-attachments/assets/999096b2-8525-4712-b040-4caddff2db7e" />
+      <img width="800" alt="프로필 조회 응답 결과" src="https://github.com/user-attachments/assets/57d269e0-73b3-4baa-a68a-1cef87bd4a8a" />
     </details>
     <details>
       <summary>현재 사용자 정보 조회</summary>
@@ -467,7 +474,7 @@
       <img src="https://github.com/user-attachments/assets/76af1270-2b5c-473f-b62e-8560b5ad600f" alt="Q&A 기능" width="600"/>
     </details>
   </details>
-  
+
   <details> 
     <summary>마이페이지</summary>
     <details>
