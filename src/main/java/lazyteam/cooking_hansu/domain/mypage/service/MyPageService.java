@@ -2,8 +2,10 @@ package lazyteam.cooking_hansu.domain.mypage.service;
 
 
 import jakarta.persistence.*;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.interaction.entity.*;
 import lazyteam.cooking_hansu.domain.interaction.repository.*;
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.mypage.dto.*;
@@ -13,10 +15,14 @@ import lazyteam.cooking_hansu.domain.purchase.entity.*;
 import lazyteam.cooking_hansu.domain.purchase.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.*;
 import lombok.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 import org.springframework.web.multipart.*;
@@ -30,6 +36,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class MyPageService {
 
+    private static final Logger log = LoggerFactory.getLogger(MyPageService.class);
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PurchasedLectureRepository purchasedLectureRepository;
@@ -132,37 +139,19 @@ public class MyPageService {
                 .collect(Collectors.toList());
     }
 
-    // ===== 구매한 강의 관련 메서드 =====
+    // ====== 내 강의 목록 조회 ======
 
-    @Transactional(readOnly = true)
     public Page<MyLectureListDto> getMyLectures(Pageable pageable) {
-        User user = getCurrentUser();
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        // 해당 유저가 구매한 강의 목록
-        Page<PurchasedLecture> purchases = purchasedLectureRepository.findAllByUser(user, pageable);
-
-        return purchases.map(purchase -> {
-            Lecture lecture = purchase.getLecture();
-
-            // 평균 평점 계산
-            List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lecture.getId());
-            double avgRating = reviews.isEmpty() ? 0.0 :
-                    reviews.stream().mapToInt(LectureReview::getRating).average().orElse(0.0);
-
-            // 수강생 수 계산
-            int studentCount = purchasedLectureRepository.countByLecture(lecture);
-
-            return MyLectureListDto.builder()
-                    .id(lecture.getId())
-                    .category(lecture.getCategory().toString())
-                    .title(lecture.getTitle())
-                    .description(lecture.getDescription())
-                    .averageRating(avgRating)
-                    .studentCount(studentCount)
-                    .thumbnailUrl(lecture.getThumbUrl())
-                    .build();
-        });
+        Page<MyLectureListDto> dtos = purchasedLectureRepository.findAllByUser(user,pageable)
+                .map(MyLectureListDto::fromEntity);
+        log.info("내가 구매한 강의 목록 : " + dtos.toString());
+        return dtos;
     }
+
 
     // ===== 북마크 관련 메서드 =====
 
@@ -215,9 +204,9 @@ public class MyPageService {
 
     // 현재 로그인한 사용자 조회 (테스트용)
     private User getCurrentUser() {
-        UUID testUserId = UUID.fromString(testUserIdStr);
-        return userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        return  userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
     }
 
     // 역할명을 한글로 변환하는 메서드

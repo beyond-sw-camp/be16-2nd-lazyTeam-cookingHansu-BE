@@ -10,9 +10,11 @@ import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.interaction.service.RedisInteractionService;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.util.UtilClassLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,15 +66,10 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-        //  테스트용 이메일 강제 세팅 (로그인 기능 없을 때만 사용!)
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("test@naver.com", null, List.of())
-        );
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
         // 재료목록 저장
@@ -139,9 +136,9 @@ public class LectureService {
                        List<MultipartFile> lectureVideoFiles,
                        MultipartFile multipartFile) {
 
-//  테스트용 UUID 유저 세팅
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
 
@@ -221,12 +218,17 @@ public class LectureService {
             // 2. 새 영상 등록
             List<LectureVideo> newVideos = new ArrayList<>();
 
+            int fileIndex = 0;
+
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
-                MultipartFile file = (lectureVideoFiles != null && i < lectureVideoFiles.size())
-                        ? lectureVideoFiles.get(i)
-                        : null;
+                MultipartFile file = null;
 
+                // 새 파일 필요한 경우에만 fileList에서 꺼냄
+                if ((dto.getVideoUrl() == null || dto.getVideoUrl().isBlank())
+                        && lectureVideoFiles != null && fileIndex < lectureVideoFiles.size()) {
+                    file = lectureVideoFiles.get(fileIndex++);
+                }
                 String videoUrl;
                 int duration;
 
@@ -303,33 +305,27 @@ public class LectureService {
 
 
 // ====== 승인된 강의목록 조회 ======
-    public List<LectureResDto> findAllLecture(Pageable pageable) {
-        return lectureRepository.findAll(pageable).stream()
-                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .map(LectureResDto::fromEntity)
-                .toList();
-    }
+public Page<LectureResDto> findAllLecture(Pageable pageable) {
+    return lectureRepository.findAllByApprovalStatus(pageable,ApprovalStatus.APPROVED)
+            .map(LectureResDto::fromEntity);
+}
 
 
 
 // ====== 내 강의 목록 조회 ======
-    public List<LectureResDto> findAllMyLecture(Pageable pageable) {
-        //        테스트용 UUID 유저 세팅, 로그인 기능 구현 후 강사 ID를 넣어야 함
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    public Page<LectureResDto> findAllMyLecture(Pageable pageable) {
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        return lectureRepository.findAllBySubmittedById(pageable, userId).stream()
-                .filter(a -> a.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .map(LectureResDto::fromEntity)
-                .toList();
+        return lectureRepository.findAllBySubmittedByIdAndApprovalStatus(user.getId(), ApprovalStatus.APPROVED, pageable)
+                .map(LectureResDto::fromEntity);
     }
 
 
     
 // ====== 강의상세목록 조회 ======
     public LectureDetailDto findDetailLecture(UUID lectureId) {
-        //        테스트용 UUID 유저 세팅
-        UUID userId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("유저없음"));
 
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
@@ -378,5 +374,8 @@ public class LectureService {
 
         lecture.lectureDelete();
     }
+
+
+
 
 }

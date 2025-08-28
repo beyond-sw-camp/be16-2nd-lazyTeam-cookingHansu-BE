@@ -25,6 +25,7 @@ public class LectureDetailDto {
     private UUID lectureId;
     private String nickname; // 강의 제출자 닉네임
     private String name; // 강의 제출자 이름
+    private String submittedByProfile; // 강의 제출자 프로필
     private String title;
     private String description;
     private LevelEnum level;
@@ -35,6 +36,7 @@ public class LectureDetailDto {
     private Long likeCount; // 좋아요 수 추가
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
+    private UUID submittedById;
 
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
@@ -69,6 +71,7 @@ public class LectureDetailDto {
                 .lectureId(lecture.getId())
                 .nickname(submittedBy.getNickname()) // 강의제출자
                 .name(submittedBy.getName()) //강의 제출자
+                .submittedByProfile(submittedBy.getPicture()) // 강의 제출자 프로필
                 .title(lecture.getTitle())
                 .description(lecture.getDescription())
                 .level(lecture.getLevel())
@@ -79,6 +82,7 @@ public class LectureDetailDto {
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
+                .submittedById(submittedBy.getId())
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
                 .lectureStepResDtoList(

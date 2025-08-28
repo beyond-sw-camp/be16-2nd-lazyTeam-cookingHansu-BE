@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
-import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteAllDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteOneDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemAddDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemListDto;
@@ -12,7 +11,9 @@ import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
 import lazyteam.cooking_hansu.domain.purchase.repository.CartItemRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +32,9 @@ public class CartItemService {
     public void addCart(CartItemAddDto dto) {
 
 
-//        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         for(UUID id : dto.getLectureIds()) {
             Lecture lecture = lectureRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("해당 ID의 강의가 없습니다."));
@@ -52,8 +52,10 @@ public class CartItemService {
 
     }
 
-    public List<CartItemListDto> findById(UUID id) {
-        User user = userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("해당 유저 없습니다."));
+    public List<CartItemListDto> findList() {
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         return cartItemRepository.findAllByUser(user).stream().map(CartItemListDto::fromEntity).toList();
 
@@ -61,11 +63,10 @@ public class CartItemService {
 
 
     public void deleteOne(CartDeleteOneDto cartDeleteOneDto) {
-        //        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
 
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         Lecture lecture = lectureRepository.findById(cartDeleteOneDto.getLectureId())
                 .orElseThrow(() -> new EntityNotFoundException("강의 없음"));
 
@@ -76,9 +77,10 @@ public class CartItemService {
     }
 
 
-    public void deleteAll(CartDeleteAllDto cartDeleteAllDto) {
-        User user = userRepository.findById(cartDeleteAllDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+    public void deleteAll() {
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         cartItemRepository.deleteAllByUser(user);
     }
 

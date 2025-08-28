@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.purchase.controller;
 
 import jakarta.validation.Valid;
-import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteAllDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteOneDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemAddDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartItemListDto;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 
 @RestController
@@ -31,9 +29,9 @@ public class CartItemController {
     }
 
 //    장바구니 조회(유저 id로 조회)
-    @GetMapping("/list/{id}")
-    public ResponseEntity<?> CartList(@PathVariable UUID id) {
-        List<CartItemListDto> dto =  cartItemService.findById(id);
+    @GetMapping("/list")
+    public ResponseEntity<?> cartList() {
+        List<CartItemListDto> dto =  cartItemService.findList();
         return new ResponseEntity<>(ResponseDto.ok(dto,HttpStatus.OK),HttpStatus.OK);
     }
 
@@ -45,8 +43,8 @@ public class CartItemController {
     }
 
     @DeleteMapping("/deleteAll")
-    public ResponseEntity<?> deleteAll(@RequestBody CartDeleteAllDto cartDeleteAllDto) {
-        cartItemService.deleteAll(cartDeleteAllDto);
+    public ResponseEntity<?> deleteAll() {
+        cartItemService.deleteAll();
         return new ResponseEntity<>(ResponseDto.ok("전체삭제 완료",HttpStatus.OK),HttpStatus.OK);
     }
 
