@@ -19,7 +19,9 @@ public interface LectureRepository extends JpaRepository<Lecture, UUID> {
 
     Page<Lecture> findAll(Pageable pageable);
 
-    Page<Lecture> findAllBySubmittedById(Pageable pageable,UUID id);
+    Page<Lecture> findAllBySubmittedByIdAndApprovalStatus(UUID submittedById,
+                                                          ApprovalStatus approvalStatus,
+                                                          Pageable pageable);
 
 
 }

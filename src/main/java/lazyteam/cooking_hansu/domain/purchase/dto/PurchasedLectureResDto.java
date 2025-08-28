@@ -1,4 +1,4 @@
-package lazyteam.cooking_hansu.domain.mypage.dto;
+package lazyteam.cooking_hansu.domain.purchase.dto;
 
 
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Data
-public class MyLectureListDto {
+public class PurchasedLectureResDto {
     private UUID id; // 강의 ID
     private String title; // 강의 제목
     private String description; // 강의 설명
@@ -32,7 +32,7 @@ public class MyLectureListDto {
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
 
-    public static MyLectureListDto fromEntity(PurchasedLecture purchasedLecture) {
+    public static PurchasedLectureResDto fromEntity(PurchasedLecture purchasedLecture) {
 
         Lecture lecture = purchasedLecture.getLecture();
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
@@ -44,7 +44,7 @@ public class MyLectureListDto {
                 : BigDecimal.valueOf(sum)
                 .divide(BigDecimal.valueOf(cnt), 1, RoundingMode.HALF_UP);
 
-        return MyLectureListDto.builder()
+        return PurchasedLectureResDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
                 .description(lecture.getDescription())

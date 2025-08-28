@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.notification.sse;
 
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;

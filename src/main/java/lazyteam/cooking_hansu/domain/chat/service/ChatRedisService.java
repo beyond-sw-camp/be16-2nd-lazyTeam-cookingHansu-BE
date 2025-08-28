@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import lazyteam.cooking_hansu.domain.notification.dto.ChatNotificationDto;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
+
 @Service
 @Slf4j
 public class ChatRedisService implements MessageListener {
@@ -28,6 +32,7 @@ public class ChatRedisService implements MessageListener {
     private final ObjectMapper objectMapper;
     private final RedisTemplate<String, Map<String, String>> chatParticipantsRedisTemplate;
     private final RedisTemplate<String, String> chatOnlineParticipantRedisTemplate;
+    private final NotificationService notificationService;
 
 
     // Redis Keys
@@ -46,13 +51,15 @@ public class ChatRedisService implements MessageListener {
             @Qualifier("chatOnlineParticipants") RedisTemplate<String, String> chatOnlineParticipantRedisTemplate,
             SimpMessageSendingOperations messageTemplate,
             ChatParticipantRepository chatParticipantRepository,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            NotificationService notificationService) {
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatPubsubRedisTemplate = chatPubsubRedisTemplate;
         this.messageTemplate = messageTemplate;
         this.objectMapper = objectMapper;
         this.chatParticipantsRedisTemplate = chatParticipantsRedisTemplate;
         this.chatOnlineParticipantRedisTemplate = chatOnlineParticipantRedisTemplate;
+        this.notificationService = notificationService;
     }
 
     /* ----------------------------- Publish (to Redis) ----------------------------- */
@@ -77,6 +84,49 @@ public class ChatRedisService implements MessageListener {
         }
 
         chatPubsubRedisTemplate.convertAndSend(topic(roomId, SUFFIX_CHAT_MESSAGE), payload);
+        
+        // 새로 추가: 채팅 알림 발송
+        sendChatNotificationToParticipants(roomId, chatMessage);
+    }
+
+    /**
+     * 채팅방 참여자들에게 채팅 알림 발송
+     */
+    private void sendChatNotificationToParticipants(Long roomId, ChatMessageResDto chatMessage) {
+        try {
+            Map<String, String> participants = getOrLoadParticipantMap(roomId);
+
+            for (String participantId : participants.keySet()) {
+                if (participantId == null || participantId.trim().isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    String cleanParticipantId = participantId.trim();
+                    UUID participantUUID = UUID.fromString(cleanParticipantId);
+
+                    // 본인 제외
+                    if (!participantUUID.equals(chatMessage.getSenderId())) {
+                        ChatNotificationDto notification = ChatNotificationDto.builder()
+                                .recipientId(participantUUID)
+                                .targetId(UUID.randomUUID())  // 고유한 UUID 생성
+                                .chatRoomId(roomId)
+                                .content(chatMessage.getMessage())
+                                .senderId(chatMessage.getSenderId())
+                                .targetType(TargetType.CHAT)
+                                .createdAt(chatMessage.getCreatedAt())
+                                .build();
+
+                        notificationService.createAndDispatchChatNotification(notification);
+                    }
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid participant ID format: '{}', error: {}", participantId, e.getMessage());
+                    continue;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to send chat notifications: {}", e.getMessage());
+        }
     }
 
     // 온라인 진입 브로드캐스트(전체 온라인 목록 전송)

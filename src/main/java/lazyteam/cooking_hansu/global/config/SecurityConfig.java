@@ -64,8 +64,7 @@ public class SecurityConfig {
                         "/post/comment/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
-                        "/api/interactions/**", // 상호작용 API 모두 허용
-                        "/api/notifications/**" // 알림
+                        "/api/interactions/**" // 상호작용 API 모두 허용
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
