@@ -12,12 +12,14 @@ import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureReviewRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,10 +37,9 @@ public class LectureReviewService {
 //    리뷰 작성 : 리뷰 쓸 강의의 ID와 작성자(강의를 구매한 일반 회원)의 ID를 매개변수로 받아 toEntity
     public void create(ReviewCreateDto reviewCreateDto) {
 
-        //        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         if(reviewCreateDto.getRating()<1 || reviewCreateDto.getRating()>5) {
 //            디버깅용
@@ -47,6 +48,11 @@ public class LectureReviewService {
 
         Lecture lecture = lectureRepository.findById(reviewCreateDto.getLectureId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 존재하지 않습니다."));
+
+        if(lecture.getSubmittedBy().getId().equals(user.getId())) {
+            throw new AccessDeniedException("본인 강의에는 리뷰를 작성할 수 없습니다.");
+        }
+
         Optional<LectureReview> lectureReview = lectureReviewRepository
                 .findByLectureIdAndWriterId(reviewCreateDto.getLectureId(),user.getId());
         System.out.println(lectureReview);
@@ -83,10 +89,10 @@ public class LectureReviewService {
 
 //    강의 리뷰 수정
     public void reviewModify(ReviewModifyDto reviewModifyDto) {
-        //        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         if(reviewModifyDto.getRating()!=null) {
             if(reviewModifyDto.getRating()<1 || reviewModifyDto.getRating()>5) {
 
@@ -113,10 +119,9 @@ public class LectureReviewService {
 
 //    리뷰 삭제
     public void reviewDelete(UUID lectureId) {
-        //        테스트용 유저 세팅
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
         LectureReview lectureReview = lectureReviewRepository.findByLectureIdAndWriterId(lectureId,user.getId())
                 .orElseThrow(()->new EntityNotFoundException("해당 ID 리뷰 존재하지 않습니다."));
         lectureReviewRepository.delete(lectureReview);
@@ -126,7 +131,7 @@ public class LectureReviewService {
         int s = lectureReview.getRating();
         lecture.setReviewSum( (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum()) - s );
         lecture.setReviewCount( Math.max(0, (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount()) - 1) );
-        lecture.setReviewCount(Math.max(0, lecture.getReviewCount() - 1));
+        lectureRepository.save(lecture);
     }
 
 

@@ -3,10 +3,14 @@ package lazyteam.cooking_hansu.domain.purchase.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.enums.PayMethod;
 import lazyteam.cooking_hansu.domain.common.enums.PaymentStatus;
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
+import lazyteam.cooking_hansu.domain.purchase.dto.PurchasedLectureHistoryDto;
+import lazyteam.cooking_hansu.domain.purchase.dto.PurchasedLectureResDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPaymentConfirmDto;
 import lazyteam.cooking_hansu.domain.purchase.dto.TossPrepayDto;
 import lazyteam.cooking_hansu.domain.purchase.entity.CartItem;
@@ -22,12 +26,16 @@ import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -67,11 +75,9 @@ public class PurchaseService {
 
     // 프론트엔드에서 결제창에서 확인을 누르면 Controller를 통해 dto로 정보를 받아서 이 로직 실행
     public JSONObject confirmPayment(TossPaymentConfirmDto tossPaymentConfirmDto) {
-
-        // 테스트용 유저 (로그인 기능이 붙으면 SecurityContextHolder로 대체)
-        UUID testUserId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        User user = userRepository.findById(testUserId)
-                .orElseThrow(() -> new EntityNotFoundException("테스트 유저가 없습니다."));
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         JSONParser parser = new JSONParser();
 
@@ -218,6 +224,16 @@ public class PurchaseService {
         }
 
         cartItemRepository.deleteAll(items);
+    }
+
+//    결제정보 조회
+    public PurchasedLectureHistoryDto payHistory(UUID lectureId) {
+        UUID userId = AuthUtils.getCurrentUserId();
+        log.info("유저 아이디 : " + userId);
+        PurchasedLecture purchasedLecture = purchasedLectureRepository.findByUser_IdAndLecture_Id(userId,lectureId)
+                .orElseThrow(()-> new EntityNotFoundException("결제된 강의가 없습니다."));
+        log.info("결제된 강의 정보 : " + purchasedLecture.toString());
+        return PurchasedLectureHistoryDto.fromEntity(purchasedLecture);
     }
 
 
