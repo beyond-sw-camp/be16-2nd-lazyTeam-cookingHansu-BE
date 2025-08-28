@@ -218,12 +218,17 @@ public class LectureService {
             // 2. 새 영상 등록
             List<LectureVideo> newVideos = new ArrayList<>();
 
+            int fileIndex = 0;
+
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
-                MultipartFile file = (lectureVideoFiles != null && i < lectureVideoFiles.size())
-                        ? lectureVideoFiles.get(i)
-                        : null;
+                MultipartFile file = null;
 
+                // 새 파일 필요한 경우에만 fileList에서 꺼냄
+                if ((dto.getVideoUrl() == null || dto.getVideoUrl().isBlank())
+                        && lectureVideoFiles != null && fileIndex < lectureVideoFiles.size()) {
+                    file = lectureVideoFiles.get(fileIndex++);
+                }
                 String videoUrl;
                 int duration;
 
