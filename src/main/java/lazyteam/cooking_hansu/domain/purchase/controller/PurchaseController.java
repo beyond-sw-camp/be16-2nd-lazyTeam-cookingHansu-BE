@@ -24,7 +24,6 @@ public class PurchaseController {
 
 
 
-    @PreAuthorize("hasRole('GENERAL')")
     @PostMapping("/prepay")
     public ResponseEntity<?> prepaymentSave(@RequestBody TossPrepayDto tossPrepayDto) {
         purchaseService.prepaymentSave(tossPrepayDto);
@@ -32,7 +31,6 @@ public class PurchaseController {
     }
 
 
-    @PreAuthorize("hasRole('GENERAL')")
     @PostMapping("/confirm")
     public JSONObject confirmPayment(@RequestBody @Valid TossPaymentConfirmDto tossPaymentConfirmDto) {
 

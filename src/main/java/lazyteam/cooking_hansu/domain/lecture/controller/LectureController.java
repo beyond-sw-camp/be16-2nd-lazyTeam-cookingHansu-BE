@@ -74,7 +74,7 @@ public class LectureController {
 //    내가 업로드 한 강의목록 조회(판매자)
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @GetMapping("/mylist")
-    public ResponseEntity<?> findAllMyLecture(@PageableDefault(size = 8, sort = "createdAt",
+    public ResponseEntity<?> findAllMyLecture(@PageableDefault(size = 6, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         Page<LectureResDto> lectureResDtos = lectureService.findAllMyLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDtos,HttpStatus.OK),HttpStatus.OK);

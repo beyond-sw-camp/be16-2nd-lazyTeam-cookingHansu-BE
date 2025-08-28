@@ -318,8 +318,9 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        return lectureRepository.findAllBySubmittedByIdAndApprovalStatus(user.getId(), ApprovalStatus.APPROVED, pageable)
-                .map(LectureResDto::fromEntity);
+        Page<LectureResDto> myLectures = lectureRepository.findAllBySubmittedById(userId,pageable).map(LectureResDto::fromEntity);
+        log.info("판매한 강의목록 : " + myLectures.toString());
+        return  myLectures;
     }
 
 
