@@ -17,8 +17,6 @@ import java.util.UUID;
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
-    List<ChatMessage> findByChatRoomOrderByCreatedAtAsc(ChatRoom chatRoom);
-
     List<ChatMessage> findByChatRoomAndCreatedAtAfterOrderByCreatedAtAsc(ChatRoom chatRoom, LocalDateTime createdAtAfter);
     
     // 인덱스 기반 pagination - 최신 메시지부터 조회 (역순)

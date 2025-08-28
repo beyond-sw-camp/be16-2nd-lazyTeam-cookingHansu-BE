@@ -83,23 +83,6 @@ public class ChatService {
             }
         }
 
-//        // 읽음 상태 – 보낸 사람은 Y, 나머지 N
-//        List<ChatParticipant> participants = chatParticipantRepository.findByChatRoom(chatRoom);
-//        for (ChatParticipant p : participants) {
-//            String readFlag = p.getUser().getId().equals(sender.getId()) ? "Y" : "N";
-//            readStatusRepository.save(ReadStatus.builder()
-//                    .chatRoom(chatRoom)
-//                    .user(p.getUser())
-//                    .chatMessage(chatMessage)
-//                    .isRead(readFlag)
-//                    .build());
-//            // 비활성 복구
-//            if (!p.getUser().getId().equals(sender.getId()) && "N".equals(p.getIsActive())) {
-//                p.joinChatRoom();
-//            }
-//        }
-
-
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
                 .roomId(roomId)
@@ -249,8 +232,6 @@ public class ChatService {
         ChatParticipant participant = chatParticipantRepository
                 .findByChatRoomAndUser(chatRoom, user)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
-
-        Long lastMessageId = participant.getLastReadMessage() == null ? 0 : participant.getLastReadMessage().getId();
 
         // 인덱스 기반 cursor pagination
         int pageIndex = 0;
