@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.domain.post.service;
 
 import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
+import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.post.dto.*;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
@@ -38,6 +39,8 @@ public class PostService {
     private final IngredientsRepository ingredientsRepository;
     private final RecipeStepRepository recipeStepRepository;
     private final S3Uploader s3Uploader;
+    private final InteractionService interactionService;  // 추가
+
 
     private User getCurrentUser() {
         UUID userId = AuthUtils.getCurrentUserId();
@@ -128,8 +131,19 @@ public class PostService {
         List<Ingredients> ingredients = ingredientsRepository.findByPost(post);
         List<RecipeStep> steps = recipeStepRepository.findByPostOrderByStepSequence(post);
 
-        log.info("Post 상세 조회 완료 - Post ID: {}, 제목: {}", postId, post.getTitle());
-        return PostResponseDto.fromEntity(post, ingredients, steps);
+        Boolean isLiked = null;
+        Boolean isBookmarked = null;
+
+        try {
+            UUID currentUserId = AuthUtils.getCurrentUserId();
+            if (currentUserId != null) {
+                isLiked = interactionService.isPostLikedByCurrentUser(postId);
+                isBookmarked = interactionService.isPostBookmarkedByCurrentUser(postId);
+            }
+        } catch (Exception e) {
+        }
+
+        return PostResponseDto.fromEntity(post, ingredients, steps, isLiked, isBookmarked);
     }
 
 
@@ -142,9 +156,7 @@ public class PostService {
         if (thumbnail != null && !thumbnail.isEmpty()) {
             try {
                 thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
-                log.info("Post 썸네일 업데이트 성공: {}", thumbnailUrl);
             } catch (Exception e) {
-                log.error("Post 썸네일 업데이트 실패: {}", e.getMessage());
                 throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
             }
         } else if (requestDto.getThumbnailUrl() != null) {
@@ -207,10 +219,35 @@ public class PostService {
 
         Page<Post> postsPage = postRepository.findPostsByFilters(role, category, pageable);
 
+        UUID currentUserId = null;
+        try {
+            currentUserId = AuthUtils.getCurrentUserId();
+        } catch (Exception e) {
+            log.debug("비회원 접근: {}", e.getMessage());
+        }
+
+        final UUID finalCurrentUserId = currentUserId;
+
+        Page<PostListResponseDto> result = postsPage.map(post -> {
+            Boolean isLiked = null;
+            Boolean isBookmarked = null;
+
+            if (finalCurrentUserId != null) {
+                try {
+                    isLiked = interactionService.isPostLikedByCurrentUser(post.getId());
+                    isBookmarked = interactionService.isPostBookmarkedByCurrentUser(post.getId());
+                } catch (Exception e) {
+                    log.debug("상태 확인 실패 - postId: {}", post.getId());
+                }
+            }
+
+            return PostListResponseDto.fromEntity(post, isLiked, isBookmarked);
+        });
+
         log.info("Post 목록 조회 - role: {}, category: {}, filterSort: {}, page: {}, totalElements: {}",
                 role, category, filterSort, pageable.getPageNumber(), postsPage.getTotalElements());
 
-        return postsPage.map(PostListResponseDto::fromEntity);
+        return result;
     }
 
     // ========== 유틸리티 메서드 ==========

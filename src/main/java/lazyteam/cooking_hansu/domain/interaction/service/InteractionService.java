@@ -263,6 +263,67 @@ public class InteractionService {
         return true;
     }
 
+    /**
+     * 현재 사용자의 게시글 좋아요 상태 확인
+     */
+    public boolean isPostLikedByCurrentUser(UUID postId) {
+        User user = getCurrentUser();
+        UUID userId = user.getId();
+
+        // Redis에서 먼저 확인
+        boolean isLiked = redisInteractionService.isPostLikedByUser(postId, userId);
+
+        // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
+        if (!isLiked) {
+            boolean dbLikedStatus = postLikesRepository.findByUserIdAndPostId(userId, postId) != null;
+            if (dbLikedStatus) {
+                redisInteractionService.setPostLikeStatus(postId, userId, true);
+                isLiked = true;
+            }
+        }
+
+        return isLiked;
+    }
+
+    /**
+     * 현재 사용자의 게시글 북마크 상태 확인
+     */
+    public boolean isPostBookmarkedByCurrentUser(UUID postId) {
+        User user = getCurrentUser();
+        UUID userId = user.getId();
+
+        // Redis에서 먼저 확인
+        boolean isBookmarked = redisInteractionService.isPostBookmarkedByUser(postId, userId);
+
+        // Redis에 데이터가 없으면 DB에서 확인하고 Redis에 캐싱
+        if (!isBookmarked) {
+            boolean dbBookmarkedStatus = bookmarkRepository.findByUserIdAndPostId(userId, postId) != null;
+            if (dbBookmarkedStatus) {
+                redisInteractionService.setPostBookmarkStatus(postId, userId, true);
+                isBookmarked = true;
+            }
+        }
+
+        return isBookmarked;
+    }
+    public boolean isLectureLikedByCurrentUser(UUID lectureId) {
+        User user = getCurrentUser();
+        UUID userId = user.getId();
+
+        // Redis에서 먼저 확인
+        boolean isLiked = redisInteractionService.isLectureLikedByUser(lectureId, userId);
+
+        // Redis에 데이터가 없으면 DB에서 확인
+        if (!isLiked) {
+            boolean dbLikedStatus = lectureLikesRepository.findByUserIdAndLectureId(userId, lectureId) != null;
+            if (dbLikedStatus) {
+                redisInteractionService.setLectureLikeStatus(lectureId, userId, true);
+                isLiked = true;
+            }
+        }
+
+        return isLiked;
+    }
 
     // ========== 유틸리티 메서드 ==========
     private User getCurrentUser() {

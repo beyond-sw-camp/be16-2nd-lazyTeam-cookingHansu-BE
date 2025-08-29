@@ -31,6 +31,8 @@ public class PostResponseDto {
     private Long likeCount;
     private Long viewCount;
     private Long bookmarkCount;
+    private Boolean isLiked;        // 좋아요 눌렀는지 확인하는거 추가
+    private Boolean isBookmarked;   // 북마크 눌렀는지 확인하는거 추가
     private Boolean isOpen;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -100,7 +102,8 @@ public class PostResponseDto {
     }
 
     // 통합 Post 엔티티로부터 DTO 생성 (재료, 조리순서 포함)
-    public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps) {
+    public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps,
+                                             Boolean isLiked, Boolean isBookmarked) {
         return PostResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -114,6 +117,8 @@ public class PostResponseDto {
                 .likeCount(post.getLikeCount())
                 .viewCount(post.getViewCount())
                 .bookmarkCount(post.getBookmarkCount())
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
                 .isOpen(post.getIsOpen())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
