@@ -151,17 +151,35 @@ public class PostService {
         User currentUser = getCurrentUser();
         Post post = getPostByIdAndUser(postId, currentUser);
 
-        // 썸네일 업로드 처리
-        String thumbnailUrl = post.getThumbnailUrl(); // 기존 URL 유지
+        // 기존 썸네일 URL 저장
+        String oldThumbnailUrl = post.getThumbnailUrl();
+        String thumbnailUrl = oldThumbnailUrl; // 기본값은 기존 URL
+
+        // 새로운 썸네일이 업로드된 경우
         if (thumbnail != null && !thumbnail.isEmpty()) {
             try {
+                // 새 이미지 업로드
                 thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
+                log.info("Post 썸네일 업데이트 성공: {}", thumbnailUrl);
+
+                // 기존 이미지 삭제 (기존 URL이 있는 경우에만)
+                if (oldThumbnailUrl != null && !oldThumbnailUrl.isEmpty()) {
+                    try {
+                        s3Uploader.delete(oldThumbnailUrl);
+                        log.info("기존 Post 썸네일 삭제 성공: {}", oldThumbnailUrl);
+                    } catch (Exception deleteException) {
+                        log.warn("기존 Post 썸네일 삭제 실패 (계속 진행): {}", deleteException.getMessage());
+                    }
+                }
             } catch (Exception e) {
+                log.error("Post 썸네일 업데이트 실패: {}", e.getMessage());
                 throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
             }
         } else if (requestDto.getThumbnailUrl() != null) {
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
+
+        // 나머지 기존 코드 그대로...
         PostUpdateData updateData = PostUpdateData.builder()
                 .title(requestDto.getTitle())
                 .description(requestDto.getDescription())
@@ -175,7 +193,6 @@ public class PostService {
                 .build();
 
         post.updatePost(updateData);
-
         // 재료 정보 갱신
         if (requestDto.getIngredients() != null) {
             ingredientsRepository.deleteByPost(post);
