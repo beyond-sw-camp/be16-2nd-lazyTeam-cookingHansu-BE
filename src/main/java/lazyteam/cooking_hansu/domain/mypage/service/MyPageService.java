@@ -17,6 +17,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.*;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class MyPageService {
         return ProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-//                .info(user.getInfo())
+                .info(user.getInfo())
                 .profileImageUrl(user.getPicture())
                 .userType(getUserTypeDisplayName(user.getRole()))
                 .build();
@@ -202,11 +203,12 @@ public class MyPageService {
 
     // ===== 공통 메서드 =====
 
-    // 현재 로그인한 사용자 조회 (테스트용)
+    // 현재 로그인한 사용자 조회
     private User getCurrentUser() {
         UUID userId = AuthUtils.getCurrentUserId();
         return  userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+
     }
 
     // 역할명을 한글로 변환하는 메서드

@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.lecture.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
+import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeAndApprovalEntity;
