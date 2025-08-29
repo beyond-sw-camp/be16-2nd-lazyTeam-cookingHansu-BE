@@ -45,8 +45,9 @@ public class JwtTokenFilter extends GenericFilter {
             authorityList.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role").toString()));
             Authentication authentication = new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorityList);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("JWT 인증 성공: email={}, role={}", claims.getSubject(), claims.get("role"));
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("JWT 파싱 실패", e);
         }
         chain.doFilter(request, response);
     }

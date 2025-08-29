@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.service.LectureService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -59,7 +60,7 @@ public class LectureController {
     @GetMapping("/list")
     public ResponseEntity<?> findAllLecture(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
-        List<LectureResDto> lectureResDto = lectureService.findAllLecture(pageable);
+        Page<LectureResDto> lectureResDto = lectureService.findAllLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
     }
 
@@ -70,12 +71,12 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok(detailDto,HttpStatus.OK),HttpStatus.OK);
     }
 
-//    내 강의 목록 조회
+//    내가 업로드 한 강의목록 조회(판매자)
     @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @GetMapping("/mylist")
     public ResponseEntity<?> findAllMyLecture(@PageableDefault(size = 8, sort = "createdAt",
-            direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
-        List<LectureResDto> lectureResDtos = lectureService.findAllMyLecture(pageable);
+            direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<LectureResDto> lectureResDtos = lectureService.findAllMyLecture(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDtos,HttpStatus.OK),HttpStatus.OK);
 
     }
@@ -87,5 +88,7 @@ public class LectureController {
         lectureService.deleteLecture(lectureId);
         return new ResponseEntity<>(ResponseDto.ok("강의가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
     }
+
+
 
 }

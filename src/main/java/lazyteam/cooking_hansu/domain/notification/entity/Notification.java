@@ -39,6 +39,9 @@ public class Notification extends BaseIdAndTimeEntity {
     @Builder.Default
     private Boolean isDeleted = false;
 
+    @Column(name="room_id")
+    private Long roomId;
+
     public void markRead() {
         this.isRead = true;
     }

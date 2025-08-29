@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.report.entity.Report;
 import lazyteam.cooking_hansu.domain.report.repository.ReportRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +29,7 @@ public class ReportService {
     private final UserRepository userRepository;
 
     public void createReport(ReportCreateDto reportCreateDto){
-        // TODO: 실제 인증된 사용자 정보로 변경 필요
-        UUID id = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        UUID id = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("신고를 생성할 사용자를 찾을 수 없습니다."));
         List<Report> reportList = reportRepository.findAllByStatus(Status.PENDING);
 //        이미 신고가 되어있고 같은사람이면 중복신고못하게 막기

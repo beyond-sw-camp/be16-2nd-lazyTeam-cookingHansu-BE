@@ -1,11 +1,15 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
+import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
+import lazyteam.cooking_hansu.domain.mypage.dto.MyLectureListDto;
 import lazyteam.cooking_hansu.domain.mypage.dto.ProfileUpdateRequestDto;
 import lazyteam.cooking_hansu.domain.mypage.service.*;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,13 +59,14 @@ public class MyPageController {
         );
     }
 
+    //   내가 구매한 강의 목록조회
     @GetMapping("/lectures")
-    public ResponseEntity<?> myLectures(@PageableDefault(size = 8) Pageable pageable) {
-        return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyLectures(pageable), HttpStatus.OK),
-                HttpStatus.OK
-        );
+    public ResponseEntity<?> myLectures(@PageableDefault(size = 6, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<MyLectureListDto> lectureResDto = myPageService.getMyLectures(pageable);
+        return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
     }
+
 
     @GetMapping("/bookmarked-posts")
     public ResponseEntity<?> myBookmarkedPosts() {

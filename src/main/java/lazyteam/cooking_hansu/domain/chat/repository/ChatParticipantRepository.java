@@ -41,19 +41,6 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
           CASE WHEN MAX(cm.createdAt) IS NULL THEN 1 ELSE 0 END,
           MAX(cm.createdAt) DESC
     """)
-    List<ChatParticipant> findMyActiveParticipantsOrderByLastMessage(@Param("user") User user);
-
-    @Query("""
-        SELECT cp
-        FROM ChatParticipant cp
-        LEFT JOIN ChatMessage cm ON cm.chatRoom = cp.chatRoom
-        WHERE cp.user = :user
-          AND cp.isActive = 'Y'
-        GROUP BY cp.id, cp.chatRoom.id
-        ORDER BY
-          CASE WHEN MAX(cm.createdAt) IS NULL THEN 1 ELSE 0 END,
-          MAX(cm.createdAt) DESC
-    """)
     Slice<ChatParticipant> findMyActiveParticipantsOrderByLastMessageSlice(@Param("user") User user, Pageable pageable);
 
     boolean existsByChatRoomAndUser(ChatRoom chatRoom, User user);

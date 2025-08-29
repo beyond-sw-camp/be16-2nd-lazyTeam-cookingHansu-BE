@@ -1,9 +1,9 @@
-> **누구나 요리를 배우고, 나누고, 소통하는 All-in-One 요리 플랫폼**  
-> 레시피 공유부터 요리 전문가 강의까지, 한 수 배워보세요!
+# 🍳 요리한수 (Cooking Hansu) - 레시피 공유 및 강의 커뮤니티 서비스
+<img width="800" height="1000" alt="요리한수" src="https://github.com/user-attachments/assets/67175952-18b8-463f-b010-65395f81e1c0" />
+<br>
 
-# 🍳 요리한수 (Cooking Hansu) --> 추후 이미지와 움짤로 변경 예정
----
-## 👨‍👩‍👧‍👦 Team Members
+
+## 🙋🏻 팀원 소개
 
 <table>
   <tr>
@@ -269,47 +269,15 @@
     <summary>관리자</summary>
     <details>
       <summary>관리자 대시보드 조회</summary>
-      `GET /admin/dashboard`
+      <img src="https://github.com/user-attachments/assets/41ff8758-e02d-4b51-87f0-a9613e561fa3" alt="대시보드 조회" width="800"/>
     </details>
     <details>
-      <summary>승인 대기 강의 목록 조회</summary>
-      `GET /admin/lecture/list`
+      <summary>강의 관리</summary>
+      <img src="https://github.com/user-attachments/assets/5d3477b6-0e37-483d-95be-41b61f83dcd8" alt="강의 승인" width="800"/>
     </details>
     <details>
-      <summary>강의 승인</summary>
-      `PATCH /admin/lecture/approve/{lectureId}`
-    </details>
-    <details>
-      <summary>강의 반려</summary>
-      `PATCH /admin/lecture/reject/{lectureId}`
-    </details>
-    <details>
-      <summary>승인 대기 요리사 목록 조회</summary>
-      `GET /admin/user/waiting/chef`
-    </details>
-    <details>
-      <summary>승인 대기 자영업자 목록 조회</summary>
-      `GET /admin/user/waiting/business`
-    </details>
-    <details>
-      <summary>사용자 승인</summary>
-      `PATCH /admin/user/approve/{userId}`
-    </details>
-    <details>
-      <summary>사용자 거절</summary>
-      `PATCH /admin/user/reject/{userId}`
-    </details>
-    <details>
-      <summary>사용자 활성화</summary>
-      `PATCH /admin/user/active/{userId}`
-    </details>
-    <details>
-      <summary>사용자 비활성화</summary>
-      `PATCH /admin/user/inactive/{userId}`
-    </details>
-    <details>
-      <summary>사용자 전체 목록 조회</summary>
-      `GET /admin/user/list`
+      <summary>사용자 관리</summary>
+      <img src="https://github.com/user-attachments/assets/45791e70-42db-4afe-bd7f-c6ea1ce7d148" alt="사용자 관리" width="800"/>
     </details>
     <details>
       <summary>신고 목록 조회</summary>
@@ -325,15 +293,15 @@
     </details>
     <details>
       <summary>공지사항 등록</summary>
-      `POST /admin/notice/create`
+      <img src="https://github.com/user-attachments/assets/80aed914-6a5e-4a38-9529-4f2e426443fd" alt="공지사항 등록" width="800"/>
     </details>
     <details>
       <summary>공지사항 수정</summary>
-      `PUT /admin/notice/update/{id}`
+      <img src="https://github.com/user-attachments/assets/9be9ae10-6985-4e9d-ab7e-c02cc662ba4f" alt="공지사항 수정" width="800"/>
     </details>
     <details>
       <summary>공지사항 삭제</summary>
-      `DELETE /admin/notice/delete/{id}`
+      <img src="https://github.com/user-attachments/assets/42c943cb-b560-4b7d-8652-28fb4f49879f" alt="공지사항 삭제" width="800"/>
     </details>
   </details>
   
@@ -357,18 +325,25 @@
     <details>
       <summary>토큰 리프레시</summary>
       `POST /user/refresh`
+      <img src="https://github.com/user-attachments/assets/fcf6f11b-1f5d-48e2-8227-e8cce13be663" alt="토큰 리프레시(새로고침)" width="800"/>
     </details>
     <details>
       <summary>로그아웃</summary>
       `POST /user/logout`
+      <img src="https://github.com/user-attachments/assets/2cb3cc94-2dee-4314-a10c-84a47ca13d98" alt="로그아웃" width="800" />
     </details>
     <details>
       <summary>회원 추가 정보 입력</summary>
       `POST /user/add-info`
+      <img src="https://github.com/user-attachments/assets/494d9bde-83ec-4e76-8386-8f100fdad71c" alt="추가 정보 입력 (일반)" width="800" />
+      <img src="https://github.com/user-attachments/assets/7838734c-e129-45da-98de-7f23cc1435ff" alt="추가 정보 입력 (종사자)" width="800" />
+      <img src="https://github.com/user-attachments/assets/a483bbc9-0f81-47f4-8d89-74af612b9bfd" alt="추가 정보 입력 (자영업자)" width="800" />
     </details>
     <details>
       <summary>프로필 조회</summary>
       `GET /user/profile`
+      <img width="1435" height="73" alt="헤더 프로필 조회" src="https://github.com/user-attachments/assets/999096b2-8525-4712-b040-4caddff2db7e" />
+      <img width="800" alt="프로필 조회 응답 결과" src="https://github.com/user-attachments/assets/57d269e0-73b3-4baa-a68a-1cef87bd4a8a" />
     </details>
     <details>
       <summary>현재 사용자 정보 조회</summary>
@@ -379,49 +354,36 @@
       `DELETE /user/delete`
     </details>
   </details>
-  
+
   <details> 
     <summary>채팅</summary>
     <details>
-      <summary>내 채팅방 목록 조회</summary>
-      `GET /chat/my/rooms`
-    </details>
-    <details>
-      <summary>채팅방 참여자 목록 조회</summary>
-      `GET /chat/room/{roomId}/participants`
-    </details>
-    <details>
-      <summary>채팅방 상세 메시지 조회</summary>
-      `GET /chat/room/{roomId}/history`
-    </details>
-    <details>
-      <summary>채팅방 생성</summary>
+      <summary>채팅방 생성 및 채팅방 목록 이동</summary>
       `POST /chat/room/create`
-    </details>
-    <details>
-      <summary>채팅방 이름 수정</summary>
-      `PATCH /chat/room/{roomId}/name`
-    </details>
-    <details>
-      <summary>채팅방 나가기</summary>
-      `DELETE /chat/room/{roomId}/leave`
-    </details>
-    <details>
-      <summary>파일 업로드</summary>
-      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/22d5a80e-4f88-4b0e-81e7-bbaf0352ba47" alt="채팅방 생성" width="1000"/>
     </details>
     <details>
       <summary>실시간 메시지 전송</summary>
       `/app/chat-rooms/{roomId}/chat-message`
+      <img src="https://github.com/user-attachments/assets/fdeb4c3b-a8ad-48f2-9e7b-ef26c3a4af2f" alt="실시간 메시지 전송" width="1000"/>
     </details>
     <details>
-      <summary>온라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/online`
+      <summary>파일 업로드</summary>
+      `POST /chat/room/{roomId}/upload`
+      <img src="https://github.com/user-attachments/assets/47f59838-b70c-49ae-9be2-46e7c58e1354" alt="파일 업로드" width="1000"/>
     </details>
     <details>
-      <summary>오프라인 상태 변경</summary>
-      `/app/chat-rooms/{roomId}/offline`
+      <summary>채팅방 이름 수정</summary>
+      `PATCH /chat/room/{roomId}/name`
+      <img src="https://github.com/user-attachments/assets/b8eaec8d-d50e-4e64-a7ec-da7c61e90d1f" alt="채팅방 이름 수정" width="1000"/>
     </details>
+    <details>
+      <summary>채팅방 나가기</summary>
+      `DELETE /chat/room/{roomId}/leave`
+      <img src="https://github.com/user-attachments/assets/34649cb5-9d89-4c25-9bab-e7dc0f6e2880" alt="채팅방 나가기" width="1000"/>
+    </details>
+
+
   </details>
   
   <details>
@@ -429,30 +391,36 @@
     <details>
       <summary>댓글 생성</summary>
       `POST /post/comment/create`
+      <img src="https://github.com/user-attachments/assets/8c3fd6cf-2bd5-4973-8a5a-9ecbed3d8344" alt="댓글 생성" width="600"/>
     </details>
     <details>
       <summary>댓글 목록 조회</summary>
       `GET /post/comment/list/{postId}`
+      <img src="https://github.com/user-attachments/assets/282aa1ea-27da-4d72-8c7b-baf4a1e7f640" alt="댓글 목록조회" width="600"/>
     </details>
     <details>
       <summary>댓글 수정</summary>
       `PATCH /post/comment/update/{commentId}`
+      <img src="https://github.com/user-attachments/assets/f19424e0-cc6f-47fc-887a-c43f51c8d39f" alt="댓글 수정" width="600"/>
     </details>
     <details>
       <summary>댓글 삭제</summary>
       `DELETE /post/comment/delete/{commentId}`
+      <img src="https://github.com/user-attachments/assets/0dce6c2d-61f2-4193-8513-af899ed68f78" alt="댓글 삭제" width="600"/>
     </details>
   </details>
-  
+
   <details> 
     <summary>좋아요</summary>
     <details>
       <summary>게시글 좋아요 토글</summary>
       `POST /api/interactions/posts/{postId}/likes`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="게시글 좋아요 토글" width="600"/>
     </details>
     <details>
       <summary>강의 좋아요 토글</summary>
       `POST /api/interactions/lectures/{lectureId}/likes`
+      <img src="https://github.com/user-attachments/assets/6dc33e26-2a78-4480-9681-9c08551ea55a" alt="강의 좋아요 토글" width="600"/>
     </details>
   </details>
   
@@ -461,6 +429,7 @@
     <details>
       <summary>게시글 북마크 토글</summary>
       `POST /api/interactions/posts/{postId}/bookmarks`
+      <img src="https://github.com/user-attachments/assets/33289823-786b-44b6-ae33-824cce064548" alt="북마크 토글" width="600"/>
     </details>
   </details>
   
@@ -469,6 +438,7 @@
     <details>
       <summary>게시글 조회수 증가</summary>
       `POST /api/interactions/posts/{postId}/views`
+      <img src="https://github.com/user-attachments/assets/45a56af0-831c-4965-abe8-45bc5a7927c9" alt="조회수 증가" width="600"/>
     </details>
   </details>
   
@@ -476,74 +446,35 @@
     <summary>강의</summary>
     <details>
       <summary>강의 등록</summary>
-      `POST /lecture/post`
+      <img src="https://github.com/user-attachments/assets/11af95c1-de26-42ad-b0ba-20a412e64e8e" alt="강의 등록" width="600"/>
     </details>
     <details>
       <summary>강의 수정</summary>
-      `PATCH /lecture/update/{lectureId}`
+      <img src="https://github.com/user-attachments/assets/7aa176e0-dce7-4758-bd75-4be53f4aaaec" alt="강의 수정" width="600"/>
     </details>
     <details>
       <summary>강의 목록 조회</summary>
-      `GET /lecture/list`
+      <img width="1069" height="1631" alt="localhost_3000_lectures (2)" src="https://github.com/user-attachments/assets/8bca739d-608d-4d52-8de3-f3b66174901f" />
     </details>
     <details>
       <summary>강의 상세 조회</summary>
-      `GET /lecture/detail/{lectureId}`
-    </details>
-    <details>
-      <summary>내 강의 목록 조회</summary>
-      `GET /lecture/mylist`
+      <img width="1069" height="3411" alt="localhost_3000_lectures_db09a8db-b186-48b1-8f86-489f9a249fa1" src="https://github.com/user-attachments/assets/ca737063-d3f9-40c1-8b37-43203d84d938" />
+      <img src="https://github.com/user-attachments/assets/ad7f5a2c-a8b3-4450-9e41-032c79c8a206" alt="공유하기" width="600"/>
     </details>
     <details>
       <summary>강의 삭제</summary>
-      `DELETE /lecture/delete/{lectureId}`
+      <img src="https://github.com/user-attachments/assets/bbd82053-d8d5-482d-9ddf-b938c2a263ca" alt="강의 삭제" width="600"/>
     </details>
     <details>
-      <summary>리뷰 등록</summary>
-      `POST /review/post`
+      <summary>리뷰 기능</summary>
+      <img src="https://github.com/user-attachments/assets/1e3f9f39-038e-446f-a234-14203b385a8f" alt="리뷰 기능" width="600"/>
     </details>
     <details>
-      <summary>리뷰 목록 조회</summary>
-      `GET /review/list/{lectureId}`
-    </details>
-    <details>
-      <summary>리뷰 수정</summary>
-      `PATCH /review/modify`
-    </details>
-    <details>
-      <summary>리뷰 삭제</summary>
-      `DELETE /review/delete/{lectureId}`
-    </details>
-    <details>
-      <summary>Q&A 등록</summary>
-      `POST /lecture/qna/{lectureId}/create`
-    </details>
-    <details>
-      <summary>Q&A 목록 조회</summary>
-      `GET /lecture/qna/{lectureId}/list`
-    </details>
-    <details>
-      <summary>Q&A 수정</summary>
-      `PUT /lecture/qna/{qnaId}/update`
-    </details>
-    <details>
-      <summary>Q&A 삭제</summary>
-      `DELETE /lecture/qna/{qnaId}/delete`
+      <summary>Q&A 기능</summary>
+      <img src="https://github.com/user-attachments/assets/76af1270-2b5c-473f-b62e-8560b5ad600f" alt="Q&A 기능" width="600"/>
     </details>
   </details>
-  
-  <details> 
-    <summary>공지사항</summary>
-    <details>
-      <summary>공지사항 목록 조회</summary>
-      `GET /notice/list`
-    </details>
-    <details>
-      <summary>공지사항 상세 조회</summary>
-      `GET /notice/detail/{id}`
-    </details>
-  </details>
-  
+
   <details> 
     <summary>마이페이지</summary>
     <details>
@@ -564,7 +495,7 @@
     </details>
     <details>
       <summary>내 강의 목록 조회</summary>
-      `GET /api/my/lectures`
+      <img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/57809314-68af-4e0d-9f00-12b1674e631f" />
     </details>
     <details>
       <summary>내 북마크한 게시글 목록 조회</summary>
@@ -600,49 +531,38 @@
     <details>
       <summary>게시글 생성</summary>
       `POST /api/posts`
+      <img src="https://github.com/user-attachments/assets/dfa394b0-0d95-491f-b4bd-238a97563e20" alt="게시글생성" width="800"/>
     </details>
     <details>
       <summary>게시글 상세 조회</summary>
       `GET /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/abd90174-9b2f-4d0f-a9f7-04d348de09a2" alt="게시글상세조회" width="800"/>
     </details>
     <details>
       <summary>게시글 수정</summary>
       `PUT /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/0ca89557-ed4e-40af-a0a1-e33e2e54cfad" alt="게시글수정" width="800"/>
     </details>
     <details>
       <summary>게시글 삭제</summary>
       `DELETE /api/posts/{postId}`
+      <img src="https://github.com/user-attachments/assets/b636eb09-fe96-4647-99f4-236d68843ab5" alt="게시글삭제" width="800"/>
     </details>
     <details>
       <summary>게시글 목록 조회</summary>
       `GET /api/posts`
+      <img src="https://github.com/user-attachments/assets/07e1155c-6686-4cfd-86d9-13ad7acc095b" alt="게시글삭제" width="800"/>
     </details>
   </details>
   <details>
     <summary>결제</summary>
     <details>
-      <summary>결제 전 정보 저장</summary>
-      `POST /purchase/prepay`
-    </details>
-    <details>
       <summary>결제 확인</summary>
-      `POST /purchase/confirm`
+      <img src="https://github.com/user-attachments/assets/26226052-dd93-40d1-885b-720fb0242a2f" alt="강의 결제" width="800"/>
     </details>
     <details>
       <summary>장바구니 담기</summary>
-      `POST /cart/add`
-    </details>
-    <details>
-      <summary>장바구니 목록 조회</summary>
-      `GET /cart/list/{id}`
-    </details>
-    <details>
-      <summary>장바구니 단건 삭제</summary>
-      `DELETE /cart/delete`
-    </details>
-    <details>
-      <summary>장바구니 전체 삭제</summary>
-      `DELETE /cart/deleteAll`
+      <img src="https://github.com/user-attachments/assets/644610c8-4cd9-4b6d-af57-6b95c410941e" alt="장바구니 기능" width="800"/>
     </details>
   </details>
   <details>
@@ -660,22 +580,120 @@
 <details>
   <summary><b>트러블 슈팅</b></summary>
 
-### 🔎 발생 이슈
-- [ ] (예: 소셜 로그인 시 OAuth Redirect 오류 발생)  
-- [ ] (예: WebSocket 연결이 불안정하여 채팅 메시지 누락)  
+  <details>
+    <summary><b>강의 등록 시 순환참조 이슈</b></summary>
 
-### 🧩 원인 분석
-- (예: 카카오 개발자 콘솔 Redirect URI 설정 누락)  
-- (예: 서버 Keep-Alive 설정 미흡으로 인한 연결 끊김)  
+  ### 🔎 발생 이슈
+  - 강의 등록 시 `Lecture`와 `ingredients`, `steps`를 DTO → Entity로 변환하는 과정에서 **순환참조 오류** 발생  
 
-### 🛠️ 해결 방법
-- (예: 올바른 Redirect URI 등록 후 정상 동작 확인)  
-- (예: Spring WebSocket Heartbeat Interval 조정 및 Redis Pub/Sub 적용)  
+  ### 🧩 원인 분석
+  - `Lecture.builder()` 안에서 아직 완전히 생성되지 않은 `Lecture`를 `ingredients`, `steps`에 동시에 넣으려다 보니 JPA가 순환 구조로 인식  
 
-### ✅ 최종 결과
-- (예: 로그인 정상 처리 및 사용자 프로필 연동 성공)  
+  ### 🛠️ 해결 방법
+  - Controller에서 multipart 요청을 분리 처리  
+  - Service 계층에서 순차적으로 저장 흐름 적용  
+    1. `Lecture` 엔티티 먼저 저장  
+    2. 저장된 `Lecture`를 기반으로 `ingredients` 목록 변환 후 저장  
+    3. `steps` 목록 변환 후 저장  
+    4. 썸네일 이미지는 S3 업로드 후 `Lecture`에 업데이트  
+
+  ### ✅ 최종 결과
+  - 순환참조 문제 제거  
+  - 엔티티 저장 책임이 명확하게 분리되어 구조가 깔끔해짐  
+
+  </details>
+
+  <details>
+    <summary><b>토스 결제 연동 시 흐름 정리</b></summary>
+
+  ### 🔎 발생 이슈
+  - 결제 시 주문 등록 → 결제창 호출 → 결제 승인 과정이 불명확해 구현 중 오류 발생  
+
+  ### 🧩 원인 분석
+  - 프론트에서 결제 요청 시 `orderId`, `amount`, `lectureIds`를 백엔드로 전달하는 로직 혼동  
+  - 결제 승인(confirm) 단계에서 토스 API 호출 구조가 직관적이지 않음  
+
+  ### 🛠️ 해결 방법
+  1. **사전 주문 저장** (`POST /purchase/prepay`)  
+     - `orderId`, `amount`, `lectureIds`를 DB에 저장  
+  2. **토스 결제창 호출** (프론트)  
+     - `TossPayments.requestPayment()` 사용  
+  3. **결제 승인 요청** (`POST /purchase/confirm`)  
+     - 성공 시 전달되는 `paymentKey`, `orderId`, `amount`를 이용해 백엔드에서 토스 API 호출 → 승인 처리  
+
+  ### ✅ 최종 결과
+  - 결제 흐름이 `사전 저장 → 결제창 호출 → 승인`으로 명확하게 정리됨  
+  - 프론트/백엔드 역할이 분리되어 유지보수성과 가독성이 개선됨  
+
+  </details>
+
+  <details>
+    <summary><b>채팅 모듈 – 실시간 읽음 처리 문제</b></summary>
+
+  ### 🔎 발생 이슈
+  - 채팅 메시지는 실시간 송수신이 가능했지만, 상대방이 읽었는지는 새로고침해야 목록에 반영됨  
+
+  ### 🧩 원인 분석
+  - 읽음 처리 테이블만 사용하여, **실시간 온라인 채널 구독**과 **읽음 갱신 로직**이 누락됨  
+
+  ### 🛠️ 해결 방법
+  - 읽음 처리 테이블 삭제  
+  - 메시지, 채팅 참여자, 채팅 온라인 참여자 **3개 채널 구독**  
+  - 참여자 채널에 *마지막 읽은 메시지 ID* 저장  
+  - 클라이언트 로컬에서 메시지 ID와 비교하여 **UnreadCount** 계산  
+  - 상대방 온라인 진입 시 카운트 감소 & Redis 상태 동기화  
+  - 채팅방 퇴장 시 마지막 읽음 ID 갱신  
+
+  ### ✅ 최종 결과
+  - 새로고침 없이도 읽음 여부가 실시간 반영  
+  - Redis와 DB 간 상태가 안정적으로 일치  
+
+  </details>
+
+  <details>
+    <summary><b>채팅 모듈 – 1:1 채팅 읽음 처리 오류</b></summary>
+
+  ### 🔎 발생 이슈
+  - 1:1 채팅에서 메시지를 내가 보내든, 상대방이 보내든 항상 읽음 처리됨  
+
+  ### 🧩 원인 분석
+  - 마지막 읽음 ID를 실시간 POST로 즉시 갱신 → 송신 시점마다 **항상 읽음 처리**  
+
+  ### 🛠️ 해결 방법
+  - 메시지, 참여자, 온라인 참여자 **3개 채널 구독**  
+  - 이벤트 기반으로만 마지막 읽음 ID 갱신  
+  - 로컬에서 마지막 ID를 기준으로 UnreadCount 계산  
+
+  ### ✅ 최종 결과
+  - 송신자/수신자 구분 없이 올바른 읽음 처리  
+  - 그룹 채팅으로도 확장 가능한 구조 확보  
+
+  </details>
+
+  <details>
+    <summary><b>채팅 모듈 – 파일 업로드 처리 문제</b></summary>
+
+  ### 🔎 발생 이슈
+  - STOMP 메시지 전송 시 파일 자체 업로드 시도 → 구조적 한계로 오류 발생  
+
+  ### 🧩 원인 분석
+  - STOMP는 문자열 전송 전용  
+  - 파일과 메시지를 동시에 처리하려다 비효율 발생  
+
+  ### 🛠️ 해결 방법
+  - 프론트에서 **Presigned URL** 발급받아 S3 업로드  
+  - 업로드 완료 후 URL을 백엔드에 전달  
+  - 메시지에는 해당 URL만 문자열로 저장  
+
+  ### ✅ 최종 결과
+  - 파일 업로드와 메시지 전송이 안정적으로 분리  
+  - STOMP는 메시지 전송 전용으로 단순화  
+  - REST API를 통한 업로드로 UX와 효율성 개선  
+
+  </details>
 
 </details>
+
 
 ---
 

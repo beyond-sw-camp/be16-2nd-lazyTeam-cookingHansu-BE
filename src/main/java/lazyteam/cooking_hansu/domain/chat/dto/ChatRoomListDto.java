@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.chat.dto;
 
+import lazyteam.cooking_hansu.domain.chat.entity.ChatParticipant;
 import lazyteam.cooking_hansu.domain.chat.entity.ChatRoom;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class ChatRoomListDto {
     private Integer newMessageCount; // 읽지 않은 메시지 수
     private LocalDateTime lastMessageTime; // 마지막 메시지 시간
 
-    public static ChatRoomListDto fromEntity(ChatRoom chatRoom, User otherUser,int unreadCount) {
+    public static ChatRoomListDto fromEntity(ChatRoom chatRoom, User otherUser, int unreadCount, ChatParticipant participant) {
         String lastMessage = "메세지를 보내 채팅을 시작해보세요!";
         if (!chatRoom.getMessages().isEmpty()) {
             lastMessage = chatRoom.getMessages().get(chatRoom.getMessages().size() - 1).getMessageText();
@@ -32,7 +33,7 @@ public class ChatRoomListDto {
 
         return ChatRoomListDto.builder()
                 .roomId(chatRoom.getId())
-                .customRoomName(chatRoom.getName())
+                .customRoomName(participant.getCustomRoomName())
                 .otherUserName(otherUser.getName())
                 .otherUserNickname(otherUser.getNickname())
                 .otherUserProfileImage(otherUser.getPicture())
