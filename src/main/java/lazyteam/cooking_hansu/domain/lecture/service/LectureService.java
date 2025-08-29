@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.*;
@@ -14,11 +15,8 @@ import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.util.UtilClassLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
@@ -28,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import software.amazon.awssdk.services.s3.S3Client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +39,6 @@ import java.util.UUID;
 public class LectureService {
 
     private final LectureRepository lectureRepository;
-    private final S3Client s3Client;
     private final UserRepository userRepository;
     private final LectureIngredientsListRepository lectureIngredientsListRepository;
     private final LectureStepRepository lectureStepRepository;
@@ -50,9 +46,8 @@ public class LectureService {
     private final VideoUtil videoUtil;
     private final S3Uploader s3Uploader;
     private final LectureReviewRepository lectureReviewRepository;
-    private final LectureQnaRepository lectureQnaRepository;
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
-
+    private final InteractionService interactionService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -346,6 +341,16 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
         } catch (Exception e) {
             log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
             // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+        }
+
+        Boolean isLiked = null;
+        try {
+            UUID currentUserId = AuthUtils.getCurrentUserId();
+            if (currentUserId != null) {
+                isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
+            }
+        } catch (Exception e) {
+            log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
         }
 
         User submittedBy = lecture.getSubmittedBy();
