@@ -49,10 +49,6 @@ public class LectureService {
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
     private final InteractionService interactionService;
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-
-
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
                        List<LectureIngredientsListDto> lectureIngredientsListDto,

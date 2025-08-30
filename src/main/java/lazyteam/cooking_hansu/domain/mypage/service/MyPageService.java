@@ -2,28 +2,21 @@ package lazyteam.cooking_hansu.domain.mypage.service;
 
 
 import jakarta.persistence.*;
-import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
+import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.interaction.entity.*;
 import lazyteam.cooking_hansu.domain.interaction.repository.*;
-import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
-import lazyteam.cooking_hansu.domain.lecture.entity.*;
-import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.mypage.dto.*;
 import lazyteam.cooking_hansu.domain.post.entity.*;
 import lazyteam.cooking_hansu.domain.post.repository.*;
-import lazyteam.cooking_hansu.domain.purchase.entity.*;
 import lazyteam.cooking_hansu.domain.purchase.repository.*;
 import lazyteam.cooking_hansu.domain.user.entity.common.*;
 import lazyteam.cooking_hansu.domain.user.repository.*;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.*;
-import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 import org.springframework.web.multipart.*;
@@ -41,14 +34,10 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PurchasedLectureRepository purchasedLectureRepository;
-    private final LectureReviewRepository lectureReviewRepository;
     private final BookmarkRepository bookmarkRepository;
     private final PostLikesRepository postLikesRepository;
     private final S3Uploader s3Uploader;
-
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
-
+    private final PostCommentRepository postCommentRepository;
     // ===== 프로필 관련 메서드 =====
 
     // 프로필 조회
@@ -125,10 +114,11 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public List<MyPostListDto> getMyPosts() {
         User user = getCurrentUser();
-        List<Post> posts = postRepository.findAllByUser(user);
+        List<Post> posts = postRepository.findAllByUserAndDeletedAtIsNull(user);
 
         return posts.stream()
-                .map(post -> MyPostListDto.builder()
+                .map(post -> { Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+                        return MyPostListDto.builder()
                         .id(post.getId())
                         .title(post.getTitle())
                         .description(post.getDescription())
@@ -136,7 +126,10 @@ public class MyPageService {
                         .createdAt(post.getCreatedAt())
                         .likeCount(post.getLikeCount())
                         .bookmarkCount(post.getBookmarkCount())
-                        .build())
+                        .isOpen(post.getIsOpen())
+                        .commentCount(commentCount)
+                        .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -163,6 +156,8 @@ public class MyPageService {
         return bookmarkRepository.findAllByUser(user).stream()
                 .map(bookmark -> {
                     Post post = bookmark.getPost();
+                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+
                     return MyBookmarkLikedListDto.builder()
                             .id(post.getId())
                             .title(post.getTitle())
@@ -172,6 +167,8 @@ public class MyPageService {
                             .bookmarkCount(post.getBookmarkCount())
                             .writerNickname(post.getUser().getNickname())
                             .createdAt(post.getCreatedAt())
+                            .commentCount(commentCount)
+                            .isOpen(post.getIsOpen())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -187,6 +184,8 @@ public class MyPageService {
         return postLikesList.stream()
                 .map(like -> {
                     Post post = like.getPost();
+                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+
                     return MyBookmarkLikedListDto.builder()
                             .id(post.getId())
                             .title(post.getTitle())
@@ -196,6 +195,8 @@ public class MyPageService {
                             .bookmarkCount(post.getBookmarkCount())
                             .writerNickname(post.getUser().getNickname())
                             .createdAt(post.getCreatedAt())
+                            .commentCount(commentCount)
+                            .isOpen(post.getIsOpen())
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -19,5 +19,7 @@ public class MyBookmarkLikedListDto {
     private Long bookmarkCount;
     private LocalDateTime createdAt;
     private String writerNickname;
+    private Long commentCount;
+    private Boolean isOpen;
 }
 

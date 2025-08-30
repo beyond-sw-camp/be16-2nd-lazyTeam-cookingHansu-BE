@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.post.service;
 
+import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
 import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.post.dto.*;
@@ -40,6 +41,7 @@ public class PostService {
     private final RecipeStepRepository recipeStepRepository;
     private final S3Uploader s3Uploader;
     private final InteractionService interactionService;  // 추가
+    private final PostCommentRepository postCommentRepository;
 
 
     private User getCurrentUser() {
@@ -122,9 +124,22 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 게시글입니다."));
 
-        // 삭제되었거나 비공개 게시글인 경우 접근 차단
-        if (post.isDeleted() || !post.getIsOpen()) {
+        // 삭제된 게시글은 접근 차단
+        if (post.isDeleted()) {
             throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
+        }
+
+        // 비공개 게시글의 경우 작성자만 접근 가능
+        if (!post.getIsOpen()) {
+            try {
+                UUID currentUserId = AuthUtils.getCurrentUserId();
+                if (currentUserId == null || !post.getUser().getId().equals(currentUserId)) {
+                    throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
+                }
+            } catch (Exception e) {
+                // 비로그인 사용자가 비공개 게시글에 접근
+                throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
+            }
         }
 
         // 연관 데이터 조회
@@ -257,8 +272,10 @@ public class PostService {
                     log.debug("상태 확인 실패 - postId: {}", post.getId());
                 }
             }
+            // 댓글 갯수 조회 추가했음.
+            Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
 
-            return PostListResponseDto.fromEntity(post, isLiked, isBookmarked);
+            return PostListResponseDto.fromEntity(post, isLiked, isBookmarked, commentCount);
         });
 
         log.info("Post 목록 조회 - role: {}, category: {}, filterSort: {}, page: {}, totalElements: {}",

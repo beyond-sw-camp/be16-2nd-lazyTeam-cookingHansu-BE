@@ -17,4 +17,6 @@ public class MyPostListDto {
     private LocalDateTime createdAt;
     private Long likeCount;
     private Long bookmarkCount;
+    private Long commentCount;
+    private Boolean isOpen;
 }

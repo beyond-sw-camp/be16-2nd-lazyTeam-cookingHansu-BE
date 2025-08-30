@@ -31,9 +31,10 @@ public class PostCommentService {
     public UUID createComment(PostCommentCreateDto postCommentCreateDto) {
 
         // 유저가 존재하는지 확인
-        User user = getCurrentUser();
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         Post post = postRepository.findById(postCommentCreateDto.getPostId()).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
-
         PostComment postComment;
         // 대댓글인 경우 부모 댓글을 찾아서 설정
         // 부모 댓글이 없는 경우 null로 설정
@@ -116,10 +117,5 @@ public class PostCommentService {
         else{
             postComment.deleteComment();
         }
-    }
-    private User getCurrentUser() {
-        UUID userId = AuthUtils.getCurrentUserId();
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
