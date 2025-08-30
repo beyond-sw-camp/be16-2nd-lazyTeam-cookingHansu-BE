@@ -31,6 +31,7 @@ public class LectureDetailDto {
     private LevelEnum level;
     private CategoryEnum category;
     private Integer price;
+    private Boolean isLiked;
     private Integer reviewCount;
     private Integer qnaCount;
     private Long likeCount; // 좋아요 수 추가

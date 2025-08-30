@@ -22,13 +22,15 @@ public class PostListResponseDto {
     private LevelEnum level;
     private Integer cookTime;
     private Integer serving;
-    
+    //    상태조회
+    private Boolean isLiked;        // 현재 사용자의 좋아요 상태
+    private Boolean isBookmarked;   // 현재 사용자의 북마크 상태
     // 카운트 정보
+    private Long commentCount;
     private Long likeCount;
     private Long viewCount;
     private Long bookmarkCount;
 
-//    이넘
     // 작성자 정보
     private String nickname;
     private Role role;
@@ -41,7 +43,8 @@ public class PostListResponseDto {
      * Post Entity를 PostListResponseDto로 변환
      * 강의쪽 fromEntity 패턴을 참고
      */
-    public static PostListResponseDto fromEntity(Post post) {
+    public static PostListResponseDto fromEntity(Post post, Boolean isLiked, Boolean isBookmarked,
+                                                 Long commentCount) {
         return PostListResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -54,10 +57,13 @@ public class PostListResponseDto {
                 .likeCount(post.getLikeCount())
                 .viewCount(post.getViewCount())
                 .bookmarkCount(post.getBookmarkCount())
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
                 .nickname(post.getUser().getNickname())
                 .role(post.getUser().getRole())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .commentCount(commentCount)
                 .build();
     }
 }

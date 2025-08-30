@@ -5,6 +5,7 @@ import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Post;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
 import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
+import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 
@@ -30,6 +31,8 @@ public class PostResponseDto {
     private Long likeCount;
     private Long viewCount;
     private Long bookmarkCount;
+    private Boolean isLiked;        // 좋아요 눌렀는지 확인하는거 추가
+    private Boolean isBookmarked;   // 북마크 눌렀는지 확인하는거 추가
     private Boolean isOpen;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -64,6 +67,7 @@ public class PostResponseDto {
         private UUID id;
         private Integer stepSequence;
         private String content;
+        private String description;
 
         public static RecipeStepDto fromEntity(RecipeStep step) {
             if (step == null) return null;
@@ -71,6 +75,7 @@ public class PostResponseDto {
                     .id(step.getId())
                     .stepSequence(step.getStepSequence())
                     .content(step.getContent())
+                    .description(step.getDescription())
                     .build();
         }
     }
@@ -84,20 +89,21 @@ public class PostResponseDto {
         private UUID id;
         private String nickname;
         private String profileImageUrl;
-        private String role; //이넘으로바꾸고
+        private Role role;
 
         public static UserInfoDto fromEntity(User user) {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
                     .profileImageUrl(user.getPicture())
-                    .role(user.getRole() != null ? user.getRole().name() : "GENERAL")
+                    .role(user.getRole())
                     .build();
         }
     }
 
     // 통합 Post 엔티티로부터 DTO 생성 (재료, 조리순서 포함)
-    public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps) {
+    public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps,
+                                             Boolean isLiked, Boolean isBookmarked) {
         return PostResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -111,6 +117,8 @@ public class PostResponseDto {
                 .likeCount(post.getLikeCount())
                 .viewCount(post.getViewCount())
                 .bookmarkCount(post.getBookmarkCount())
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
                 .isOpen(post.getIsOpen())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())

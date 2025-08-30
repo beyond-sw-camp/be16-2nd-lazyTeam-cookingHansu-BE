@@ -15,6 +15,11 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findBySocialId(String socialId);
+
+
     // 닉네임 중복 검사
     boolean existsByNickname(String nickname);
 
