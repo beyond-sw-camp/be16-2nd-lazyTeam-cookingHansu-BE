@@ -23,7 +23,6 @@ import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -58,9 +57,6 @@ public class SecurityConfig {
                         "/api/my/**", // Mypage 관련 API
                         "/lecture/**",
                         "/user/**",
-                        "/cart/**",
-                        "/purchase/**",
-                        "/review/**",
                         "/post/comment/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
