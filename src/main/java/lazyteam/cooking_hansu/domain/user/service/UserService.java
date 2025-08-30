@@ -3,6 +3,9 @@ package lazyteam.cooking_hansu.domain.user.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.domain.user.dto.UserCreateDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
@@ -17,6 +20,8 @@ import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
+import lazyteam.cooking_hansu.global.auth.JwtTokenProvider;
+import lazyteam.cooking_hansu.global.service.RefreshTokenService;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 회원 서비스
@@ -41,6 +48,9 @@ public class UserService {
     private final ChefRepository chefRepository;
     private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
+    private final NotificationService notificationService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${my.test.user-id}")
     private String testUserIdStr;
@@ -62,8 +72,8 @@ public class UserService {
         return waitingBusinesses.map(WaitingBusinessListDto::fromEntity);
     }
 
-//    사용자 승인
-    public void approveUser(UUID userId) {
+//    사용자 승인 - 새로운 토큰을 반환
+    public Map<String, String> approveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
         // Chef 엔티티 확인
@@ -74,8 +84,26 @@ public class UserService {
             }
             chef.approve();
             user.updateRoleStatus(Role.CHEF);
-            // 역할은 이미 CHEF로 설정되어 있으므로 별도 변경 불필요
-            return;
+            
+            // 새로운 토큰 생성 및 Redis에 저장
+            String newAccessToken = jwtTokenProvider.createAtToken(user);
+            String newRefreshToken = jwtTokenProvider.createRtToken(user);
+            refreshTokenService.updateRefreshToken(user.getId().toString(), newRefreshToken);
+            
+            // 승인 알림 생성 및 발송
+            SseMessageDto approvalNotification = SseMessageDto.builder()
+                    .recipientId(userId)
+                    .content("셰프 회원가입이 승인되었습니다. 이제 모든 서비스를 이용하실 수 있습니다.")
+                    .targetType(TargetType.APPROVAL)
+                    .targetId(userId)
+                    .build();
+            notificationService.createAndDispatch(approvalNotification);
+
+            // 새로운 토큰 반환
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", newAccessToken);
+            tokens.put("refreshToken", newRefreshToken);
+            return tokens;
         }
 
         // Owner 엔티티 확인
@@ -85,9 +113,28 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
-            user.updateRoleStatus(Role.CHEF);
-            // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
-            return;
+            user.updateRoleStatus(Role.OWNER);
+            
+            // 새로운 토큰 생성 및 Redis에 저장
+            String newAccessToken = jwtTokenProvider.createAtToken(user);
+            String newRefreshToken = jwtTokenProvider.createRtToken(user);
+            refreshTokenService.updateRefreshToken(user.getId().toString(), newRefreshToken);
+            
+            // 승인 알림 생성 및 발송
+            SseMessageDto approvalNotification = SseMessageDto.builder()
+                    .recipientId(userId)
+                    .content("사업자 회원가입이 승인되었습니다. 이제 모든 서비스를 이용하실 수 있습니다.")
+                    .targetType(TargetType.APPROVAL)
+                    .targetId(userId)
+                    .build();
+            notificationService.createAndDispatch(approvalNotification);
+
+            
+            // 새로운 토큰 반환
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", newAccessToken);
+            tokens.put("refreshToken", newRefreshToken);
+            return tokens;
         }
 
         throw new IllegalArgumentException("승인 대상이 되는 셰프 또는 사업자 정보를 찾을 수 없습니다. userId: " + userId);
