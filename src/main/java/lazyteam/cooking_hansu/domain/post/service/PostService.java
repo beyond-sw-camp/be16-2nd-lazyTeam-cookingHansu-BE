@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.post.service;
 
+import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.common.enums.FilterSort;
+import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.post.dto.*;
 import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lazyteam.cooking_hansu.domain.post.entity.Ingredients;
@@ -12,8 +14,8 @@ import lazyteam.cooking_hansu.domain.post.repository.RecipeStepRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
+import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -38,13 +40,13 @@ public class PostService {
     private final IngredientsRepository ingredientsRepository;
     private final RecipeStepRepository recipeStepRepository;
     private final S3Uploader s3Uploader;
+    private final InteractionService interactionService;  // 추가
+    private final PostCommentRepository postCommentRepository;
 
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
 
     private User getCurrentUser() {
-        UUID testUserId = UUID.fromString(testUserIdStr);
-        return userRepository.findById(testUserId)
+        UUID userId = AuthUtils.getCurrentUserId();
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
@@ -68,14 +70,19 @@ public class PostService {
         String thumbnailUrl = null;
         if (thumbnail != null && !thumbnail.isEmpty()) {
             try {
+                log.info("S3 업로드 시작 - 파일명: {}, 크기: {} bytes", thumbnail.getOriginalFilename(), thumbnail.getSize());
                 thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
                 log.info("Post 썸네일 업로드 성공: {}", thumbnailUrl);
             } catch (Exception e) {
-                log.error("Post 썸네일 업로드 실패: {}", e.getMessage());
+                log.error("Post 썸네일 업로드 실패: {}", e.getMessage(), e);
                 throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
             }
         } else if (requestDto.getThumbnailUrl() != null) {
             thumbnailUrl = requestDto.getThumbnailUrl();
+            log.info("기존 썸네일 URL 사용: {}", thumbnailUrl);
+        } else {
+            log.warn("썸네일이 제공되지 않음 - thumbnail: {}, requestDto.thumbnailUrl: {}",
+                    thumbnail, requestDto.getThumbnailUrl());
         }
 
         // Post 엔티티 생성
@@ -104,33 +111,54 @@ public class PostService {
             saveRecipeSteps(savedPost, requestDto.getSteps());
         }
 
-        log.info("통합 Post 작성 완료. 사용자: {}, Post ID: {}, 인분: {}인분", 
+        log.info("통합 Post 작성 완료. 사용자: {}, Post ID: {}, 인분: {}인분",
                 currentUser.getEmail(), savedPost.getId(), savedPost.getServing());
         return savedPost.getId();
     }
 
     /**
-     * Post 상세 조회 (재료, 조리순서 포함)
+     * Post 상세 조회 (재료, 조리순서 포함) - 비회원도 접근 가능
      */
     @Transactional(readOnly = true)
     public PostResponseDto getPost(UUID postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 게시글입니다."));
 
+        // 삭제된 게시글은 접근 차단
         if (post.isDeleted()) {
-            throw new EntityNotFoundException("삭제된 게시글입니다.");
+            throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
         }
 
-        User currentUser = getCurrentUser();
-        if (!post.getIsOpen() && !post.isOwnedBy(currentUser)) {
-            throw new IllegalArgumentException("비공개 게시글에 대한 권한이 없습니다.");
+        // 비공개 게시글의 경우 작성자만 접근 가능
+        if (!post.getIsOpen()) {
+            try {
+                UUID currentUserId = AuthUtils.getCurrentUserId();
+                if (currentUserId == null || !post.getUser().getId().equals(currentUserId)) {
+                    throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
+                }
+            } catch (Exception e) {
+                // 비로그인 사용자가 비공개 게시글에 접근
+                throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
+            }
         }
 
         // 연관 데이터 조회
         List<Ingredients> ingredients = ingredientsRepository.findByPost(post);
         List<RecipeStep> steps = recipeStepRepository.findByPostOrderByStepSequence(post);
 
-        return PostResponseDto.fromEntity(post, ingredients, steps);
+        Boolean isLiked = null;
+        Boolean isBookmarked = null;
+
+        try {
+            UUID currentUserId = AuthUtils.getCurrentUserId();
+            if (currentUserId != null) {
+                isLiked = interactionService.isPostLikedByCurrentUser(postId);
+                isBookmarked = interactionService.isPostBookmarkedByCurrentUser(postId);
+            }
+        } catch (Exception e) {
+        }
+
+        return PostResponseDto.fromEntity(post, ingredients, steps, isLiked, isBookmarked);
     }
 
 
@@ -138,12 +166,26 @@ public class PostService {
         User currentUser = getCurrentUser();
         Post post = getPostByIdAndUser(postId, currentUser);
 
-        // 썸네일 업로드 처리
-        String thumbnailUrl = post.getThumbnailUrl(); // 기존 URL 유지
+        // 기존 썸네일 URL 저장
+        String oldThumbnailUrl = post.getThumbnailUrl();
+        String thumbnailUrl = oldThumbnailUrl; // 기본값은 기존 URL
+
+        // 새로운 썸네일이 업로드된 경우
         if (thumbnail != null && !thumbnail.isEmpty()) {
             try {
+                // 새 이미지 업로드
                 thumbnailUrl = s3Uploader.upload(thumbnail, "posts/thumbnails/");
                 log.info("Post 썸네일 업데이트 성공: {}", thumbnailUrl);
+
+                // 기존 이미지 삭제 (기존 URL이 있는 경우에만)
+                if (oldThumbnailUrl != null && !oldThumbnailUrl.isEmpty()) {
+                    try {
+                        s3Uploader.delete(oldThumbnailUrl);
+                        log.info("기존 Post 썸네일 삭제 성공: {}", oldThumbnailUrl);
+                    } catch (Exception deleteException) {
+                        log.warn("기존 Post 썸네일 삭제 실패 (계속 진행): {}", deleteException.getMessage());
+                    }
+                }
             } catch (Exception e) {
                 log.error("Post 썸네일 업데이트 실패: {}", e.getMessage());
                 throw new RuntimeException("썸네일 업로드에 실패했습니다: " + e.getMessage());
@@ -151,6 +193,8 @@ public class PostService {
         } else if (requestDto.getThumbnailUrl() != null) {
             thumbnailUrl = requestDto.getThumbnailUrl();
         }
+
+        // 나머지 기존 코드 그대로...
         PostUpdateData updateData = PostUpdateData.builder()
                 .title(requestDto.getTitle())
                 .description(requestDto.getDescription())
@@ -164,20 +208,6 @@ public class PostService {
                 .build();
 
         post.updatePost(updateData);
-
-//        재료 요리순서 굳
-        if (requestDto.getIngredients() != null) {
-            ingredientsRepository.deleteByPost(post);
-            saveIngredients(post, requestDto.getIngredients());
-        }
-
-        if (requestDto.getSteps() != null) {
-            recipeStepRepository.deleteByPost(post);
-            saveRecipeSteps(post, requestDto.getSteps());
-        }
-
-        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
-
         // 재료 정보 갱신
         if (requestDto.getIngredients() != null) {
             ingredientsRepository.deleteByPost(post);
@@ -204,7 +234,7 @@ public class PostService {
         // 연관 데이터 삭제 (Cascade 설정으로 자동 삭제되지만 명시적으로)
         ingredientsRepository.deleteByPost(post);
         recipeStepRepository.deleteByPost(post);
-        
+
         // Soft Delete
         post.softDelete();
         postRepository.save(post);
@@ -215,39 +245,43 @@ public class PostService {
     /**
      * Post 목록 조회
      */
-    // 서비스도 Pageable로 변경
     @Transactional(readOnly = true)
     public Page<PostListResponseDto> getPostList(Role role, CategoryEnum category,
                                                  FilterSort filterSort, Pageable pageable) {
 
-        // filterSort 기반으로 정렬 재정의
-        Sort customSort = switch (filterSort) {
-            case POPULAR -> Sort.by(Sort.Direction.DESC, "viewCount");
-            case LIKES -> Sort.by(Sort.Direction.DESC, "likeCount");
-            case BOOKMARKS -> Sort.by(Sort.Direction.DESC, "bookmarkCount");
-            case LATEST -> Sort.by(Sort.Direction.DESC, "createdAt");
-        };
+        Page<Post> postsPage = postRepository.findPostsByFilters(role, category, pageable);
 
-        Pageable customPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                customSort
-        );
-        // 기본 조회
-        Page<Post> postsPage;
-        if (category != null) {
-            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrueAndCategory(category, pageable);
-        } else {
-            postsPage = postRepository.findByDeletedAtIsNullAndIsOpenTrue(pageable);
+        UUID currentUserId = null;
+        try {
+            currentUserId = AuthUtils.getCurrentUserId();
+        } catch (Exception e) {
+            log.debug("비회원 접근: {}", e.getMessage());
         }
-        return new PageImpl<>(
-            postsPage.getContent().stream()
-                    .filter(post -> role == null || post.getUser().getRole().name().equalsIgnoreCase(String.valueOf(role)))
-                    .map(PostListResponseDto::fromEntity)
-                    .toList(),
-            customPageable,
-            postsPage.getTotalElements()
-        );
+
+        final UUID finalCurrentUserId = currentUserId;
+
+        Page<PostListResponseDto> result = postsPage.map(post -> {
+            Boolean isLiked = null;
+            Boolean isBookmarked = null;
+
+            if (finalCurrentUserId != null) {
+                try {
+                    isLiked = interactionService.isPostLikedByCurrentUser(post.getId());
+                    isBookmarked = interactionService.isPostBookmarkedByCurrentUser(post.getId());
+                } catch (Exception e) {
+                    log.debug("상태 확인 실패 - postId: {}", post.getId());
+                }
+            }
+            // 댓글 갯수 조회 추가했음.
+            Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+
+            return PostListResponseDto.fromEntity(post, isLiked, isBookmarked, commentCount);
+        });
+
+        log.info("Post 목록 조회 - role: {}, category: {}, filterSort: {}, page: {}, totalElements: {}",
+                role, category, filterSort, pageable.getPageNumber(), postsPage.getTotalElements());
+
+        return result;
     }
 
     // ========== 유틸리티 메서드 ==========
@@ -288,14 +322,17 @@ public class PostService {
                 .map(dto -> {
                     Integer stepSequence;
                     String content;
+                    String description;
 
                     // 타입 확인해서 필드 추출
                     if (dto instanceof PostCreateRequestDto.RecipeStepRequestDto createDto) {
                         stepSequence = createDto.getStepSequence();
                         content = createDto.getContent();
+                        description = createDto.getDescription();
                     } else if (dto instanceof PostUpdateRequestDto.RecipeStepUpdateDto updateDto) {
                         stepSequence = updateDto.getStepSequence();
                         content = updateDto.getContent();
+                        description = updateDto.getDescription();
                     } else {
                         throw new IllegalArgumentException("지원하지않는 DTO 타입이 오류입니다.");
                     }
@@ -304,6 +341,7 @@ public class PostService {
                             .post(post)
                             .stepSequence(stepSequence)
                             .content(content)
+                            .description(description)
                             .build();
                 })
                 .toList();

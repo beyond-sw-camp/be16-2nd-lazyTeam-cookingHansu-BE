@@ -25,6 +25,7 @@ public class LectureResDto {
     private ApprovalStatus status; // 강의 상태 (필터링 용도)
     private Integer price; // 강의 가격
     private String thumbUrl;
+    private Boolean isLiked;
     private Integer reviewCount;
     private Integer qnaCount;
     private Long likeCount;

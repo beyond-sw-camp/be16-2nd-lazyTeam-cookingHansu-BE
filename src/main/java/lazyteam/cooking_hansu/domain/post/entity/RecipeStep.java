@@ -24,4 +24,7 @@ public class RecipeStep extends BaseIdEntity {
     @Column(nullable = false)
     private String content; // 조리 단계 설명
 
+    @Column(columnDefinition = "TEXT")
+    private String description; // 추가 설명
+
 }

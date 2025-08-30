@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface PostCommentRepository extends JpaRepository<PostComment, UUID> {
 
     List<PostComment> findAllByPostAndParentCommentIsNull(Post post);
+    Long countByPostAndCommentIsDeletedFalse(Post post);
 }
