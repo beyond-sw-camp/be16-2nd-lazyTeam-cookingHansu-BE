@@ -147,7 +147,14 @@ public class LectureService {
         }
 
         // 강의 정보 수정
+
+        if(lecture.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
+            lecture.setPending();
+            log.info("강의상태가 변경되었습니다." + lecture.getApprovalStatus());
+        }
         lecture.updateInfo(lectureUpdateDto);
+
+
 
         // 강의 재료 리스트 수정
         if (lectureIngredientsListDto != null && !lectureIngredientsListDto.isEmpty()) { // [FIX] NPE 방지
@@ -318,8 +325,9 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
-        return lectureRepository.findAllBySubmittedByIdAndApprovalStatus(user.getId(), ApprovalStatus.APPROVED, pageable)
-                .map(LectureResDto::fromEntity);
+        Page<LectureResDto> myLectures = lectureRepository.findAllBySubmittedById(userId,pageable).map(LectureResDto::fromEntity);
+        log.info("판매한 강의목록 : " + myLectures.toString());
+        return  myLectures;
     }
 
 
