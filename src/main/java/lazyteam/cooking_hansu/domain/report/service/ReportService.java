@@ -11,6 +11,8 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,10 +27,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReportService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
 
     public void createReport(ReportCreateDto reportCreateDto){
+        log.info("dto : " + reportCreateDto);
         UUID id = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("신고를 생성할 사용자를 찾을 수 없습니다."));
         List<Report> reportList = reportRepository.findAllByStatus(Status.PENDING);
@@ -64,5 +68,11 @@ public class ReportService {
         report.updateStatus(Status.REJECTED, rejectRequestDto.getReason());
 
         //        TODO:나중에 승인 알림 기능 추가 필요
+    }
+
+    public boolean checkReport(UUID targetId) {
+        UUID id = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("신고를 생성할 사용자를 찾을 수 없습니다."));
+        return reportRepository.existsByUserIdAndTargetIdAndStatus(id, targetId, Status.PENDING);
     }
 }
