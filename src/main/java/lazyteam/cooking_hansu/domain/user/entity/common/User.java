@@ -9,6 +9,7 @@ import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.user.entity.chef.Chef;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,13 +109,19 @@ public class User extends BaseIdAndTimeEntity {
 //    // 메시지 읽음(MessageReadStatus) 테이블에 FK user_id로 1:N 연관 관계
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @Builder.Default
-//    private List<ChatReadStatus> chatReadStatusList = new ArrayList<>();gi
+//    private List<ChatReadStatus> chatReadStatusList = new ArrayList<>();
 //
 //    // 채팅 참여(ChatParticipant) 테이블에 FK user_id로 1:N 식별 관계
 //    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @Builder.Default
 //    private List<ChatParticipant> chatParticipantList = new ArrayList<>();
 //
+
+    // 강의(Lecture) 테이블에 FK submitted_id(요청자 Id)로 1:N 연관 관계
+    @OneToMany(mappedBy = "submittedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Lecture> lectureList = new ArrayList<>();
+
 //
 //    // 강의 리뷰(LectureReview> 테이블에 FK writer_id(작성자 ID)로 1:n 연관 관계
 //    @OneToMany(mappedBy = "writerId", cascade = CascadeType.ALL, orphanRemoval = true)
