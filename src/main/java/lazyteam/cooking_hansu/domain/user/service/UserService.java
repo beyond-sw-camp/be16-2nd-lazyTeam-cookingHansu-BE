@@ -78,7 +78,7 @@ public class UserService {
             }
             chef.approve();
             user.updateRoleStatus(Role.CHEF);
-            
+
             // 승인 알림 생성 및 발송
             SseMessageDto approvalNotification = SseMessageDto.builder()
                     .recipientId(userId)
@@ -97,8 +97,9 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
+            // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
             user.updateRoleStatus(Role.OWNER);
-            
+
             // 승인 알림 생성 및 발송
             SseMessageDto approvalNotification = SseMessageDto.builder()
                     .recipientId(userId)
@@ -195,9 +196,12 @@ public class UserService {
                 );
                 log.info("프로필 이미지 S3 업로드 성공: {} -> {}", picture, uploadedPictureUrl);
             } catch (Exception e) {
-                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용: {}", picture, e);
-                uploadedPictureUrl = picture; // 업로드 실패 시 원본 URL 사용
+                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용 - URL: {}, error: {}", picture, e.getMessage());
+                // ✅ S3 업로드 실패 시 원본 URL 사용 (안전한 fallback)
+                uploadedPictureUrl = picture;
             }
+        } else {
+            log.info("프로필 이미지가 제공되지 않음 - email: {}", email);
         }
 
         // 사용자 엔티티 저장

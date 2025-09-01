@@ -50,17 +50,13 @@ public class SecurityConfig {
                         "/api-docs/**",       // OpenAPI JSON
                         "/v3/api-docs/**",       // OpenAPI JSON
                         "/swagger-resources/**", // Swagger 리소스
-                        "/notice/**",
+                        "/notice/list",
+                        "/notice/detail/**",
                         "/admin/login", // 관리자 로그인만 허용
                         "/admin/refresh", // 관리자 토큰 갱신만 허용
-                        "/report/**", // Report 관련 API
-//                        "/api/my/**", // Mypage 관련 API
-                        "/lecture/**",
-                        "/user/**",
                         "/post/comment/**",
-                        "/api/recipes/**",
-                        "/api/posts/**", // 게시글 API 모두 허용
-                        "/api/interactions/**" // 상호작용 API 모두 허용
+                        "lecture/list",
+                        "/lecture/detail/**"
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

@@ -135,16 +135,14 @@ public class UserAdditionalInfoService {
         // 자격증 파일 업로드
         String licenseUrl = uploadFileIfPresent(requestDto.getLicenseFile(), "chef/licenses/");
 
-        // Chef 엔티티 생성 및 저장
-        ChefDto chefDto = ChefDto.builder()
+        // Chef 엔티티 직접 생성 및 저장
+        Chef chef = Chef.builder()
                 .user(user)
                 .licenseNumber(requestDto.getLicenseNumber())
                 .cuisineType(requestDto.getCuisineType())
                 .licenseUrl(licenseUrl)
                 .build();
 
-        validateDto(chefDto);
-        Chef chef = chefDto.toEntity();
         Chef savedChef = chefRepository.save(chef);
         savedChef.setPending(); // 승인 대기 상태로 설정
 
@@ -162,8 +160,8 @@ public class UserAdditionalInfoService {
         // 사업자등록증 파일 업로드
         String businessUrl = uploadFileIfPresent(requestDto.getBusinessFile(), "business/certificates/");
 
-        // Owner 엔티티 생성 및 저장
-        BusinessDto businessDto = BusinessDto.builder()
+        // Owner 엔티티 직접 생성 및 저장
+        Owner owner = Owner.builder()
                 .user(user)
                 .businessNumber(requestDto.getBusinessNumber())
                 .businessUrl(businessUrl)
@@ -172,8 +170,6 @@ public class UserAdditionalInfoService {
                 .shopCategory(requestDto.getShopCategory())
                 .build();
 
-        validateDto(businessDto);
-        Owner owner = businessDto.toEntity();
         Owner savedOwner = ownerRepository.save(owner);
         savedOwner.setPending(); // 승인 대기 상태로 설정
 
