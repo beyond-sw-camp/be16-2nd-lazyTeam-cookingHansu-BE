@@ -47,7 +47,7 @@ public class NotificationController {
         notificationService.markRead(id);
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
-    
+
     // 알림 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable UUID id) {
@@ -55,3 +55,4 @@ public class NotificationController {
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
 }
+

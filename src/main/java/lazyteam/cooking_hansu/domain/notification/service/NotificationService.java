@@ -3,6 +3,7 @@ package lazyteam.cooking_hansu.domain.notification.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationListResponseDto;
+import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
 import lazyteam.cooking_hansu.domain.notification.entity.Notification;
 import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
@@ -20,9 +21,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lazyteam.cooking_hansu.domain.notification.dto.ChatNotificationDto;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -133,7 +138,7 @@ public class NotificationService {
         // 채팅 관련 알림 중 해당 채팅방의 알림들을 읽음 처리
         List<Notification> chatNotifications = notificationRepository
             .findByRecipient_IdAndTargetTypeAndIsReadFalse(userId, lazyteam.cooking_hansu.domain.notification.entity.TargetType.CHAT);
-        
+
         for (Notification notification : chatNotifications) {
             // targetId가 chatRoomId와 일치하는지 확인 (UUID를 String으로 변환하여 비교)
             if (notification.getTargetId().toString().equals(chatRoomId.toString())) {
@@ -154,7 +159,7 @@ public class NotificationService {
                 .targetId(chatNotificationDto.getTargetId())
                 .roomId(chatNotificationDto.getChatRoomId())
                 .build();
-        
+
         notificationRepository.save(notification);
         notificationPublisher.publishChatNotification(chatNotificationDto);
     }

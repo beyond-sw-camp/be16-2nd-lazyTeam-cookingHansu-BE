@@ -44,7 +44,6 @@ public class SecurityConfig {
                 // authorizeHttpRequests 내의 requestMatchers는 추후 수정할 예정
                 .authorizeHttpRequests(a -> a.requestMatchers(
                         "/connect/**",
-                        "/user/**", // Google OAuth 로그인
                         "/swagger-ui.html",
                         "/swagger-ui/**",// Swagger UI (html, js, css)
                         "/api-docs/**",       // OpenAPI JSON
@@ -55,7 +54,9 @@ public class SecurityConfig {
                         "/admin/refresh", // 관리자 토큰 갱신만 허용
                         "/lecture/list",
                         "/lecture/detail/**",
-                        "/api/recipes/**"
+                        "/report/**", // Report 관련 API
+                        "/user/**",
+                        "/api/posts/" // 게시글 목록 조회용
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

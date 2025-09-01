@@ -75,6 +75,7 @@ public class MyPageService {
     }
 
     // 프로필 이미지 업로드
+    @Transactional
     public String uploadProfileImage(MultipartFile image) {
         System.out.println("=== 이미지 업로드 시작 ===");
         System.out.println("파일명: " + image.getOriginalFilename());
@@ -102,6 +103,8 @@ public class MyPageService {
             // 사용자 프로필 이미지 URL 업데이트
             user.updateProfileImage(imageUrl);
             System.out.println("사용자 프로필 이미지 업데이트 완료");
+            // 즉시 DB 반영
+            userRepository.save(user);
             return imageUrl;
         } catch (Exception e) {
             System.out.println("S3 업로드 실패: " + e.getMessage());

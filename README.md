@@ -507,25 +507,41 @@
     </details>
   </details>
   
-  <details> 
-    <summary>알림</summary>
-    <details>
-      <summary>공지사항 등록 시 알림</summary>
-      <img src="https://github.com/user-attachments/assets/aa8c5ff0-1a99-4b1d-a390-2adab4abb086" alt="공지사항-작성-시-알림" width="600"/>
-    </details>
-    <details>
-      <summary>게시글 댓글 시 알림</summary>
-      `GET /api/notifications`
-    </details>
-    <details>
-      <summary>알림 읽음 처리</summary>
-      `PATCH /api/notifications/{id}/read`
-    </details>
-    <details>
-      <summary>알림 삭제</summary>
-      `DELETE /api/notifications/{id}`
-    </details>
+<details>
+  <summary>알림</summary>
+
+  <details>
+    <summary>회원가입 승인 시 알림</summary>
+    
   </details>
+
+  <details>
+    <summary>공지사항 등록 시 알림</summary>
+    <img src="https://github.com/user-attachments/assets/2414a75d-6294-4a0d-8272-5efe67ea15b9" alt="공지사항-작성-시-알림" width="600"/>
+  </details>
+
+  <details>
+    <summary>게시글 댓글 시 알림</summary>
+    
+  </details>
+
+  <details>
+    <summary>게시글 답글 시 알림</summary>
+    
+  </details>
+
+  <details>
+    <summary>강의 결제 성공 시 알림</summary>
+    <img src="https://github.com/user-attachments/assets/b9644176-69cc-4bfd-91f2-ca60f0adcfdb" alt="강의 결제-성공-시-알림" width="600"/>
+
+  </details>
+
+  <details>
+    <summary>강의 Q&A 시 알림</summary>
+    
+  </details>
+</details>
+
   <details> 
     <summary>게시글</summary>
     <details>
