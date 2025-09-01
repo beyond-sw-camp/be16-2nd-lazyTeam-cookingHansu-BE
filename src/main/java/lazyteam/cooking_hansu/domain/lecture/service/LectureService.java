@@ -48,7 +48,6 @@ public class LectureService {
     private final LectureReviewRepository lectureReviewRepository;
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
     private final InteractionService interactionService;
-    private final LectureProgressRepository progressRepository;
 
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
@@ -369,25 +368,8 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
 
         List<LectureStep> lectureStepList = lecture.getLectureStepList();
 
-        Integer progressPercent = null;
-        try {
-            UUID userId = AuthUtils.getCurrentUserId();
-            int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
-            long completedVideos = progressRepository
-                    .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
-
-            if (totalVideos > 0) {
-                progressPercent = (int) ((completedVideos * 100) / totalVideos);
-            } else {
-                progressPercent = 0;
-            }
-        } catch (Exception e) {
-            // 로그인 안 된 경우 anonymousUser → progressPercent = null
-            progressPercent = null;
-        }
-
         LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-                ,videos,ingredientsList,lectureStepList, progressPercent);
+                ,videos,ingredientsList,lectureStepList);
 
         return lectureDetailDto;
     }
@@ -400,35 +382,6 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
                 .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));
 
         lecture.lectureDelete();
-    }
-
-    // 영상 진행도 업데이트
-    public UUID updateProgress(UUID videoId, int second) {
-        UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
-
-        LectureVideo video = lectureVideoRepository.findById(videoId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 강의 영상입니다."));
-
-        LectureProgress progress = progressRepository.findByUserIdAndLectureVideoId(userId, videoId)
-                .orElse(LectureProgress.builder()
-                        .user(user)
-                        .lectureVideo(video)
-                        .build());
-
-        progress.updateProgress(second, video.getDuration());
-        return progressRepository.save(progress).getId();
-    }
-
-    // 강의 단위 진행률(%) 계산
-    public int getLectureProgressPercent(UUID lectureId) {
-        UUID userId = AuthUtils.getCurrentUserId();
-        int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
-        long completedVideos = progressRepository.countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
-
-        if (totalVideos == 0) return 0;
-        return (int) ((completedVideos * 100) / totalVideos);
     }
 
 
