@@ -22,6 +22,8 @@ public class QnaResDto {
     private LocalDateTime questionUpdatedAt;
     private UUID parentId;
     private String parentProfileUrl;
+    private LocalDateTime parentJoinedAt; // 부모 가입 일자
+    private String parentEmail; // 부모 이메일
 
 //    답변
     private String answerName;
@@ -32,7 +34,8 @@ public class QnaResDto {
     private UUID answerId;
     private UUID qnaId;
     private String answerProfileUrl;
-
+    private LocalDateTime answerJoinedAt; // 자식 가입 일자
+    private String answerEmail; // 자식 이메일
 
     public static QnaResDto fromEntity(LectureQna lectureQna) {
 
@@ -50,6 +53,8 @@ public class QnaResDto {
                 .parentId(parent.getUser().getId())
                 .qnaId(parent.getId())
                 .parentProfileUrl(parent.getUser().getPicture())
+                .parentJoinedAt(parent.getUser().getCreatedAt())
+                .parentEmail(parent.getUser().getEmail())
 
                 // 답변
                 .answerName(answer != null && answer.getUser() != null ? answer.getUser().getName() : null)
@@ -58,6 +63,8 @@ public class QnaResDto {
                 .answerUpdatedAt(answer != null ? answer.getUpdatedAt() : null)
                 .answerId(answer != null && answer.getUser() != null ? answer.getUser().getId(): null)
                 .answerProfileUrl(answer != null && answer.getUser() != null ? answer.getUser().getPicture(): null)
+                .answerJoinedAt(answer != null && answer.getUser() != null ? answer.getUser().getCreatedAt(): null)
+                .answerEmail(answer != null && answer.getUser() != null ? answer.getUser().getEmail(): null)
                 .build();
     }
 

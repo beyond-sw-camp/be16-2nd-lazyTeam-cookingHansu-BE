@@ -8,9 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +40,8 @@ public class LectureDetailDto {
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
     private UUID submittedById;
+    private LocalDateTime submittedJoinedAt; // 강사 가입일자
+    private String submittedByEmail; // 강사 이메일
 
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
@@ -84,6 +88,8 @@ public class LectureDetailDto {
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
                 .submittedById(submittedBy.getId())
+                .submittedJoinedAt(submittedBy.getCreatedAt())
+                .submittedByEmail(submittedBy.getEmail())
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
                 .lectureStepResDtoList(

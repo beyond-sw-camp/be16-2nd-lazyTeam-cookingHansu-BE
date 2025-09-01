@@ -108,7 +108,7 @@ public class User extends BaseIdAndTimeEntity {
 //    // 메시지 읽음(MessageReadStatus) 테이블에 FK user_id로 1:N 연관 관계
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @Builder.Default
-//    private List<ChatReadStatus> chatReadStatusList = new ArrayList<>();
+//    private List<ChatReadStatus> chatReadStatusList = new ArrayList<>();gi
 //
 //    // 채팅 참여(ChatParticipant) 테이블에 FK user_id로 1:N 식별 관계
 //    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
