@@ -54,9 +54,8 @@ public class SecurityConfig {
                         "/admin/login", // 관리자 로그인만 허용
                         "/admin/refresh", // 관리자 토큰 갱신만 허용
                         "/report/**", // Report 관련 API
-//                        "/api/my/**", // Mypage 관련 API
-                        "/lecture/**",
-                        "/user/**",
+                        "/lecture/list",
+                        "/lecture/detail/**",
                         "/post/comment/**",
                         "/api/recipes/**",
                         "/api/posts/**", // 게시글 API 모두 허용
