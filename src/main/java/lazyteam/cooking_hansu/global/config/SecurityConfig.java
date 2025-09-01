@@ -55,6 +55,17 @@ public class SecurityConfig {
                         "/lecture/list",
                         "/lecture/detail/**",
                         "/report/**", // Report 관련 API
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                        "/api/my/**", // Mypage 관련 API
+                        "/lecture/list",
+                        "/lecture/detail/**",
+=======
+//                        "/api/my/**", // Mypage 관련 API
+                        "/lecture/**",
+>>>>>>> 60e5e18012fa4d8ee3b1434fa21c8dccc6879818
+>>>>>>> 4872b146214b10bc3fd32c51342fd26ff6000b13
                         "/user/**",
                         "/api/posts/" // 게시글 목록 조회용
                 ).permitAll().anyRequest().authenticated())
