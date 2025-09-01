@@ -11,8 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -25,7 +23,6 @@ public class LectureVideoResDto {
     private Boolean preview;
     private Integer sequence;
     private Integer duration; // 초단위로 데이터 받을 예정 > 250 : 4분10초
-    private UUID videoId;
 
     public static LectureVideoResDto fromEntity(LectureVideo lectureVideo) {
         return LectureVideoResDto.builder()
@@ -34,7 +31,6 @@ public class LectureVideoResDto {
                 .preview(lectureVideo.getPreview())
                 .sequence(lectureVideo.getSequence())
                 .duration(lectureVideo.getDuration())
-                .videoId(lectureVideo.getId())
                 .build();
     }
 }
