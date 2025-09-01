@@ -89,6 +89,17 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("강의가 삭제되었습니다.", HttpStatus.OK),HttpStatus.OK);
     }
 
+    // 영상 시청 진행도 업데이트
+    @PostMapping("/progress/{videoId}")
+    public ResponseEntity<?> updateProgress(@PathVariable UUID videoId,
+                                            @RequestParam int second) {
+        UUID progressId = lectureService.updateProgress(videoId, second);
+        return new ResponseEntity<>(
+                ResponseDto.ok("진행도 저장 id=" + progressId, HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
+
 
 
 }
