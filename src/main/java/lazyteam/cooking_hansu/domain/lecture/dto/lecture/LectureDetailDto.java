@@ -39,8 +39,6 @@ public class LectureDetailDto {
     private BigDecimal reviewAvg;
     private UUID submittedById;
 
-    private Integer progressPercent; // 학습진행률
-
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
 
@@ -59,7 +57,7 @@ public class LectureDetailDto {
 
     public static LectureDetailDto fromEntity(Lecture lecture, User submittedBy, List<LectureReview> reviews
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
-            ,List<LectureStep> lectureStepList, Integer progressPercent) {
+            ,List<LectureStep> lectureStepList) {
 
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
         int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
@@ -110,7 +108,6 @@ public class LectureDetailDto {
                 )
 
                 .lectureReviewResDtoList(reviews.stream().map(LectureReviewResDto::fromEntity).toList())
-                .progressPercent(progressPercent)
                 .build();
     }
 
