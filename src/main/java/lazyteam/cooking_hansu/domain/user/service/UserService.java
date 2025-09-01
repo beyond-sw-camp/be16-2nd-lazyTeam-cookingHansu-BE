@@ -3,6 +3,9 @@ package lazyteam.cooking_hansu.domain.user.service;
 import jakarta.persistence.EntityNotFoundException;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
+import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.domain.user.dto.UserCreateDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserListDto;
 import lazyteam.cooking_hansu.domain.user.dto.WaitingBusinessListDto;
@@ -41,6 +44,7 @@ public class UserService {
     private final ChefRepository chefRepository;
     private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
+    private final NotificationService notificationService;
 
     @Value("${my.test.user-id}")
     private String testUserIdStr;
@@ -62,7 +66,7 @@ public class UserService {
         return waitingBusinesses.map(WaitingBusinessListDto::fromEntity);
     }
 
-//    사용자 승인
+//    사용자 승인 - 승인 상태만 변경하고 알림 발송
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
@@ -74,7 +78,15 @@ public class UserService {
             }
             chef.approve();
             user.updateRoleStatus(Role.CHEF);
-            // 역할은 이미 CHEF로 설정되어 있으므로 별도 변경 불필요
+            
+            // 승인 알림 생성 및 발송
+            SseMessageDto approvalNotification = SseMessageDto.builder()
+                    .recipientId(userId)
+                    .content("셰프 회원가입이 승인되었습니다. 이제 모든 서비스를 이용하실 수 있습니다.")
+                    .targetType(TargetType.APPROVAL)
+                    .targetId(userId)
+                    .build();
+            notificationService.createAndDispatch(approvalNotification);
             return;
         }
 
@@ -85,8 +97,16 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
-            user.updateRoleStatus(Role.CHEF);
-            // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
+            user.updateRoleStatus(Role.OWNER);
+            
+            // 승인 알림 생성 및 발송
+            SseMessageDto approvalNotification = SseMessageDto.builder()
+                    .recipientId(userId)
+                    .content("사업자 회원가입이 승인되었습니다. 이제 모든 서비스를 이용하실 수 있습니다.")
+                    .targetType(TargetType.APPROVAL)
+                    .targetId(userId)
+                    .build();
+            notificationService.createAndDispatch(approvalNotification);
             return;
         }
 

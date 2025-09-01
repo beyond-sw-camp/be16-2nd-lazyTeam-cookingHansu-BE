@@ -56,17 +56,17 @@ public class NoticeService {
         List<User> allUsers = userRepository.findAll();
         
         for (User u : allUsers) {
-            notificationService.createAndDispatch(
-                    SseMessageDto.builder()
-                            .recipientId(u.getId())
-                            .targetType(TargetType.NOTICE)
-                            .targetId(notice.getId())
-                            .content(notice.getTitle())
-                            .build()
-            );
+                            notificationService.createAndDispatch(
+                        SseMessageDto.builder()
+                                .recipientId(u.getId())
+                                .targetType(TargetType.NOTICE)
+                                .targetId(notice.getId())
+                                .content(notice.getTitle())
+                                .createdAt(notice.getCreatedAt())
+                                .build()
+                );
         }
     }
-
 
     // 공지사항 전체 목록 조회
     @Transactional(readOnly = true)

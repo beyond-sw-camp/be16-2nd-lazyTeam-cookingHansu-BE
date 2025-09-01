@@ -61,7 +61,7 @@ public class LectureQnaService {
             );
 
             // QNA 답변 알림 발송 (질문자에게)
-            String notificationContent = String.format("Q&A에 답변이 달렸습니다: \"%s\"", 
+            String notificationContent = String.format("질문에 답변이 등록되었습니다: \"%s\"", 
                     parentQna.getContent().length() > 30 
                             ? parentQna.getContent().substring(0, 30) + "..." 
                             : parentQna.getContent());
@@ -69,7 +69,7 @@ public class LectureQnaService {
             SseMessageDto sseMessageDto = SseMessageDto.builder()
                     .recipientId(parentQna.getUser().getId())
                     .targetType(TargetType.QNACOMMENT)
-                    .targetId(parentQna.getId())
+                    .targetId(lecture.getId())
                     .content(notificationContent)
                     .build();
             
@@ -91,6 +91,25 @@ public class LectureQnaService {
         );
 
         lectureQnaRepository.save(qna);
+
+        // 질문 등록 알림 발송 (강의 등록자에게)
+        // 질문자가 강의 등록자가 아닌 경우에만 알림 발송
+        if (!user.getId().equals(lecture.getSubmittedBy().getId())) {
+            String notificationContent = String.format("강의에 새로운 질문이 등록되었습니다: \"%s\"", 
+                    qna.getContent().length() > 30 
+                            ? qna.getContent().substring(0, 30) + "..." 
+                            : qna.getContent());
+            
+            SseMessageDto sseMessageDto = SseMessageDto.builder()
+                    .recipientId(lecture.getSubmittedBy().getId())
+                    .targetType(TargetType.QNACOMMENT)
+                    .targetId(lecture.getId())
+                    .content(notificationContent)
+                    .build();
+            
+            notificationService.createAndDispatch(sseMessageDto);
+        }
+
         return qna.getId();
     }
 

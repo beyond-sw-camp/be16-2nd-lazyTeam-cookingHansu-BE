@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
+import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
 
 @Service
 @Transactional
@@ -26,6 +29,7 @@ public class PostCommentService {
     private final PostCommentRepository postCommentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final NotificationService notificationService;
 
 //    댓글 생성
     public UUID createComment(PostCommentCreateDto postCommentCreateDto) {
@@ -36,8 +40,8 @@ public class PostCommentService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         Post post = postRepository.findById(postCommentCreateDto.getPostId()).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
         PostComment postComment;
+        
         // 대댓글인 경우 부모 댓글을 찾아서 설정
-        // 부모 댓글이 없는 경우 null로 설정
         if(postCommentCreateDto.getParentCommentId() != null) {
             PostComment parentComment = postCommentRepository.findById(postCommentCreateDto.getParentCommentId()).orElseThrow(() -> new EntityNotFoundException("부모 댓글이 존재하지 않습니다."));
             //  depth 1 제한
@@ -50,6 +54,18 @@ public class PostCommentService {
                     .user(user)
                     .content(postCommentCreateDto.getContent())
                     .build();
+            
+            // 답글 알림 생성 (최초 댓글 작성자에게)
+            if (!parentComment.getUser().getId().equals(userId)) {
+                notificationService.createAndDispatch(
+                    SseMessageDto.builder()
+                        .recipientId(parentComment.getUser().getId())
+                        .content(user.getNickname() + "님이 회원님의 댓글에 답글을 남겼습니다.")
+                        .targetType(TargetType.REPLY)
+                        .targetId(post.getId()) // 게시글 ID로 변경
+                        .build()
+                );
+            }
         }
         else {
             postComment = PostComment.builder()
@@ -57,6 +73,18 @@ public class PostCommentService {
                     .user(user)
                     .content(postCommentCreateDto.getContent())
                     .build();
+            
+            // 게시글 댓글 알림 생성 (게시글 작성자에게)
+            if (!post.getUser().getId().equals(userId)) {
+                notificationService.createAndDispatch(
+                    SseMessageDto.builder()
+                        .recipientId(post.getUser().getId())
+                        .content(user.getNickname() + "님이 회원님의 게시글에 댓글을 남겼습니다.")
+                        .targetType(TargetType.POSTCOMMENT)
+                        .targetId(post.getId())
+                        .build()
+                );
+            }
         }
         postCommentRepository.save(postComment);
         return postComment.getId();
