@@ -53,13 +53,9 @@ public class SecurityConfig {
                         "/notice/**",
                         "/admin/login", // 관리자 로그인만 허용
                         "/admin/refresh", // 관리자 토큰 갱신만 허용
-                        "/api/my/**", // Mypage 관련 API
-                        "/lecture/**",
-                        "/user/**",
-                        "/post/comment/**",
-                        "/api/recipes/**",
-                        "/api/posts/**", // 게시글 API 모두 허용
-                        "/api/interactions/**" // 상호작용 API 모두 허용
+                        "/lecture/list",
+                        "/lecture/detail/**",
+                        "/api/recipes/**"
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }
