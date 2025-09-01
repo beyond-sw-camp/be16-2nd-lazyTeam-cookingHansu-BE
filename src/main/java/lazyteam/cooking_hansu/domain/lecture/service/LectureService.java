@@ -404,7 +404,7 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
         return progressRepository.save(progress).getId();
     }
 
-    // 강의 단위 진행률(%) 계산
+    // 강의 단위 진행률(%) 계산 ->향후 필요할 수 있어서 남겨 둠
     public int getLectureProgressPercent(UUID lectureId) {
         UUID userId = AuthUtils.getCurrentUserId();
         int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
