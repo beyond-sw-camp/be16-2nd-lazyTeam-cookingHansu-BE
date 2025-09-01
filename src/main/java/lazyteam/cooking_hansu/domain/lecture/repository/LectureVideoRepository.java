@@ -23,4 +23,7 @@ public interface LectureVideoRepository extends JpaRepository<LectureVideo, UUID
 
     List<LectureVideo> findByLecture(Lecture lecture);
 
+    // 강의 ID 기준 영상 개수
+    int countByLectureId(UUID lectureId);
+
 }
