@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -27,6 +29,8 @@ public class LectureVideoDto {
     private Integer sequence;
 
     private Integer duration; // 초단위로 데이터 받을 예정 > 250 : 4분10초
+
+    private UUID videoId;
 
 
     public LectureVideo toEntity(Lecture lecture, String videoUrl, int duration, boolean preview) {

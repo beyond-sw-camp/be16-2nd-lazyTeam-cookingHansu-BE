@@ -323,57 +323,76 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
     }
 
 
-    
+
 // ====== 강의상세목록 조회 ======
-    public LectureDetailDto findDetailLecture(UUID lectureId) {
+public LectureDetailDto findDetailLecture(UUID lectureId) {
 
-        Lecture lecture = lectureRepository.findById(lectureId)
-                .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
+    Lecture lecture = lectureRepository.findById(lectureId)
+            .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
 
-        // Redis에서 좋아요 수 가져와서 동기화
-        try {
-            Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
-            if (cachedLikeCount != null) {
-                // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
-                lecture.updateLikeCount(cachedLikeCount);
-                log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
-            } else {
-                // Redis에 캐시가 없으면 DB 값을 Redis에 저장
-                Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
-                redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
-                log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
-            }
-        } catch (Exception e) {
-            log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
-            // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+    // Redis에서 좋아요 수 가져와서 동기화
+    try {
+        Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
+        if (cachedLikeCount != null) {
+            // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
+            lecture.updateLikeCount(cachedLikeCount);
+            log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
+        } else {
+            // Redis에 캐시가 없으면 DB 값을 Redis에 저장
+            Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
+            redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
+            log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
         }
-
-        Boolean isLiked = null;
-        try {
-            UUID currentUserId = AuthUtils.getCurrentUserId();
-            if (currentUserId != null) {
-                isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
-            }
-        } catch (Exception e) {
-            log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
-        }
-
-        User submittedBy = lecture.getSubmittedBy();
-        List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
-
-        List<LectureQna> qnas = lecture.getQnas();
-
-        List<LectureVideo> videos = lecture.getVideos();
-
-        List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
-
-        List<LectureStep> lectureStepList = lecture.getLectureStepList();
-
-        LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-                ,videos,ingredientsList,lectureStepList);
-
-        return lectureDetailDto;
+    } catch (Exception e) {
+        log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
+        // Redis 연동 실패해도 서비스는 정상 동작하도록 함
     }
+
+    Boolean isLiked = null;
+    try {
+        UUID currentUserId = AuthUtils.getCurrentUserId();
+        if (currentUserId != null) {
+            isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
+        }
+    } catch (Exception e) {
+        log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
+    }
+
+    User submittedBy = lecture.getSubmittedBy();
+    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
+
+    List<LectureQna> qnas = lecture.getQnas();
+
+    List<LectureVideo> videos = lecture.getVideos();
+
+    List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
+
+    List<LectureStep> lectureStepList = lecture.getLectureStepList();
+
+    Integer progressPercent = null;
+    try {
+        UUID userId = AuthUtils.getCurrentUserId();
+        int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
+        long completedVideos = progressRepository
+                .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
+
+        if (totalVideos > 0) {
+            progressPercent = (int) ((completedVideos * 100) / totalVideos);
+        } else {
+            progressPercent = 0;
+        }
+    } catch (Exception e) {
+        // 로그인 안 된 경우 anonymousUser → progressPercent = null
+        progressPercent = null;
+    }
+
+    LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
+            ,videos,ingredientsList,lectureStepList, progressPercent);
+
+    return lectureDetailDto;
+}
+
+
 
 
 
