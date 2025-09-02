@@ -15,7 +15,6 @@ import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
@@ -417,7 +416,7 @@ public LectureDetailDto findDetailLecture(UUID lectureId) {
     }
 
     LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-            ,videos,ingredientsList,lectureStepList, progressPercent);
+            ,videos,ingredientsList,lectureStepList, progressPercent,isLiked);
 
     return lectureDetailDto;
 }

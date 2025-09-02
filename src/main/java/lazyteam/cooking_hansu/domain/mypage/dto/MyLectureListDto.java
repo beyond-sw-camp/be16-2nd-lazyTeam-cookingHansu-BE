@@ -59,6 +59,31 @@ public class MyLectureListDto {
                 .reviewAvg(avg)
                 .build();
     }
+    // MyLectureListDto.java에 추가할 메서드 (기존 fromEntity 아래에 추가)
 
+    public static MyLectureListDto fromEntity(Lecture lecture) {
+        int sum = (lecture.getReviewSum() == null ? 0 : lecture.getReviewSum());
+        int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
 
+        // Decimal 타입의 나눗셈 수행, 0 나눗셈 방지
+        BigDecimal avg = (cnt == 0)
+                ? BigDecimal.ZERO.setScale(1)
+                : BigDecimal.valueOf(sum)
+                .divide(BigDecimal.valueOf(cnt), 1, RoundingMode.HALF_UP);
+
+        return MyLectureListDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .description(lecture.getDescription())
+                .category(lecture.getCategory())
+                .status(lecture.getApprovalStatus())
+                .price(lecture.getPrice())
+                .thumbUrl(lecture.getThumbUrl())
+                .reviewCount(lecture.getReviewCount())
+                .qnaCount(lecture.getQnaCount())
+                .likeCount(lecture.getLikeCount())
+                .purchaseCount(lecture.getPurchaseCount())
+                .reviewAvg(avg)
+                .build();
+    }
 }

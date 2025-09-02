@@ -56,8 +56,9 @@ public class SecurityConfig {
                         "/report/**", // Report 관련 API
                         "/lecture/list",
                         "/lecture/detail/**",
-                        "/api/recipes/**",
-                        "/api/posts/**" // 게시글 API 모두 허용
+                        "/post/comment/**",
+                        "/api/posts",        // GET 목록 조회만 허용
+                        "/api/posts/*"    // GET 상세 조회만 허용
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

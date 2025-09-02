@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lazyteam.cooking_hansu.domain.comment.repository.PostCommentRepository;
 import lazyteam.cooking_hansu.domain.interaction.entity.*;
 import lazyteam.cooking_hansu.domain.interaction.repository.*;
+import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.mypage.dto.*;
 import lazyteam.cooking_hansu.domain.post.entity.*;
 import lazyteam.cooking_hansu.domain.post.repository.*;
@@ -38,6 +39,8 @@ public class MyPageService {
     private final PostLikesRepository postLikesRepository;
     private final S3Uploader s3Uploader;
     private final PostCommentRepository postCommentRepository;
+    private final LectureLikesRepository lectureLikesRepository;
+
     // ===== 프로필 관련 메서드 =====
 
     // 프로필 조회
@@ -128,6 +131,7 @@ public class MyPageService {
                         .thumbnailUrl(post.getThumbnailUrl())
                         .createdAt(post.getCreatedAt())
                         .likeCount(post.getLikeCount())
+                        .category(post.getCategory())
                         .bookmarkCount(post.getBookmarkCount())
                         .isOpen(post.getIsOpen())
                         .commentCount(commentCount)
@@ -157,6 +161,11 @@ public class MyPageService {
         User user = getCurrentUser();
 
         return bookmarkRepository.findAllByUser(user).stream()
+                .filter(bookmark -> {
+                    Post post = bookmark.getPost();
+                    // 내 게시글이거나 공개 게시글만 보이도록 필터링
+                    return post.getIsOpen() || post.getUser().getId().equals(user.getId());
+                })
                 .map(bookmark -> {
                     Post post = bookmark.getPost();
                     Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
@@ -166,6 +175,41 @@ public class MyPageService {
                             .title(post.getTitle())
                             .description(post.getDescription())
                             .thumbnailUrl(post.getThumbnailUrl())
+                            .likeCount(post.getLikeCount())
+                            .category(post.getCategory())
+                            .bookmarkCount(post.getBookmarkCount())
+                            .writerNickname(post.getUser().getNickname())
+                            .createdAt(post.getCreatedAt())
+                            .commentCount(commentCount)
+                            .isOpen(post.getIsOpen())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // ===== 레시피 좋아요 관련 메서드 =====
+
+    @Transactional(readOnly = true)
+    public List<MyBookmarkLikedListDto> getMyLikes() {
+        User user = getCurrentUser();
+        List<PostLikes> postLikesList = postLikesRepository.findAllByUser(user);
+
+        return postLikesList.stream()
+                .filter(like -> {
+                    Post post = like.getPost();
+                    // 내 게시글이거나 공개 게시글만 보이도록 필터링
+                    return post.getIsOpen() || post.getUser().getId().equals(user.getId());
+                })
+                .map(like -> {
+                    Post post = like.getPost();
+                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+
+                    return MyBookmarkLikedListDto.builder()
+                            .id(post.getId())
+                            .title(post.getTitle())
+                            .description(post.getDescription())
+                            .thumbnailUrl(post.getThumbnailUrl())
+                            .category(post.getCategory())
                             .likeCount(post.getLikeCount())
                             .bookmarkCount(post.getBookmarkCount())
                             .writerNickname(post.getUser().getNickname())
@@ -177,31 +221,16 @@ public class MyPageService {
                 .collect(Collectors.toList());
     }
 
-    // ===== 좋아요 관련 메서드 =====
+    // ===== 강의 좋아요 관련 메서드 =====
+
 
     @Transactional(readOnly = true)
-    public List<MyBookmarkLikedListDto> getMyLikes() {
+    public List<MyLectureListDto> getMyLikedLectures() {
         User user = getCurrentUser();
-        List<PostLikes> postLikesList = postLikesRepository.findAllByUser(user);
+        List<LectureLikes> lectureLikesList = lectureLikesRepository.findAllByUser(user);
 
-        return postLikesList.stream()
-                .map(like -> {
-                    Post post = like.getPost();
-                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
-
-                    return MyBookmarkLikedListDto.builder()
-                            .id(post.getId())
-                            .title(post.getTitle())
-                            .description(post.getDescription())
-                            .thumbnailUrl(post.getThumbnailUrl())
-                            .likeCount(post.getLikeCount())
-                            .bookmarkCount(post.getBookmarkCount())
-                            .writerNickname(post.getUser().getNickname())
-                            .createdAt(post.getCreatedAt())
-                            .commentCount(commentCount)
-                            .isOpen(post.getIsOpen())
-                            .build();
-                })
+        return lectureLikesList.stream()
+                .map(like -> MyLectureListDto.fromEntity(like.getLecture()))
                 .collect(Collectors.toList());
     }
 
