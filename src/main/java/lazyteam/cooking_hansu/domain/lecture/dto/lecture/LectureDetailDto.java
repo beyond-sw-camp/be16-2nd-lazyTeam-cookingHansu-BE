@@ -8,9 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +40,11 @@ public class LectureDetailDto {
     private Integer purchaseCount;
     private BigDecimal reviewAvg;
     private UUID submittedById;
+    private LocalDateTime submittedJoinedAt; // 강사 가입일자
+    private String submittedByEmail; // 강사 이메일
+    private Integer progressPercent; // 학습진행률
+
+
 
 //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
@@ -57,7 +64,7 @@ public class LectureDetailDto {
 
     public static LectureDetailDto fromEntity(Lecture lecture, User submittedBy, List<LectureReview> reviews
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
-            ,List<LectureStep> lectureStepList) {
+            ,List<LectureStep> lectureStepList, Integer progressPercent, boolean isLiked) {
 
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
         int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
@@ -78,12 +85,15 @@ public class LectureDetailDto {
                 .level(lecture.getLevel())
                 .category(lecture.getCategory())
                 .price(lecture.getPrice())
+                .isLiked(isLiked)
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
                 .submittedById(submittedBy.getId())
+                .submittedJoinedAt(submittedBy.getCreatedAt())
+                .submittedByEmail(submittedBy.getEmail())
                 .ingredResDtoList(ingredientsList.stream().map(LectureIngredResDto::fromEntity).toList())
 
                 .lectureStepResDtoList(
@@ -106,7 +116,7 @@ public class LectureDetailDto {
                                 .map(LectureVideoResDto::fromEntity)
                                 .toList()
                 )
-
+                .progressPercent(progressPercent)
                 .lectureReviewResDtoList(reviews.stream().map(LectureReviewResDto::fromEntity).toList())
                 .build();
     }

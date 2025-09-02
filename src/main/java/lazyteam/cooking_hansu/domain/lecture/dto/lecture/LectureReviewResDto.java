@@ -23,6 +23,8 @@ public class LectureReviewResDto {
     private LocalDateTime updateAt;
     private UUID reviewerId;
     private String profileUrl;
+    private LocalDateTime reviewerJoinedAt; //가입일자
+    private String reviewerEmail; // 이메일
 
     public static LectureReviewResDto fromEntity(LectureReview lectureReview) {
         return LectureReviewResDto.builder()
@@ -33,6 +35,8 @@ public class LectureReviewResDto {
                 .updateAt(lectureReview.getUpdatedAt())
                 .reviewerId(lectureReview.getWriter().getId())
                 .profileUrl(lectureReview.getWriter().getPicture())
+                .reviewerJoinedAt(lectureReview.getWriter().getCreatedAt())
+                .reviewerEmail(lectureReview.getWriter().getEmail())
                 .build();
     }
 }

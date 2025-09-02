@@ -1,6 +1,5 @@
 package lazyteam.cooking_hansu.domain.mypage.controller;
 
-import lazyteam.cooking_hansu.domain.lecture.dto.lecture.LectureResDto;
 import lazyteam.cooking_hansu.domain.mypage.dto.MyLectureListDto;
 import lazyteam.cooking_hansu.domain.mypage.dto.ProfileUpdateRequestDto;
 import lazyteam.cooking_hansu.domain.mypage.service.*;
@@ -80,6 +79,14 @@ public class MyPageController {
     public ResponseEntity<?> myLikedPosts() {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.getMyLikes(), HttpStatus.OK),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/liked-lectures")
+    public ResponseEntity<?> myLikedLectures() {
+        return new ResponseEntity<>(
+                ResponseDto.ok(myPageService.getMyLikedLectures(), HttpStatus.OK),
                 HttpStatus.OK
         );
     }

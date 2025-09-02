@@ -1,5 +1,7 @@
 package lazyteam.cooking_hansu.domain.report.dto;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lazyteam.cooking_hansu.domain.report.entity.Report;
@@ -19,9 +21,11 @@ import java.util.UUID;
 @Builder
 public class ReportCreateDto {
 
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "신고 유형은 필수 입력입니다.")
     private ReportType reportType; // 신고 유형 (예: 레시피, 사용자, 댓글 등)
     private UUID targetId; // 신고 대상 ID (예: 레시피 ID, 사용자 ID, 댓글 ID)
+    @Enumerated(EnumType.STRING)
     @NotNull(message = "신고 사유 유형은 필수 입력입니다.")
     private ReportReasonType reportReasonType; // 신고 사유 유형 (예: 스팸, 잘못된 내용, 불쾌한 행동 등)
     private String content; // 신고 사유에 대한 추가 설명
