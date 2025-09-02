@@ -34,4 +34,11 @@ public class LectureVideo extends BaseIdAndTimeEntity {
     @Column(nullable = false)
     private Integer duration; // 초단위로 데이터 받을 예정 > 250 : 4분10초
 
+    // 메타데이터 업데이트 메서드
+    public void updateMetadata(String title, boolean preview) {
+        this.title = title;
+        this.preview = preview;
+    }
+
+
 }

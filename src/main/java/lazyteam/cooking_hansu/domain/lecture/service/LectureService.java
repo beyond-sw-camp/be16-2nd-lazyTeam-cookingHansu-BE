@@ -28,7 +28,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -47,6 +49,7 @@ public class LectureService {
     private final LectureReviewRepository lectureReviewRepository;
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
     private final InteractionService interactionService;
+    private final LectureProgressRepository progressRepository;
 
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
@@ -116,6 +119,7 @@ public class LectureService {
 
         return lecture.getId();
     }
+
 
     // ====== 강의수정 ======
     public UUID update(LectureUpdateDto lectureUpdateDto,
@@ -198,64 +202,91 @@ public class LectureService {
 
         // ===== 강의영상 수정 =====
         if (lectureVideoDto != null && !lectureVideoDto.isEmpty()) {
-            // 1. 기존 영상 제거
-            List<LectureVideo> oldVideos = lectureVideoRepository.findByLecture(lecture);
-            if (!oldVideos.isEmpty()) {
-                for (LectureVideo video : oldVideos) {
-                    try {
-                        s3Uploader.delete(video.getVideoUrl());
-                    } catch (Exception e) {
-                        log.warn("기존 강의영상 삭제 실패(무시): url={}, msg={}", video.getVideoUrl(), e.getMessage());
-                    }
-                }
-                lectureVideoRepository.deleteAll(oldVideos);
-                log.info("기존 강의영상 제거 완료");
-            }
+            // 기존 영상 목록 조회
+            List<LectureVideo> existingVideos = lectureVideoRepository.findByLecture(lecture);
+            Map<Integer, LectureVideo> existingVideoMap = existingVideos.stream()
+                    .collect(Collectors.toMap(LectureVideo::getSequence, video -> video));
 
-            // 2. 새 영상 등록
-            List<LectureVideo> newVideos = new ArrayList<>();
+            log.info("기존 영상 {}개 발견", existingVideos.size());
 
             int fileIndex = 0;
+            List<LectureVideo> videosToSave = new ArrayList<>();
+            List<LectureVideo> videosToDelete = new ArrayList<>();
 
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
+                int sequence = dto.getSequence();
                 MultipartFile file = null;
 
-                // 새 파일 필요한 경우에만 fileList에서 꺼냄
+                // 새 파일이 필요한 경우에만 fileList에서 꺼냄
                 if ((dto.getVideoUrl() == null || dto.getVideoUrl().isBlank())
                         && lectureVideoFiles != null && fileIndex < lectureVideoFiles.size()) {
                     file = lectureVideoFiles.get(fileIndex++);
                 }
-                String videoUrl;
-                int duration;
 
                 if (file != null && !file.isEmpty()) {
+                    // 새 파일 업로드 - 기존 영상 교체
+                    log.info("영상 {}번 새 파일로 교체", sequence);
+
+                    // 기존 영상이 있다면 S3에서 삭제
+                    LectureVideo existingVideo = existingVideoMap.get(sequence);
+                    if (existingVideo != null) {
+                        try {
+                            s3Uploader.delete(existingVideo.getVideoUrl());
+                            videosToDelete.add(existingVideo);
+                            log.info("기존 영상 {}번 S3에서 삭제: {}", sequence, existingVideo.getVideoUrl());
+                        } catch (Exception e) {
+                            log.warn("기존 영상 {}번 S3 삭제 실패(무시): {}", sequence, e.getMessage());
+                        }
+                    }
+
                     // 새 파일 업로드
                     String ext = videoUtil.detectAndValidateContainerExt(file);
-                    String fileName = "lecture-" + lecture.getId() + "-video-" + dto.getSequence() + "." + ext;
+                    String fileName = "lecture-" + lecture.getId() + "-video-" + sequence + "." + ext;
 
-                    log.info("업로드 파일명={}", fileName);
-                    videoUrl = s3Uploader.upload(file, fileName);
+                    log.info("새 파일 업로드: {}", fileName);
+                    String videoUrl = s3Uploader.upload(file, fileName);
 
+                    int duration;
                     try {
                         duration = videoUtil.extractDuration(file);
                     } catch (IOException | InterruptedException e) {
                         throw new IllegalArgumentException("파일길이 추출 중 오류 발생", e);
                     }
-                } else {
-                    // 파일이 없고, 기존 URL만 전달된 경우 → 그대로 사용
-                    videoUrl = dto.getVideoUrl();
-                    duration = dto.getDuration(); // DTO에 기존 길이 담아두는 방식
-                }
 
-                boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
-                LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
-                newVideos.add(video);
+                    boolean isPreview = (i == 0); // 첫 번째 영상만 미리보기
+                    LectureVideo video = dto.toEntity(lecture, videoUrl, duration, isPreview);
+                    videosToSave.add(video);
+
+                } else {
+                    // 기존 영상 유지 - 메타데이터만 업데이트
+                    LectureVideo existingVideo = existingVideoMap.get(sequence);
+                    if (existingVideo != null) {
+                        log.info("영상 {}번 기존 파일 유지, 메타데이터만 업데이트", sequence);
+
+                        // 기존 영상의 메타데이터만 업데이트 (제목, 미리보기 여부)
+                        existingVideo.updateMetadata(dto.getTitle(), i == 0); // 첫 번째 영상만 미리보기
+                        videosToSave.add(existingVideo);
+
+                    } else {
+                        // 기존 영상이 없는데 새 파일도 없는 경우 - 에러
+                        throw new IllegalArgumentException("영상 " + sequence + "번: 기존 파일도 없고 새 파일도 없습니다.");
+                    }
+                }
             }
 
-            // 3. DB 저장
-            lectureVideoRepository.saveAll(newVideos);
-            log.info("새 강의영상 등록 완료 (총 {}개)", newVideos.size());
+            // 삭제할 영상들을 DB에서 제거
+            if (!videosToDelete.isEmpty()) {
+                lectureVideoRepository.deleteAll(videosToDelete);
+                log.info("기존 영상 {}개 DB에서 삭제", videosToDelete.size());
+            }
+
+            // 모든 영상 저장 (새 영상 생성 + 기존 영상 메타데이터 업데이트)
+            lectureVideoRepository.saveAll(videosToSave);
+            log.info("모든 영상 저장 완료 (총 {}개)", videosToSave.size());
+
+            log.info("강의영상 수정 완료 - 총 {}개 영상 처리", videosToSave.size());
+
         } else {
             log.info("영상 DTO 미전달 → 교체 스킵");
         }
@@ -321,57 +352,76 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
     }
 
 
-    
+
 // ====== 강의상세목록 조회 ======
-    public LectureDetailDto findDetailLecture(UUID lectureId) {
+public LectureDetailDto findDetailLecture(UUID lectureId) {
 
-        Lecture lecture = lectureRepository.findById(lectureId)
-                .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
+    Lecture lecture = lectureRepository.findById(lectureId)
+            .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
 
-        // Redis에서 좋아요 수 가져와서 동기화
-        try {
-            Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
-            if (cachedLikeCount != null) {
-                // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
-                lecture.updateLikeCount(cachedLikeCount);
-                log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
-            } else {
-                // Redis에 캐시가 없으면 DB 값을 Redis에 저장
-                Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
-                redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
-                log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
-            }
-        } catch (Exception e) {
-            log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
-            // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+    // Redis에서 좋아요 수 가져와서 동기화
+    try {
+        Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
+        if (cachedLikeCount != null) {
+            // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
+            lecture.updateLikeCount(cachedLikeCount);
+            log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
+        } else {
+            // Redis에 캐시가 없으면 DB 값을 Redis에 저장
+            Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
+            redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
+            log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
         }
-
-        Boolean isLiked = null;
-        try {
-            UUID currentUserId = AuthUtils.getCurrentUserId();
-            if (currentUserId != null) {
-                isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
-            }
-        } catch (Exception e) {
-            log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
-        }
-
-        User submittedBy = lecture.getSubmittedBy();
-        List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
-
-        List<LectureQna> qnas = lecture.getQnas();
-
-        List<LectureVideo> videos = lecture.getVideos();
-
-        List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
-
-        List<LectureStep> lectureStepList = lecture.getLectureStepList();
-
-        LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-                ,videos,ingredientsList,lectureStepList,isLiked);
-
-        return lectureDetailDto;
+    } catch (Exception e) {
+        log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
+        // Redis 연동 실패해도 서비스는 정상 동작하도록 함
     }
+
+    Boolean isLiked = null;
+    try {
+        UUID currentUserId = AuthUtils.getCurrentUserId();
+        if (currentUserId != null) {
+            isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
+        }
+    } catch (Exception e) {
+        log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
+    }
+
+    User submittedBy = lecture.getSubmittedBy();
+    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
+
+    List<LectureQna> qnas = lecture.getQnas();
+
+    List<LectureVideo> videos = lecture.getVideos();
+
+    List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
+
+    List<LectureStep> lectureStepList = lecture.getLectureStepList();
+
+    Integer progressPercent = null;
+    try {
+        UUID userId = AuthUtils.getCurrentUserId();
+        int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
+        long completedVideos = progressRepository
+                .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
+
+        if (totalVideos > 0) {
+            progressPercent = (int) ((completedVideos * 100) / totalVideos);
+        } else {
+            progressPercent = 0;
+        }
+    } catch (Exception e) {
+        // 로그인 안 된 경우 anonymousUser → progressPercent = null
+        progressPercent = null;
+    }
+
+    LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
+            ,videos,ingredientsList,lectureStepList, progressPercent,isLiked);
+
+    return lectureDetailDto;
+}
+
+
 
 
 
@@ -381,6 +431,36 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
                 .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));
 
         lecture.lectureDelete();
+    }
+
+    // 영상 진행도 업데이트
+    public UUID updateProgress(UUID videoId, int second) {
+        UUID userId = AuthUtils.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
+
+        LectureVideo video = lectureVideoRepository.findById(videoId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 강의 영상입니다."));
+
+        LectureProgress progress = progressRepository.findByUserIdAndLectureVideoId(userId, videoId)
+                .orElse(LectureProgress.builder()
+                        .user(user)
+                        .lectureVideo(video)
+                        .build());
+
+        progress.updateProgress(second, video.getDuration());
+        return progressRepository.save(progress).getId();
+    }
+
+    // 강의 단위 진행률(%) 계산 ->향후 필요할 수 있어서 남겨 둠
+    public int getLectureProgressPercent(UUID lectureId) {
+        UUID userId = AuthUtils.getCurrentUserId();
+        int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
+        long completedVideos = progressRepository
+                .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
+
+        if (totalVideos == 0) return 0;
+        return (int) ((completedVideos * 100) / totalVideos);
     }
 
 
