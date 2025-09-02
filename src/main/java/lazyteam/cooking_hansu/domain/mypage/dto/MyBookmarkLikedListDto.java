@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.mypage.dto;
 
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class MyBookmarkLikedListDto {
     private String title;
     private String description;
     private String thumbnailUrl;
+    private CategoryEnum category;     // 카테고리
     private Long likeCount;
     private Long bookmarkCount;
     private LocalDateTime createdAt;

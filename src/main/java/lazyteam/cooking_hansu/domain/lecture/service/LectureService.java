@@ -15,7 +15,6 @@ import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.dto.RejectRequestDto;
@@ -369,7 +368,7 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
         List<LectureStep> lectureStepList = lecture.getLectureStepList();
 
         LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-                ,videos,ingredientsList,lectureStepList);
+                ,videos,ingredientsList,lectureStepList,isLiked);
 
         return lectureDetailDto;
     }

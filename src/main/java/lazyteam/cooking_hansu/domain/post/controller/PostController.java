@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
@@ -36,7 +37,8 @@ public class PostController {
     private final InteractionService interactionService;
 
     @Operation(summary = "통합 Post 생성", description = "레시피 정보가 포함된 Post를 생성합니다. (제목, 설명, 재료, 조리순서, 썸네일 등)")
-    @PostMapping
+    @PreAuthorize("isAuthenticated()") // 로그인한 사용자만
+    @PostMapping("/create")
     public ResponseEntity<?> createPost(
             @Valid @RequestPart("request") PostCreateRequestDto requestDto,
             @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail) {
@@ -75,7 +77,8 @@ public class PostController {
     }
 
     @Operation(summary = "Post 수정", description = "Post의 기본 정보, 재료, 조리순서를 수정합니다.")
-    @PutMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/update/{postId}")
     public ResponseEntity<?> updatePost(
             @PathVariable UUID postId,
             @Valid @RequestPart("request") PostUpdateRequestDto requestDto,
@@ -87,7 +90,8 @@ public class PostController {
     }
 
     @Operation(summary = "Post 삭제", description = "Post를 소프트 삭제하고 연관된 재료, 조리순서도 함께 삭제됩니다.")
-    @DeleteMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/delete/{postId}")
     public ResponseEntity<?> deletePost(
             @Parameter(description = "Post ID", required = true)
             @PathVariable UUID postId) {

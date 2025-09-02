@@ -57,7 +57,7 @@ public class LectureDetailDto {
 
     public static LectureDetailDto fromEntity(Lecture lecture, User submittedBy, List<LectureReview> reviews
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
-            ,List<LectureStep> lectureStepList) {
+            ,List<LectureStep> lectureStepList, boolean isLiked) {
 
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
         int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
@@ -78,6 +78,7 @@ public class LectureDetailDto {
                 .level(lecture.getLevel())
                 .category(lecture.getCategory())
                 .price(lecture.getPrice())
+                .isLiked(isLiked)
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
