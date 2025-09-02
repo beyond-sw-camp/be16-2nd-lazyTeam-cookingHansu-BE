@@ -24,4 +24,19 @@ public class AuthUtils {
             throw new IllegalStateException("Authentication name이 UUID 형식이 아닙니다: " + authentication.getName());
         }
     }
+
+    // 새 메서드 (비회원 허용)
+    public static UUID getCurrentUserIdOrNull() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+
+        try {
+            return UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 }

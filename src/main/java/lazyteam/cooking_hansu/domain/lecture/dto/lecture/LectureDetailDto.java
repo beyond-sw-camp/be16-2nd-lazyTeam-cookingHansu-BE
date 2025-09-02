@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
+
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -34,7 +34,7 @@ public class LectureDetailDto {
     private CategoryEnum category;
     private Integer price;
     private Boolean isLiked;
-    private Boolean isPurchased; // 구매 여부 추가
+    private Boolean isPurchased; // 구매 여부
     private Integer reviewCount;
     private Integer qnaCount;
     private Long likeCount; // 좋아요 수 추가
@@ -47,25 +47,25 @@ public class LectureDetailDto {
 
 
 
-//    재료 목록
+    //    재료 목록
     private List<LectureIngredResDto> ingredResDtoList;
 
-//    조리 순서
+    //    조리 순서
     private List<LectureStepResDto> lectureStepResDtoList;
 
-//    강의 QnA
+    //    강의 QnA
     private List<QnaResDto> qnaList;
 
-//    강의 영상
+    //    강의 영상
     private List<LectureVideoResDto> lectureVideoResDtoList;
 
-//    강의 리뷰
+    //    강의 리뷰
     private List<LectureReviewResDto> lectureReviewResDtoList;
 
 
     public static LectureDetailDto fromEntity(Lecture lecture, User submittedBy, List<LectureReview> reviews
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
-            ,List<LectureStep> lectureStepList, Integer progressPercent, Boolean isLiked, Boolean isPurchased) {
+            ,List<LectureStep> lectureStepList, Integer progressPercent, boolean isLiked, boolean isPurchased) {
 
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
         int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
@@ -86,8 +86,8 @@ public class LectureDetailDto {
                 .level(lecture.getLevel())
                 .category(lecture.getCategory())
                 .price(lecture.getPrice())
-                .isLiked(isLiked != null ? isLiked : false)
-                .isPurchased(isPurchased != null ? isPurchased : false)
+                .isLiked(isLiked)
+                .isPurchased(isPurchased)
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가

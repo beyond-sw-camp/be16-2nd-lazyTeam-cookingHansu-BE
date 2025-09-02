@@ -6,6 +6,7 @@ import lazyteam.cooking_hansu.global.auth.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,12 +18,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
 
 import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
@@ -58,7 +60,7 @@ public class SecurityConfig {
                         "/lecture/detail/**",
                         "/post/comment/list/**",
                         "/api/posts",        // GET 목록 조회만 허용
-                        "/api/posts/*"    // GET 상세 조회만 허용
+                        "/api/posts/*" 
                 ).permitAll().anyRequest().authenticated())
                 .build();
     }

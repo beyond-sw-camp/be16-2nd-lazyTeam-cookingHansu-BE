@@ -37,7 +37,7 @@ public class PostController {
     private final InteractionService interactionService;
 
     @Operation(summary = "통합 Post 생성", description = "레시피 정보가 포함된 Post를 생성합니다. (제목, 설명, 재료, 조리순서, 썸네일 등)")
-    @PreAuthorize("isAuthenticated()") // 로그인한 사용자만
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @PostMapping("/create")
     public ResponseEntity<?> createPost(
             @Valid @RequestPart("request") PostCreateRequestDto requestDto,
@@ -77,7 +77,7 @@ public class PostController {
     }
 
     @Operation(summary = "Post 수정", description = "Post의 기본 정보, 재료, 조리순서를 수정합니다.")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @PutMapping("/update/{postId}")
     public ResponseEntity<?> updatePost(
             @PathVariable UUID postId,
@@ -90,7 +90,7 @@ public class PostController {
     }
 
     @Operation(summary = "Post 삭제", description = "Post를 소프트 삭제하고 연관된 재료, 조리순서도 함께 삭제됩니다.")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<?> deletePost(
             @Parameter(description = "Post ID", required = true)

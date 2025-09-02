@@ -18,7 +18,4 @@ public interface PurchasedLectureRepository extends JpaRepository<PurchasedLectu
 
     Optional<PurchasedLecture> findByUser_IdAndLecture_Id(UUID userId, UUID lectureId);
 
-
-
-
 }
