@@ -20,6 +20,7 @@ import lazyteam.cooking_hansu.domain.user.repository.OwnerRepository;
 import lazyteam.cooking_hansu.domain.user.repository.ChefRepository;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
+import lazyteam.cooking_hansu.global.service.RefreshTokenService;
 import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,9 @@ public class UserService {
     private final ChefRepository chefRepository;
     private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
+    private final KakaoService kakaoService;
+    private final NaverService naverService;
+    private final RefreshTokenService refreshTokenService;
     private final NotificationService notificationService;
 
     @Value("${my.test.user-id}")
@@ -66,7 +70,7 @@ public class UserService {
         return waitingBusinesses.map(WaitingBusinessListDto::fromEntity);
     }
 
-//    사용자 승인 - 승인 상태만 변경하고 알림 발송
+//    사용자 승인
     public void approveUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
@@ -78,7 +82,7 @@ public class UserService {
             }
             chef.approve();
             user.updateRoleStatus(Role.CHEF);
-            
+
             // 승인 알림 생성 및 발송
             SseMessageDto approvalNotification = SseMessageDto.builder()
                     .recipientId(userId)
@@ -98,7 +102,7 @@ public class UserService {
             }
             owner.approve();
             user.updateRoleStatus(Role.OWNER);
-            
+
             // 승인 알림 생성 및 발송
             SseMessageDto approvalNotification = SseMessageDto.builder()
                     .recipientId(userId)
@@ -211,22 +215,57 @@ public class UserService {
         return userRepository.findBySocialIdAndOauthType(email, oauthType).orElse(null);
     }
 
+    // 탈퇴한 회원 포함하여 조회
+    public User getUserBySocialIdAndOauthTypeIncludingDeleted(String socialId, OauthType oauthType) {
+        return userRepository.findBySocialIdAndOauthTypeIncludingDeleted(socialId, oauthType).orElse(null);
+    }
+
+    // 회원 복구 기능
+    @Transactional
+    public User restoreUser(String socialId, OauthType oauthType, String newPictureUrl) {
+        // 탈퇴한 회원 조회
+        User deletedUser = userRepository.findBySocialIdAndOauthTypeAndIsDeleted(socialId, oauthType, "Y")
+                .orElseThrow(() -> new EntityNotFoundException("탈퇴한 회원 정보를 찾을 수 없습니다."));
+
+        // 회원 복구
+        deletedUser.restoreUser();
+
+        // 새로운 프로필 이미지가 제공된 경우 업데이트
+        if (newPictureUrl != null && !newPictureUrl.isEmpty()) {
+            deletedUser.updateProfileImage(newPictureUrl);
+        }
+
+        log.info("User restored successfully: {}", deletedUser.getId());
+        return deletedUser;
+    }
+
     public User getUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
 
-    // 회원탈퇴
-    public void deleteUser() {
-        UUID userId = AuthUtils.getCurrentUserId();
-        User currentUser = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
+        // 회원 탈퇴
+        @Transactional
+        public void deleteUser(UUID userId) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
 
-        // 프로필 이미지가 S3에 있으면 같이 삭제
-        if (currentUser.getPicture() != null) {
-            try {
-                s3Uploader.delete(currentUser.getPicture());
-            } catch (Exception ignore) { }
+            String pictureUrl = user.getPicture();
+
+            // User soft delete
+            user.deleteUser();
+
+            // Refresh Token 삭제
+            refreshTokenService.deleteRefreshToken(userId.toString());
+
+            // S3 프로필 이미지 삭제
+            if (pictureUrl != null && !pictureUrl.isEmpty()) {
+                try {
+                    s3Uploader.delete(pictureUrl);
+                    log.info("S3 profile image deleted for user: {}", userId);
+                } catch (Exception e) {
+                    log.error("Failed to delete S3 profile image for user: {}. Error: {}", userId, e.getMessage());
+                }
+            }
+            log.info("User soft deleted successfully: {}", userId);
         }
-
-        currentUser.deleteUser();
-    }
 }

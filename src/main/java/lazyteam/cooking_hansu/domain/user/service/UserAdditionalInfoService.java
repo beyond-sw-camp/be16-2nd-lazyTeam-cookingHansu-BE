@@ -63,7 +63,7 @@ public class UserAdditionalInfoService {
             finalGeneralType = GeneralType.ETC;
         }
         
-        user.updateStep1Info(requestDto.getNickname(), finalRole, finalGeneralType);
+        user.updateStep1Info(requestDto.getNickname(), finalRole, finalGeneralType, requestDto.getInfo());
 
         // 역할별 추가 정보 처리
         processRoleSpecificInfo(user, requestDto);

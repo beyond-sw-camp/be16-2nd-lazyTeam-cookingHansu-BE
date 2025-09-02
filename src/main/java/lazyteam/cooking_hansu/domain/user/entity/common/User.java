@@ -64,6 +64,17 @@ public class User extends BaseIdAndTimeEntity {
 
     public void deleteUser() { this.isDeleted = "Y"; }
 
+    // 회원 복구 메서드 추가
+    public void restoreUser() {
+        this.isDeleted = "N";
+        this.loginStatus = LoginStatus.ACTIVE;
+    }
+
+    // 탈퇴한 회원인지 확인
+    public boolean isDeleted() {
+        return "Y".equals(this.isDeleted);
+    }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
@@ -215,10 +226,11 @@ public class User extends BaseIdAndTimeEntity {
     }
 
     // 1단계 추가 정보 업데이트 (닉네임, 역할)
-    public void updateStep1Info(String nickname, Role role, GeneralType generalType) {
+    public void updateStep1Info(String nickname, Role role, GeneralType generalType, String info) {
         this.nickname = nickname;
         this.role = role;
         this.generalType = generalType;
+        this.info = info;
     }
 
     // 일반 회원 2단계 추가 정보 업데이트
