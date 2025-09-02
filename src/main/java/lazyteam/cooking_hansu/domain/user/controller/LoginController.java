@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user/login")
@@ -46,8 +50,21 @@ public class LoginController {
             // 사용자 정보 얻기
             GoogleProfileDto googleProfileDto = googleService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialIdAndOauthType(googleProfileDto.getSub(), OauthType.GOOGLE);
+            // 탈퇴한 회원 포함하여 기존 사용자 조회
+            User originalUser = userService.getUserBySocialIdAndOauthTypeIncludingDeleted(googleProfileDto.getSub(), OauthType.GOOGLE);
+
+            // 탈퇴한 회원인 경우 특별한 응답 반환
+            if (originalUser != null && originalUser.isDeleted()) {
+                Map<String, Object> deletedUserInfo = new ConcurrentHashMap<>();
+                deletedUserInfo.put("isDeleted", true);
+                deletedUserInfo.put("socialId", googleProfileDto.getSub());
+                deletedUserInfo.put("oauthType", "GOOGLE");
+                deletedUserInfo.put("email", googleProfileDto.getEmail());
+                deletedUserInfo.put("name", googleProfileDto.getName());
+                deletedUserInfo.put("picture", googleProfileDto.getPicture());
+                deletedUserInfo.put("message", "탈퇴한 회원입니다. 복구를 원하시면 복구 버튼을 눌러주세요.");
+                return ResponseDto.ok(deletedUserInfo, HttpStatus.OK);
+            }
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
@@ -77,8 +94,21 @@ public class LoginController {
             // 사용자 정보 얻기
             KakaoProfileDto kakaoProfileDto = kakaoService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialIdAndOauthType(kakaoProfileDto.getId(), OauthType.KAKAO);
+            // 탈퇴한 회원 포함하여 기존 사용자 조회
+            User originalUser = userService.getUserBySocialIdAndOauthTypeIncludingDeleted(kakaoProfileDto.getId(), OauthType.KAKAO);
+
+            // 탈퇴한 회원인 경우 특별한 응답 반환
+            if (originalUser != null && originalUser.isDeleted()) {
+                Map<String, Object> deletedUserInfo = new ConcurrentHashMap<>();
+                deletedUserInfo.put("isDeleted", true);
+                deletedUserInfo.put("socialId", kakaoProfileDto.getId());
+                deletedUserInfo.put("oauthType", "KAKAO");
+                deletedUserInfo.put("email", kakaoProfileDto.getKakao_account().getEmail());
+                deletedUserInfo.put("name", kakaoProfileDto.getKakao_account().getName());
+                deletedUserInfo.put("picture", kakaoProfileDto.getKakao_account().getProfile().getProfile_image_url());
+                deletedUserInfo.put("message", "탈퇴한 회원입니다. 복구를 원하시면 복구 버튼을 눌러주세요.");
+                return ResponseDto.ok(deletedUserInfo, HttpStatus.OK);
+            }
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {
@@ -108,8 +138,21 @@ public class LoginController {
             // 사용자 정보 얻기
             NaverProfileDto naverProfileDto = naverService.getProfile(commonTokenDto.getAccess_token());
 
-            // 기존 사용자 조회
-            User originalUser = userService.getUserBySocialIdAndOauthType(naverProfileDto.getResponse().getId(), OauthType.NAVER);
+            // 탈퇴한 회원 포함하여 기존 사용자 조회
+            User originalUser = userService.getUserBySocialIdAndOauthTypeIncludingDeleted(naverProfileDto.getResponse().getId(), OauthType.NAVER);
+
+            // 탈퇴한 회원인 경우 특별한 응답 반환
+            if (originalUser != null && originalUser.isDeleted()) {
+                Map<String, Object> deletedUserInfo = new ConcurrentHashMap<>();
+                deletedUserInfo.put("isDeleted", true);
+                deletedUserInfo.put("socialId", naverProfileDto.getResponse().getId());
+                deletedUserInfo.put("oauthType", "NAVER");
+                deletedUserInfo.put("email", naverProfileDto.getResponse().getEmail());
+                deletedUserInfo.put("name", naverProfileDto.getResponse().getName());
+                deletedUserInfo.put("picture", naverProfileDto.getResponse().getProfile_image());
+                deletedUserInfo.put("message", "탈퇴한 회원입니다. 복구를 원하시면 복구 버튼을 눌러주세요.");
+                return ResponseDto.ok(deletedUserInfo, HttpStatus.OK);
+            }
 
             // 회원 가입이 되어 있지 않다면 회원가입
             if (originalUser == null) {

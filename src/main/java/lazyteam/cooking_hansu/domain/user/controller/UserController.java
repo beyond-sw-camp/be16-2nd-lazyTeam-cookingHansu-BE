@@ -1,13 +1,17 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
+import jakarta.persistence.EntityNotFoundException;
+import lazyteam.cooking_hansu.domain.user.dto.UserRestoreRequestDto;
+import lazyteam.cooking_hansu.domain.user.dto.UserRestoreResponseDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.CommonUserDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.HeaderProfileDto;
+import lazyteam.cooking_hansu.domain.user.entity.common.OauthType;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.service.UserService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lazyteam.cooking_hansu.global.auth.JwtTokenProvider;
-import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lazyteam.cooking_hansu.global.service.RefreshTokenService;
+import lazyteam.cooking_hansu.global.service.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,11 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +31,7 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final S3Uploader s3Uploader;
 
     // 리프레시 토큰 갱신
     @PostMapping("/refresh")
@@ -69,17 +70,6 @@ public class UserController {
         }
     }
 
-    // TODO: 회원 관련 API 메서드 구현 예정
-
-    // 회원 탈퇴
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser() {
-        userService.deleteUser();
-        return new ResponseEntity<>(
-                ResponseDto.ok("회원 탈퇴가 완료되었습니다.", HttpStatus.OK),
-                HttpStatus.OK
-        );
-    }
     // 프론트엔드 헤더에 표시될 프로필 정보
     @GetMapping("/profile")
     public ResponseDto<?> getHeaderProfile(@RequestHeader("Authorization") String accessToken) {
@@ -182,4 +172,88 @@ public class UserController {
         }
     }
 
+
+    /**
+     * 회원 탈퇴
+     */
+    @DeleteMapping("/delete")
+    public ResponseDto<?> deleteUser(@RequestHeader("Authorization") String accessToken) {
+        try {
+            if (accessToken.startsWith("Bearer ")) {
+                accessToken = accessToken.substring(7);
+            }
+
+            String id = jwtTokenProvider.getIdFromAccessToken(accessToken);
+            if (id == null || id.isEmpty()) {
+                return ResponseDto.fail(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access Token 입니다.");
+            }
+
+            userService.deleteUser(UUID.fromString(id));
+
+            Map<String, String> response = new ConcurrentHashMap<>();
+            response.put("message", "회원 탈퇴가 성공적으로 처리되었습니다.");
+
+            return ResponseDto.ok(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Delete user failed", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 탈퇴 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 회원 복구
+     */
+    @PostMapping("/restore")
+    public ResponseDto<?> restoreUser(@RequestBody UserRestoreRequestDto requestDto) {
+        try {
+            // OAuth 타입 변환
+            OauthType oauthType = OauthType.valueOf(requestDto.getOauthType().toUpperCase());
+
+            // 새로운 프로필 이미지 처리 (S3 업로드)
+            String uploadedPictureUrl = null;
+            if (requestDto.getPicture() != null && !requestDto.getPicture().isEmpty()) {
+                try {
+                    String fileName = requestDto.getSocialId(); // 소셜 ID를 파일명으로 사용
+                    uploadedPictureUrl = s3Uploader.uploadFromUrl(
+                            requestDto.getPicture(),
+                            "profiles/",
+                            fileName
+                    );
+                    log.info("복구 시 프로필 이미지 S3 업로드 성공: {} -> {}", requestDto.getPicture(), uploadedPictureUrl);
+                } catch (Exception e) {
+                    log.warn("복구 시 프로필 이미지 S3 업로드 실패, 원본 URL 사용: {}", requestDto.getPicture(), e);
+                    uploadedPictureUrl = requestDto.getPicture(); // 업로드 실패 시 원본 URL 사용
+                }
+            }
+
+            // 회원 복구
+            User restoredUser = userService.restoreUser(requestDto.getSocialId(), oauthType, uploadedPictureUrl);
+
+            // JWT 토큰 발급
+            String jwtAtToken = jwtTokenProvider.createAtToken(restoredUser);
+            String jwtRtToken = jwtTokenProvider.createRtToken(restoredUser);
+            Long expiresIn = jwtTokenProvider.getRefreshTokenExpirationTime();
+
+            // Refresh Token을 Redis에 저장
+            refreshTokenService.saveRefreshToken(restoredUser.getId().toString(), jwtRtToken);
+
+            // 응답 생성
+            UserRestoreResponseDto responseDto = UserRestoreResponseDto.fromEntity(
+                    restoredUser, jwtAtToken, jwtRtToken, expiresIn
+            );
+
+            log.info("User restore successful: {}", restoredUser.getId());
+            return ResponseDto.ok(responseDto, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid OAuth type: {}", requestDto.getOauthType(), e);
+            return ResponseDto.fail(HttpStatus.BAD_REQUEST, "유효하지 않은 OAuth 타입입니다.");
+        } catch (EntityNotFoundException e) {
+            log.error("User not found for restore: {}", requestDto.getSocialId(), e);
+            return ResponseDto.fail(HttpStatus.NOT_FOUND, "복구할 회원 정보를 찾을 수 없습니다.");
+        } catch (Exception e) {
+            log.error("User restore failed", e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "회원 복구 처리 중 오류가 발생했습니다.");
+        }
+    }
 }
