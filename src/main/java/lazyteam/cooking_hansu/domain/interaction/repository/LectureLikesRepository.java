@@ -1,6 +1,8 @@
 package lazyteam.cooking_hansu.domain.interaction.repository;
 
 import lazyteam.cooking_hansu.domain.interaction.entity.LectureLikes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -20,5 +22,5 @@ public interface LectureLikesRepository extends JpaRepository<LectureLikes, UUID
     long countByLectureId(@Param("lectureId") UUID lectureId);
 
 //    사용자별 강의 좋아요 추가용
-    List<LectureLikes> findAllByUser(User user);
+    Page<LectureLikes> findAllByUser(User user, Pageable pageable);
 }

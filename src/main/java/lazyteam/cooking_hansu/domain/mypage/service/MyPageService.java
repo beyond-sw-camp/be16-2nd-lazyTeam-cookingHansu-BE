@@ -118,30 +118,29 @@ public class MyPageService {
     // ===== 내 게시글 관련 메서드 =====
 
     @Transactional(readOnly = true)
-    public List<MyPostListDto> getMyPosts() {
+    public Page<MyPostListDto> getMyPosts(Pageable pageable) {
         User user = getCurrentUser();
-        List<Post> posts = postRepository.findAllByUserAndDeletedAtIsNull(user);
+        Page<Post> posts = postRepository.findAllByUserAndDeletedAtIsNull(user, pageable);
 
-        return posts.stream()
-                .map(post -> { Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
-                        return MyPostListDto.builder()
-                        .id(post.getId())
-                        .title(post.getTitle())
-                        .description(post.getDescription())
-                        .thumbnailUrl(post.getThumbnailUrl())
-                        .createdAt(post.getCreatedAt())
-                        .likeCount(post.getLikeCount())
-                        .category(post.getCategory())
-                        .bookmarkCount(post.getBookmarkCount())
-                        .isOpen(post.getIsOpen())
-                        .commentCount(commentCount)
-                        .build();
-                })
-                .collect(Collectors.toList());
+        return posts.map(post -> { 
+            Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+            return MyPostListDto.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .description(post.getDescription())
+                    .thumbnailUrl(post.getThumbnailUrl())
+                    .createdAt(post.getCreatedAt())
+                    .likeCount(post.getLikeCount())
+                    .category(post.getCategory())
+                    .bookmarkCount(post.getBookmarkCount())
+                    .isOpen(post.getIsOpen())
+                    .commentCount(commentCount)
+                    .build();
+        });
     }
 
     // ====== 내 강의 목록 조회 ======
-
+    @Transactional(readOnly = true)
     public Page<MyLectureListDto> getMyLectures(Pageable pageable) {
         UUID userId = AuthUtils.getCurrentUserId();
         User user = userRepository.findById(userId)
@@ -157,81 +156,66 @@ public class MyPageService {
     // ===== 북마크 관련 메서드 =====
 
     @Transactional(readOnly = true)
-    public List<MyBookmarkLikedListDto> getMyBookmarks() {
+    public Page<MyBookmarkLikedListDto> getMyBookmarks(Pageable pageable) {
         User user = getCurrentUser();
+        Page<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user, pageable);
 
-        return bookmarkRepository.findAllByUser(user).stream()
-                .filter(bookmark -> {
-                    Post post = bookmark.getPost();
-                    // 내 게시글이거나 공개 게시글만 보이도록 필터링
-                    return post.getIsOpen() || post.getUser().getId().equals(user.getId());
-                })
-                .map(bookmark -> {
-                    Post post = bookmark.getPost();
-                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+        return bookmarks.map(bookmark -> {
+            Post post = bookmark.getPost();
+            Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
 
-                    return MyBookmarkLikedListDto.builder()
-                            .id(post.getId())
-                            .title(post.getTitle())
-                            .description(post.getDescription())
-                            .thumbnailUrl(post.getThumbnailUrl())
-                            .likeCount(post.getLikeCount())
-                            .category(post.getCategory())
-                            .bookmarkCount(post.getBookmarkCount())
-                            .writerNickname(post.getUser().getNickname())
-                            .createdAt(post.getCreatedAt())
-                            .commentCount(commentCount)
-                            .isOpen(post.getIsOpen())
-                            .build();
-                })
-                .collect(Collectors.toList());
+            return MyBookmarkLikedListDto.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .description(post.getDescription())
+                    .thumbnailUrl(post.getThumbnailUrl())
+                    .likeCount(post.getLikeCount())
+                    .category(post.getCategory())
+                    .bookmarkCount(post.getBookmarkCount())
+                    .writerNickname(post.getUser().getNickname())
+                    .createdAt(post.getCreatedAt())
+                    .commentCount(commentCount)
+                    .isOpen(post.getIsOpen())
+                    .build();
+        });
     }
 
     // ===== 레시피 좋아요 관련 메서드 =====
 
     @Transactional(readOnly = true)
-    public List<MyBookmarkLikedListDto> getMyLikes() {
+    public Page<MyBookmarkLikedListDto> getMyLikes(Pageable pageable) {
         User user = getCurrentUser();
-        List<PostLikes> postLikesList = postLikesRepository.findAllByUser(user);
+        Page<PostLikes> postLikesList = postLikesRepository.findAllByUser(user, pageable);
 
-        return postLikesList.stream()
-                .filter(like -> {
-                    Post post = like.getPost();
-                    // 내 게시글이거나 공개 게시글만 보이도록 필터링
-                    return post.getIsOpen() || post.getUser().getId().equals(user.getId());
-                })
-                .map(like -> {
-                    Post post = like.getPost();
-                    Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
+        return postLikesList.map(like -> {
+            Post post = like.getPost();
+            Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
 
-                    return MyBookmarkLikedListDto.builder()
-                            .id(post.getId())
-                            .title(post.getTitle())
-                            .description(post.getDescription())
-                            .thumbnailUrl(post.getThumbnailUrl())
-                            .category(post.getCategory())
-                            .likeCount(post.getLikeCount())
-                            .bookmarkCount(post.getBookmarkCount())
-                            .writerNickname(post.getUser().getNickname())
-                            .createdAt(post.getCreatedAt())
-                            .commentCount(commentCount)
-                            .isOpen(post.getIsOpen())
-                            .build();
-                })
-                .collect(Collectors.toList());
+            return MyBookmarkLikedListDto.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .description(post.getDescription())
+                    .thumbnailUrl(post.getThumbnailUrl())
+                    .category(post.getCategory())
+                    .likeCount(post.getLikeCount())
+                    .bookmarkCount(post.getBookmarkCount())
+                    .writerNickname(post.getUser().getNickname())
+                    .createdAt(post.getCreatedAt())
+                    .commentCount(commentCount)
+                    .isOpen(post.getIsOpen())
+                    .build();
+        });
     }
 
     // ===== 강의 좋아요 관련 메서드 =====
 
 
     @Transactional(readOnly = true)
-    public List<MyLectureListDto> getMyLikedLectures() {
+    public Page<MyLectureListDto> getMyLikedLectures(Pageable pageable) {
         User user = getCurrentUser();
-        List<LectureLikes> lectureLikesList = lectureLikesRepository.findAllByUser(user);
+        Page<LectureLikes> lectureLikesList = lectureLikesRepository.findAllByUser(user, pageable);
 
-        return lectureLikesList.stream()
-                .map(like -> MyLectureListDto.fromEntity(like.getLecture()))
-                .collect(Collectors.toList());
+        return lectureLikesList.map(like -> MyLectureListDto.fromEntity(like.getLecture()));
     }
 
     // ===== 공통 메서드 =====

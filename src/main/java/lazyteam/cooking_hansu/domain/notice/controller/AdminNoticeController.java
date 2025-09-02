@@ -2,6 +2,7 @@ package lazyteam.cooking_hansu.domain.notice.controller;
 
 import jakarta.validation.Valid;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeCreateDto;
+import lazyteam.cooking_hansu.domain.notice.dto.NoticeResDto;
 import lazyteam.cooking_hansu.domain.notice.dto.NoticeUpdateDto;
 import lazyteam.cooking_hansu.domain.notice.service.NoticeService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
@@ -24,16 +25,16 @@ public class AdminNoticeController {
     //     공지사항 등록
     @PostMapping("/create")
     public ResponseEntity<?> createNotice(@ModelAttribute @Valid NoticeCreateDto noticeCreateDto) {
-        noticeService.createNotice(noticeCreateDto);
-        return new ResponseEntity<>(ResponseDto.ok("공지사항이 등록되었습니다.", HttpStatus.CREATED), HttpStatus.CREATED);
+        NoticeResDto notice = noticeService.createNotice(noticeCreateDto);
+        return new ResponseEntity<>(ResponseDto.ok(notice, HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
 
     //     공지사항 수정
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateNotice(@ModelAttribute @Valid NoticeUpdateDto noticeUpdateDto, @PathVariable UUID id) {
-        noticeService.updateNotice(id, noticeUpdateDto);
-        return new ResponseEntity<>(ResponseDto.ok("공지사항이 수정되었습니다.", HttpStatus.OK), HttpStatus.OK);
+        NoticeResDto notice = noticeService.updateNotice(id, noticeUpdateDto);
+        return new ResponseEntity<>(ResponseDto.ok(notice, HttpStatus.OK), HttpStatus.OK);
     }
 
     //     공지사항 삭제

@@ -51,9 +51,10 @@ public class MyPageController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<?> myPostList() {
+    public ResponseEntity<?> myPostList(@PageableDefault(size = 6, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyPosts(), HttpStatus.OK),
+                ResponseDto.ok(myPageService.getMyPosts(pageable), HttpStatus.OK),
                 HttpStatus.OK
         );
     }
@@ -68,25 +69,28 @@ public class MyPageController {
 
 
     @GetMapping("/bookmarked-posts")
-    public ResponseEntity<?> myBookmarkedPosts() {
+    public ResponseEntity<?> myBookmarkedPosts(@PageableDefault(size = 6, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyBookmarks(), HttpStatus.OK),
+                ResponseDto.ok(myPageService.getMyBookmarks(pageable), HttpStatus.OK),
                 HttpStatus.OK
         );
     }
 
     @GetMapping("/liked-posts")
-    public ResponseEntity<?> myLikedPosts() {
+    public ResponseEntity<?> myLikedPosts(@PageableDefault(size = 6, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyLikes(), HttpStatus.OK),
+                ResponseDto.ok(myPageService.getMyLikes(pageable), HttpStatus.OK),
                 HttpStatus.OK
         );
     }
 
     @GetMapping("/liked-lectures")
-    public ResponseEntity<?> myLikedLectures() {
+    public ResponseEntity<?> myLikedLectures(@PageableDefault(size = 6, sort = "createdAt",
+            direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
-                ResponseDto.ok(myPageService.getMyLikedLectures(), HttpStatus.OK),
+                ResponseDto.ok(myPageService.getMyLikedLectures(pageable), HttpStatus.OK),
                 HttpStatus.OK
         );
     }

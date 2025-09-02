@@ -2,10 +2,7 @@ package lazyteam.cooking_hansu.domain.notice.service;
 
 import lazyteam.cooking_hansu.domain.admin.entity.Admin;
 import lazyteam.cooking_hansu.domain.admin.repository.AdminRepository;
-import lazyteam.cooking_hansu.domain.notice.dto.NoticeCreateDto;
-import lazyteam.cooking_hansu.domain.notice.dto.NoticeDetailDto;
-import lazyteam.cooking_hansu.domain.notice.dto.NoticeListDto;
-import lazyteam.cooking_hansu.domain.notice.dto.NoticeUpdateDto;
+import lazyteam.cooking_hansu.domain.notice.dto.*;
 import lazyteam.cooking_hansu.domain.notice.entity.Notice;
 import lazyteam.cooking_hansu.domain.notice.repository.NoticeRepository;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
@@ -37,11 +34,13 @@ public class NoticeService {
     private final NotificationService notificationService;
 
     // 공지사항 등록
-    public void createNotice(NoticeCreateDto noticeCreateDto) {
-        if (noticeCreateDto.getContent() == null || noticeCreateDto.getContent().isEmpty()) {
-            throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
+    public NoticeResDto createNotice(NoticeCreateDto noticeCreateDto) {
+        if (noticeCreateDto.getTitle() == null || noticeCreateDto.getTitle().isEmpty()) {
+            throw new IllegalArgumentException("제목은 필수 입력입니다.");
         }
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (noticeCreateDto.getContent() == null || noticeCreateDto.getContent().isEmpty()) {
+            throw new IllegalArgumentException("내용은 필수 입력입니다.");
+        }
         String email = "admin@naver.com";
         Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("해당 이메일을 가진 관리자가 없습니다."));
         String imageUrl = null;
@@ -66,6 +65,13 @@ public class NoticeService {
                                 .build()
                 );
         }
+        return NoticeResDto.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .content(notice.getContent())
+                .imageUrl(notice.getImageUrl())
+                .createdAt(notice.getCreatedAt())
+                .build();
     }
 
     // 공지사항 전체 목록 조회
@@ -83,7 +89,7 @@ public class NoticeService {
     }
 
     // 공지사항 수정
-    public void updateNotice(UUID id, NoticeUpdateDto noticeUpdateDto) {
+    public NoticeResDto updateNotice(UUID id, NoticeUpdateDto noticeUpdateDto) {
         Notice notice = noticeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("수정할 공지사항이 없습니다."));
         if (noticeUpdateDto.getTitle() == null || noticeUpdateDto.getContent() == null) {
             throw new IllegalArgumentException("제목과 내용은 필수 입력입니다.");
@@ -103,6 +109,14 @@ public class NoticeService {
         // 새 이미지가 없으면 기존 이미지 URL 그대로 유지
 
         notice.updateNotice(noticeUpdateDto, newImageUrl, notice.getAdmin());
+
+        return NoticeResDto.builder()
+                .id(notice.getId())
+                .title(notice.getTitle())
+                .content(notice.getContent())
+                .imageUrl(notice.getImageUrl())
+                .createdAt(notice.getCreatedAt())
+                .build();
     }
 
     // 공지사항 삭제

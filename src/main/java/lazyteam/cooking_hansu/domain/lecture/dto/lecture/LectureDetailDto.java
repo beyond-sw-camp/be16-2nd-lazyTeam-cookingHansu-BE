@@ -34,6 +34,7 @@ public class LectureDetailDto {
     private CategoryEnum category;
     private Integer price;
     private Boolean isLiked;
+    private Boolean isPurchased; // 구매 여부 추가
     private Integer reviewCount;
     private Integer qnaCount;
     private Long likeCount; // 좋아요 수 추가
@@ -64,7 +65,7 @@ public class LectureDetailDto {
 
     public static LectureDetailDto fromEntity(Lecture lecture, User submittedBy, List<LectureReview> reviews
             , List<LectureQna> qnas, List<LectureVideo> videos, List<LectureIngredientsList> ingredientsList
-            ,List<LectureStep> lectureStepList, Integer progressPercent, boolean isLiked) {
+            ,List<LectureStep> lectureStepList, Integer progressPercent, Boolean isLiked, Boolean isPurchased) {
 
         int sum = (lecture.getReviewSum()   == null ? 0 : lecture.getReviewSum());
         int cnt = (lecture.getReviewCount() == null ? 0 : lecture.getReviewCount());
@@ -85,7 +86,8 @@ public class LectureDetailDto {
                 .level(lecture.getLevel())
                 .category(lecture.getCategory())
                 .price(lecture.getPrice())
-                .isLiked(isLiked)
+                .isLiked(isLiked != null ? isLiked : false)
+                .isPurchased(isPurchased != null ? isPurchased : false)
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
                 .likeCount(lecture.getLikeCount()) // 좋아요 수 추가

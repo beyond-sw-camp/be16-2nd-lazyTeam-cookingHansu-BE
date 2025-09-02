@@ -8,6 +8,7 @@ import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
+import lazyteam.cooking_hansu.domain.purchase.repository.PurchasedLectureRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.interaction.service.RedisInteractionService;
@@ -51,6 +52,7 @@ public class LectureService {
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
     private final InteractionService interactionService;
     private final LectureProgressRepository progressRepository;
+    private final PurchasedLectureRepository purchasedLectureRepository;
 
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
@@ -414,8 +416,20 @@ public LectureDetailDto findDetailLecture(UUID lectureId) {
         progressPercent = null;
     }
 
+    // 구매 여부 확인
+    Boolean isPurchased = false;
+    try {
+        UUID currentUserId = AuthUtils.getCurrentUserId();
+        if (currentUserId != null) {
+            isPurchased = purchasedLectureRepository.findByUser_IdAndLecture_Id(currentUserId, lectureId).isPresent();
+        }
+    } catch (Exception e) {
+        log.debug("강의 구매 여부 확인 실패 (비회원 접근): {}", e.getMessage());
+        isPurchased = false;
+    }
+
     LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-            ,videos,ingredientsList,lectureStepList, progressPercent,isLiked);
+            ,videos,ingredientsList,lectureStepList, progressPercent,isLiked,isPurchased);
 
     return lectureDetailDto;
 }

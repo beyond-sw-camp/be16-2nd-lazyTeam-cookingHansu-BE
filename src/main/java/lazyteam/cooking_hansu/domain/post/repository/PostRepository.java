@@ -17,7 +17,7 @@ import java.util.UUID;
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
-    List<Post> findAllByUserAndDeletedAtIsNull(User user);
+    Page<Post> findAllByUserAndDeletedAtIsNull(User user, Pageable pageable);
     @Query("SELECT p FROM Post p " +
             "WHERE p.deletedAt IS NULL " +
             "AND p.isOpen = true " +
