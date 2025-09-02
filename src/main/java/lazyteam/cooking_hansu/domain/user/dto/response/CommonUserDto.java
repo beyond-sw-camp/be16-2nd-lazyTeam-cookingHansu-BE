@@ -30,6 +30,8 @@ public class CommonUserDto {
     private String picture;
     @Size(message = "닉네임은 2자 이상 20자 이하여야 합니다", min = 2, max = 20)
     private String nickname;
+    @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
+    private String info;
     private Role role;
     private GeneralType generalType;
     private ChefDto chef;
@@ -42,6 +44,7 @@ public class CommonUserDto {
                 .name(user.getName())
                 .picture(user.getPicture())
                 .nickname(user.getNickname())
+                .info(user.getInfo())
                 .role(user.getRole())
                 .generalType(user.getGeneralType())
                 .chef(user.getChef() != null ? ChefDto.fromEntity(user.getChef()) : null)

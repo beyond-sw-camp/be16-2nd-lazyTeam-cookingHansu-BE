@@ -26,6 +26,9 @@ public class UserAdditionalInfoRequestDto {
     @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다")
     private String nickname;
 
+    @Size(max = 200, message = "자기소개는 200자 이하여야 합니다.")
+    private String info;
+
     @NotNull(message = "역할 선택은 필수입니다")
     private Role role;
 

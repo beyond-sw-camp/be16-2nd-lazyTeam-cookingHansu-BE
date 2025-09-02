@@ -38,6 +38,7 @@ public class UserAdditionalInfoController {
             @RequestParam @NotNull(message = "사용자 ID는 필수입니다") UUID userId,
             @RequestParam @NotBlank(message = "닉네임은 필수입니다")
             @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다") String nickname,
+            @Size(max = 200, message = "자기소개는 200자 이하여야 합니다.") String info,
             @RequestParam @NotNull(message = "역할 선택은 필수입니다") Role role,
             @RequestParam(required = false) GeneralType generalType,
             @RequestParam(required = false) String licenseNumber,
@@ -50,12 +51,13 @@ public class UserAdditionalInfoController {
             @RequestParam(required = false) String shopCategory) {
 
         try {
-            log.info("회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}", userId, role, nickname);
+            log.info("회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}, info: {}", userId, role, nickname, info);
 
             // RequestDto 생성
             UserAdditionalInfoRequestDto requestDto = UserAdditionalInfoRequestDto.builder()
                     .nickname(nickname)
                     .role(role)
+                    .info(info)
                     .generalType(generalType)
                     .licenseNumber(licenseNumber)
                     .cuisineType(cuisineType)

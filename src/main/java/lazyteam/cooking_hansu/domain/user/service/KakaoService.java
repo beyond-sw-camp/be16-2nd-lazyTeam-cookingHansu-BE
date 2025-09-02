@@ -58,5 +58,4 @@ public class KakaoService implements OAuthService<KakaoProfileDto> {
         log.info("Kakao profile JSON: {}", response.getBody());
         return response.getBody();
     }
-
 }
