@@ -521,7 +521,9 @@
 
   <details>
     <summary>게시글 댓글 시 알림</summary>
-    
+    <img src="https://github.com/user-attachments/assets/7cec0090-6571-425d-ae10-0809b4cd772e" alt="게시글 댓글-시-알림" width="600"/>
+
+
   </details>
 
   <details>
