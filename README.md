@@ -586,7 +586,8 @@
     <summary>신고</summary>
     <details>
       <summary>신고 생성</summary>
-      `POST /report/create`
+      <img width="1919" height="1035" alt="image" src="https://github.com/user-attachments/assets/904ad9d5-ac0d-4c91-870f-a901967966b7" />
+      <img width="1919" height="1072" alt="image" src="https://github.com/user-attachments/assets/f9966aa1-92d1-4345-be99-d52dab0247bd" />
     </details>
   </details>
 </details>
