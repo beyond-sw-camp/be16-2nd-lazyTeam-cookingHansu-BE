@@ -309,49 +309,48 @@
     <summary>회원</summary>
     <details>
       <summary>구글 로그인</summary>
-      `POST /user/login/google`
       <img src="https://github.com/user-attachments/assets/9b3e00f5-db75-4f99-9765-e24e29ef7ed5" alt="구글 로그인" width="800"/>
     </details>
     <details>
       <summary>카카오 로그인</summary>
-      `POST /user/login/kakao`
       <img src="https://github.com/user-attachments/assets/1da92211-524d-4757-85b9-df36ac299762" alt="카카오 로그인" width="800"/>
     </details>
     <details>
       <summary>네이버 로그인</summary>
-      `POST /user/login/naver`
       <img src="https://github.com/user-attachments/assets/60be89d0-6816-46db-b573-c7824336f93b" alt="네이버 로그인" width="800"/>
     </details>
     <details>
       <summary>토큰 리프레시</summary>
-      `POST /user/refresh`
       <img src="https://github.com/user-attachments/assets/fcf6f11b-1f5d-48e2-8227-e8cce13be663" alt="토큰 리프레시(새로고침)" width="800"/>
     </details>
     <details>
       <summary>로그아웃</summary>
-      `POST /user/logout`
       <img src="https://github.com/user-attachments/assets/2cb3cc94-2dee-4314-a10c-84a47ca13d98" alt="로그아웃" width="800" />
     </details>
     <details>
       <summary>회원 추가 정보 입력</summary>
-      `POST /user/add-info`
       <img src="https://github.com/user-attachments/assets/494d9bde-83ec-4e76-8386-8f100fdad71c" alt="추가 정보 입력 (일반)" width="800" />
       <img src="https://github.com/user-attachments/assets/7838734c-e129-45da-98de-7f23cc1435ff" alt="추가 정보 입력 (종사자)" width="800" />
       <img src="https://github.com/user-attachments/assets/a483bbc9-0f81-47f4-8d89-74af612b9bfd" alt="추가 정보 입력 (자영업자)" width="800" />
     </details>
     <details>
       <summary>프로필 조회</summary>
-      `GET /user/profile`
       <img width="1435" height="73" alt="헤더 프로필 조회" src="https://github.com/user-attachments/assets/999096b2-8525-4712-b040-4caddff2db7e" />
       <img width="800" alt="프로필 조회 응답 결과" src="https://github.com/user-attachments/assets/57d269e0-73b3-4baa-a68a-1cef87bd4a8a" />
     </details>
     <details>
       <summary>현재 사용자 정보 조회</summary>
-      `GET /user/me`
+      <img width="676" height="401" alt="user_me_회원_조회(일반)" src="https://github.com/user-attachments/assets/cfec4ba4-b983-4321-a07d-6bc7420764db" />
+      <img width="591" height="583" alt="user_me_회원_조회(종사자)" src="https://github.com/user-attachments/assets/56605858-2e7e-4be4-8bb1-d407ef9a23f7" />
+      <img width="537" height="545" alt="user_me_회원_조회(자영업자)" src="https://github.com/user-attachments/assets/f4a293e7-0a17-4d77-80c1-441187d43ad5" />
     </details>
     <details>
       <summary>회원 탈퇴</summary>
-      `DELETE /user/delete`
+      <img src="https://github.com/user-attachments/assets/f23719fc-7f7c-462d-961f-5b92ce29dd4b" alt="회원 탈퇴" width="800" />
+    </details>
+    <details>
+      <summary>탈퇴 회원 복구</summary>
+      <img src="https://github.com/user-attachments/assets/97828deb-0edc-4cdb-8ec8-9b1405b52658" alt="회원 복구" width="800" />
     </details>
   </details>
 
