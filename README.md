@@ -511,12 +511,13 @@
 
   <details>
     <summary>회원가입 승인 시 알림</summary>
-    
+    <img src="https://github.com/user-attachments/assets/a48ebab6-90c5-4c24-894e-8898192a6dba" alt="회원가입-승인-시-알림" width="600"/>
+
   </details>
 
   <details>
     <summary>공지사항 등록 시 알림</summary>
-    <img src="https://github.com/user-attachments/assets/2414a75d-6294-4a0d-8272-5efe67ea15b9" alt="공지사항-작성-시-알림" width="600"/>
+    <img src="https://github.com/user-attachments/assets/f282ec69-9d20-4c8c-b01b-e6858989b8d7" alt="공지사항-작성-시-알림" width="600"/>
   </details>
 
   <details>
@@ -528,7 +529,8 @@
 
   <details>
     <summary>게시글 답글 시 알림</summary>
-    
+    <img src="https://github.com/user-attachments/assets/d8cbcb8c-7299-4caa-9d86-55c9f525bfa6" alt="게시글 답글-시-알림" width="600"/>
+
   </details>
 
   <details>
@@ -539,7 +541,7 @@
 
   <details>
     <summary>강의 Q&A 시 알림</summary>
-    <img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/b7d8485d-e299-49f1-9ea3-efe497516e25" />
+    <img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/b7d8485d-e299-49f1-9ea3-efe497516e25" alt="강의 Q&A-시-알림" width="600"/>
 
   </details>
 </details>
