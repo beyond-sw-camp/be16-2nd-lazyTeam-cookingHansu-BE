@@ -62,7 +62,7 @@ public class LectureService {
                        MultipartFile multipartFile) {
 
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
@@ -133,7 +133,7 @@ public class LectureService {
                        MultipartFile multipartFile) {
 
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
@@ -382,10 +382,13 @@ public class LectureService {
             UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
             if (currentUserId != null) {
                 isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
+            } else {
+                // 관리자이거나 비회원인 경우 좋아요 상태를 false로 설정
+                isLiked = false;
             }
         } catch (Exception e) {
-            log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
-            isLiked = false; // 비회원은 좋아요 안 함
+            log.debug("사용자 좋아요 상태 확인 실패 (비회원/관리자 접근): {}", e.getMessage());
+            isLiked = false; // 비회원/관리자는 좋아요 안 함
         }
 
         // 현재 사용자 구매 여부 확인
@@ -394,10 +397,13 @@ public class LectureService {
             UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
             if (currentUserId != null) {
                 isPurchased = purchasedLectureRepository.findByUser_IdAndLecture_Id(currentUserId, lectureId).isPresent();
+            } else {
+                // 관리자이거나 비회원인 경우 구매 상태를 false로 설정
+                isPurchased = false;
             }
         } catch (Exception e) {
-            log.debug("사용자 구매 상태 확인 실패 (비회원 접근): {}", e.getMessage());
-            isPurchased = false; // 비회원은 구매 안 함
+            log.debug("사용자 구매 상태 확인 실패 (비회원/관리자 접근): {}", e.getMessage());
+            isPurchased = false; // 비회원/관리자는 구매 안 함
         }
 
         User submittedBy = lecture.getSubmittedBy();
@@ -429,6 +435,9 @@ public class LectureService {
                 log.debug("사용자 진행도 확인 실패: {}", e.getMessage());
                 progressPercent = null;
             }
+        } else {
+            // 관리자이거나 비회원인 경우 진행도를 null로 설정
+            progressPercent = null;
         }
 
         LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
@@ -452,7 +461,7 @@ public class LectureService {
     // 영상 진행도 업데이트
     public UUID updateProgress(UUID videoId, int second) {
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         LectureVideo video = lectureVideoRepository.findById(videoId)

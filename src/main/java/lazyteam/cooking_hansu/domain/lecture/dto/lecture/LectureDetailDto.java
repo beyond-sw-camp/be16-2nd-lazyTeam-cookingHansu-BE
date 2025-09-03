@@ -90,7 +90,7 @@ public class LectureDetailDto {
                 .isPurchased(isPurchased)
                 .reviewCount(lecture.getReviewCount())
                 .qnaCount(lecture.getQnaCount())
-                .likeCount(lecture.getLikeCount()) // 좋아요 수 추가
+                .likeCount(lecture.getLikeCount())
                 .purchaseCount(lecture.getPurchaseCount())
                 .reviewAvg(avg)
                 .submittedById(submittedBy.getId())

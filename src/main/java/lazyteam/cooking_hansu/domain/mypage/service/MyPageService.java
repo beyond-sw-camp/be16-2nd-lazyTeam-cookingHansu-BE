@@ -143,7 +143,7 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public Page<MyLectureListDto> getMyLectures(Pageable pageable) {
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Page<MyLectureListDto> dtos = purchasedLectureRepository.findAllByUser(user,pageable)
@@ -220,12 +220,11 @@ public class MyPageService {
 
     // ===== 공통 메서드 =====
 
-    // 현재 로그인한 사용자 조회
+    // 현재 로그인한 사용자 조회 (Fetch Join으로 최적화)
     private User getCurrentUser() {
         UUID userId = AuthUtils.getCurrentUserId();
-        return  userRepository.findById(userId)
+        return userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
-
     }
 
     // 역할명을 한글로 변환하는 메서드

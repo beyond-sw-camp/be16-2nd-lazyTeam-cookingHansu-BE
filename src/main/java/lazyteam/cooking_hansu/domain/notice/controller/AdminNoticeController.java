@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
- @PreAuthorize("hasRole('ADMIN')") // 테스트 위해 주석처리
+ @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/admin/notice")
 public class AdminNoticeController {
 

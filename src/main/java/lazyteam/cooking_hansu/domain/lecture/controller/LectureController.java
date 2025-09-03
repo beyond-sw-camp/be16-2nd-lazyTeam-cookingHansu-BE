@@ -39,7 +39,7 @@ public class LectureController {
         return new ResponseEntity<>(ResponseDto.ok("강의등록번호 : " + lectureId,HttpStatus.CREATED), HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER') or hasRole('ADMIN')")
     @PatchMapping(value = "/update/{lectureId}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateLecture(
@@ -82,7 +82,7 @@ public class LectureController {
     }
 
 //    강의 삭제
-    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER') or hasRole('ADMIN')")
     @DeleteMapping("/delete/{lectureId}")
     public ResponseEntity<?> deleteLecture(@PathVariable UUID lectureId) {
         lectureService.deleteLecture(lectureId);

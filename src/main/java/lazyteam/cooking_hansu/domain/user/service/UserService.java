@@ -215,10 +215,6 @@ public class UserService {
         return user;
     }
 
-    public User getUserBySocialIdAndOauthType(String email, OauthType oauthType) {
-        return userRepository.findBySocialIdAndOauthType(email, oauthType).orElse(null);
-    }
-
     // 탈퇴한 회원 포함하여 조회
     public User getUserBySocialIdAndOauthTypeIncludingDeleted(String socialId, OauthType oauthType) {
         return userRepository.findBySocialIdAndOauthTypeIncludingDeleted(socialId, oauthType).orElse(null);
@@ -244,7 +240,7 @@ public class UserService {
     }
 
     public User getUserById(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
+        return userRepository.findByIdWithDetails(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
 
         // 회원 탈퇴

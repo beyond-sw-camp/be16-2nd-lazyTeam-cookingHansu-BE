@@ -77,7 +77,7 @@ public class PostController {
     }
 
     @Operation(summary = "Post 수정", description = "Post의 기본 정보, 재료, 조리순서를 수정합니다.")
-    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER') or hasRole('ADMIN')")
     @PutMapping("/update/{postId}")
     public ResponseEntity<?> updatePost(
             @PathVariable UUID postId,
@@ -90,7 +90,7 @@ public class PostController {
     }
 
     @Operation(summary = "Post 삭제", description = "Post를 소프트 삭제하고 연관된 재료, 조리순서도 함께 삭제됩니다.")
-    @PreAuthorize("hasAnyRole('CHEF', 'OWNER')")
+    @PreAuthorize("hasAnyRole('CHEF', 'OWNER') or hasRole('ADMIN')")
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<?> deletePost(
             @Parameter(description = "Post ID", required = true)
