@@ -307,6 +307,15 @@ public class ChatService {
         // 채팅방이 이미 존재하는지 확인
         Optional<ChatRoom> existingChatRoom = chatParticipantRepository.findExistingChatRoom(user.getId(), otherUser.getId());
         if (existingChatRoom.isPresent()) {
+            ChatParticipant me = existingChatRoom.get().getParticipants().stream()
+                    .filter(p -> p.getUser().equals(user))
+                    .findFirst() // 자신(me)을 찾기만하면 되니까 findfirst
+                    .orElseThrow(() -> new EntityNotFoundException("채팅방에 참여한 기록이 없습니다."));
+
+            if ("N".equals(me.getIsActive())) {
+                me.joinChatRoom(); // isActive = "Y" 로 변경
+            }
+
             return existingChatRoom.get().getId();
         }
 
