@@ -281,15 +281,15 @@
     </details>
     <details>
       <summary>신고 목록 조회</summary>
-      `GET /admin/report/list`
+      <img src="https://github.com/user-attachments/assets/3d6c2815-2018-48ee-ad9b-96ddabdeb73f" alt="신고 목록 조회" width="800"/>
     </details>
     <details>
       <summary>신고 승인</summary>
-      `PATCH /admin/report/approve/{id}`
+      <img src="https://github.com/user-attachments/assets/a96a85f6-ef1b-4433-b633-9e791be4d525" alt="신고 승인" width="800"/>
     </details>
     <details>
       <summary>신고 반려</summary>
-      `PATCH /admin/report/reject/{id}`
+      <img src="https://github.com/user-attachments/assets/23229d2a-55b9-4d31-bd58-c002bd33aad5" alt="신고 반려" width="800"/>
     </details>
     <details>
       <summary>공지사항 등록</summary>
