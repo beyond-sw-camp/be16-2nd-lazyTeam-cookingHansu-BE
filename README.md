@@ -541,7 +541,7 @@
 
   <details>
     <summary>강의 Q&A 시 알림</summary>
-    <img width="1918" height="1078" alt="image" src="https://github.com/user-attachments/assets/b7d8485d-e299-49f1-9ea3-efe497516e25" alt="강의 Q&A-시-알림" width="600"/>
+    <img src="https://github.com/user-attachments/assets/b7d8485d-e299-49f1-9ea3-efe497516e25" alt="강의 Q&A-시-알림" width="600"/>
 
   </details>
 </details>
