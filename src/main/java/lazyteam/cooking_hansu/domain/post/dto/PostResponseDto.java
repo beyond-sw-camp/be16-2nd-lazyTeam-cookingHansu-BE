@@ -88,14 +88,18 @@ public class PostResponseDto {
     public static class UserInfoDto {
         private UUID id;
         private String nickname;
+        private String email;
         private String profileImageUrl;
+        private LocalDateTime createdAt;
         private Role role;
 
         public static UserInfoDto fromEntity(User user) {
             return UserInfoDto.builder()
                     .id(user.getId())
                     .nickname(user.getNickname())
+                    .email(user.getEmail())
                     .profileImageUrl(user.getPicture())
+                    .createdAt(user.getCreatedAt())
                     .role(user.getRole())
                     .build();
         }
