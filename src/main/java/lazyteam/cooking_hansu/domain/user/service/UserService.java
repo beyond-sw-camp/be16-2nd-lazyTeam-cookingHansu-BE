@@ -50,12 +50,6 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
     private final NotificationService notificationService;
 
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
-
-    // TODO: 회원 서비스 메서드 구현 예정
-
-
 //    요리업종 승인 대기 목록 조회
     @Transactional(readOnly = true)
     public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
