@@ -478,19 +478,19 @@
     <summary>마이페이지</summary>
     <details>
       <summary>프로필 조회</summary>
-      `GET /api/my/profile`
+      <img src="https://github.com/user-attachments/assets/278a4f71-00fc-444e-a7ab-a0f54c9672f8" alt="프로필조회" width="800"/>
     </details>
     <details>
       <summary>프로필 수정</summary>
-      `PUT /api/my/profile`
+      <img src="https://github.com/user-attachments/assets/2b916394-cb23-44f8-8db6-0421aef608cb" alt="프로필수정" width="800"/>
     </details>
     <details>
       <summary>프로필 이미지 업로드</summary>
-      `POST /api/my/profile/image`
+      <img src="https://github.com/user-attachments/assets/85002921-607f-4414-8220-dceb7e3f69e1" alt="프로필이미지업로드" width="800"/>
     </details>
     <details>
       <summary>내 게시글 목록 조회</summary>
-      `GET /api/my/posts`
+      <img src="https://github.com/user-attachments/assets/9c6fd8a2-fbf9-44bb-aa4e-397c1316262e" alt="내게시글목록조회" width="800"/>
     </details>
     <details>
       <summary>내 강의 목록 조회</summary>
@@ -498,11 +498,11 @@
     </details>
     <details>
       <summary>내 북마크한 게시글 목록 조회</summary>
-      `GET /api/my/bookmarked-posts`
+      <img src="https://github.com/user-attachments/assets/7b98888f-4210-4806-870c-74914e535928" alt="내북마크한게시글목록조회" width="800"/>
     </details>
     <details>
       <summary>내가 좋아요한 게시글 목록 조회</summary>
-      `GET /api/my/liked-posts`
+      <img src="https://github.com/user-attachments/assets/9398e977-7fce-4f30-b1f4-7942952d8d3d" alt="내가좋아요한게시글목록조회" width="800"/>
     </details>
   </details>
   
