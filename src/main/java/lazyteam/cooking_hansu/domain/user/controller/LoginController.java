@@ -1,7 +1,8 @@
 package lazyteam.cooking_hansu.domain.user.controller;
 
-import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
 import lazyteam.cooking_hansu.domain.user.dto.UserLoginDto;
+import lazyteam.cooking_hansu.domain.user.dto.UserSummaryDto;
+import lazyteam.cooking_hansu.domain.user.dto.RedirectDto;
 import lazyteam.cooking_hansu.domain.user.dto.oauth.GoogleProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.oauth.KakaoProfileDto;
 import lazyteam.cooking_hansu.domain.user.dto.oauth.NaverProfileDto;
@@ -187,8 +188,7 @@ public class LoginController {
         refreshTokenService.saveRefreshToken(user.getId().toString(), jwtRtToken);
 
         // 프론트엔드 요구사항에 맞는 응답 데이터 생성 (isNewUser는 동적으로 계산됨)
-        UserLoginDto userLoginDto = UserLoginDto.fromEntity(user, jwtAtToken, jwtRtToken, expiresIn);
-
+        UserLoginDto userLoginDto = UserLoginDto.fromEntity(UserSummaryDto.fromEntity(user), jwtAtToken, jwtRtToken, expiresIn);
         return ResponseDto.ok(userLoginDto, HttpStatus.OK);
     }
 }

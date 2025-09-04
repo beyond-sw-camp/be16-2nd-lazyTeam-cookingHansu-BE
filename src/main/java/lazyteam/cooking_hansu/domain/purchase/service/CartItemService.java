@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.purchase.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.repository.LectureRepository;
 import lazyteam.cooking_hansu.domain.purchase.dto.CartDeleteOneDto;
@@ -13,8 +12,8 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;

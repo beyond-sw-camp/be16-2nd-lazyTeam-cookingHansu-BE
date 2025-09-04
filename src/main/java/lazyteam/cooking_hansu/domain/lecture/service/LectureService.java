@@ -2,12 +2,12 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.interaction.service.InteractionService;
 import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
+import lazyteam.cooking_hansu.domain.purchase.repository.PurchasedLectureRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.interaction.service.RedisInteractionService;
@@ -23,6 +23,7 @@ import lazyteam.cooking_hansu.domain.lecture.entity.LectureVideo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class LectureService {
     private final RedisInteractionService redisInteractionService; // Redis 서비스 추가
     private final InteractionService interactionService;
     private final LectureProgressRepository progressRepository;
+    private final PurchasedLectureRepository purchasedLectureRepository;
 
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
@@ -60,7 +62,7 @@ public class LectureService {
                        MultipartFile multipartFile) {
 
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
@@ -131,7 +133,7 @@ public class LectureService {
                        MultipartFile multipartFile) {
 
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의가 없습니다."));
@@ -296,7 +298,7 @@ public class LectureService {
     }
 
 
-//    강의 목록 조회(승인 안된 강의 목록 조회)
+    //    강의 목록 조회(승인 안된 강의 목록 조회)
     public Page<WaitingLectureDto> getWaitingLectureList(Pageable pageable){
         Page<Lecture> lectures = lectureRepository.findAllByApprovalStatus(pageable, ApprovalStatus.PENDING);
         return lectures.map(lecture -> WaitingLectureDto.builder()
@@ -312,7 +314,7 @@ public class LectureService {
                 .build());
     }
 
-//    강의 승인
+    //    강의 승인
     public void approveLecture(UUID lectureId){
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. lectureId: " + lectureId));
         if(lecture.getApprovalStatus() != null && lecture.getApprovalStatus().equals(ApprovalStatus.APPROVED)) {
@@ -321,7 +323,7 @@ public class LectureService {
         lecture.approve();
     }
 
-//    강의 거절
+    //    강의 거절
     public void rejectLecture(UUID lectureId, RejectRequestDto rejectRequestDto) {
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다. lectureId: " + lectureId));
         if (lecture.getApprovalStatus() != null && lecture.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
@@ -332,19 +334,17 @@ public class LectureService {
     }
 
 
-// ====== 승인된 강의목록 조회 ======
-public Page<LectureResDto> findAllLecture(Pageable pageable) {
-    return lectureRepository.findAllByApprovalStatus(pageable,ApprovalStatus.APPROVED)
-            .map(LectureResDto::fromEntity);
-}
+    // ====== 승인된 강의목록 조회 ======
+    public Page<LectureResDto> findAllLecture(Pageable pageable) {
+        return lectureRepository.findAllByApprovalStatus(pageable,ApprovalStatus.APPROVED)
+                .map(LectureResDto::fromEntity);
+    }
 
 
 
-// ====== 내 강의 목록 조회 ======
+    // ====== 내 강의 목록 조회 ======
     public Page<LectureResDto> findAllMyLecture(Pageable pageable) {
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         Page<LectureResDto> myLectures = lectureRepository.findAllBySubmittedById(userId,pageable).map(LectureResDto::fromEntity);
         log.info("판매한 강의목록 : " + myLectures.toString());
@@ -353,79 +353,104 @@ public Page<LectureResDto> findAllLecture(Pageable pageable) {
 
 
 
-// ====== 강의상세목록 조회 ======
-public LectureDetailDto findDetailLecture(UUID lectureId) {
+    // ====== 강의상세목록 조회 ======
+    public LectureDetailDto findDetailLecture(UUID lectureId) {
 
-    Lecture lecture = lectureRepository.findById(lectureId)
-            .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
+        Lecture lecture = lectureRepository.findById(lectureId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID 강의 없습니다."));
 
-    // Redis에서 좋아요 수 가져와서 동기화
-    try {
-        Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
-        if (cachedLikeCount != null) {
-            // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
-            lecture.updateLikeCount(cachedLikeCount);
-            log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
+        // Redis에서 좋아요 수 가져와서 동기화
+        try {
+            Long cachedLikeCount = redisInteractionService.getLectureLikesCount(lectureId);
+            if (cachedLikeCount != null) {
+                // Redis에 캐시된 좋아요 수가 있으면 강의 엔티티에 업데이트
+                lecture.updateLikeCount(cachedLikeCount);
+                log.debug("강의 좋아요 수 Redis 동기화 - lectureId: {}, count: {}", lectureId, cachedLikeCount);
+            } else {
+                // Redis에 캐시가 없으면 DB 값을 Redis에 저장
+                Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
+                redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
+                log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
+            }
+        } catch (Exception e) {
+            log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
+            // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+        }
+
+        Boolean isLiked = null;
+        try {
+            UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
+            if (currentUserId != null) {
+                isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
+            } else {
+                // 관리자이거나 비회원인 경우 좋아요 상태를 false로 설정
+                isLiked = false;
+            }
+        } catch (Exception e) {
+            log.debug("사용자 좋아요 상태 확인 실패 (비회원/관리자 접근): {}", e.getMessage());
+            isLiked = false; // 비회원/관리자는 좋아요 안 함
+        }
+
+        // 현재 사용자 구매 여부 확인
+        Boolean isPurchased = null;
+        try {
+            UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
+            if (currentUserId != null) {
+                isPurchased = purchasedLectureRepository.findByUser_IdAndLecture_Id(currentUserId, lectureId).isPresent();
+            } else {
+                // 관리자이거나 비회원인 경우 구매 상태를 false로 설정
+                isPurchased = false;
+            }
+        } catch (Exception e) {
+            log.debug("사용자 구매 상태 확인 실패 (비회원/관리자 접근): {}", e.getMessage());
+            isPurchased = false; // 비회원/관리자는 구매 안 함
+        }
+
+        User submittedBy = lecture.getSubmittedBy();
+        List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
+
+        List<LectureQna> qnas = lecture.getQnas();
+
+        List<LectureVideo> videos = lecture.getVideos();
+
+        List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
+
+        List<LectureStep> lectureStepList = lecture.getLectureStepList();
+
+        Integer progressPercent = null;
+        UUID userId = AuthUtils.getCurrentUserIdOrNull();
+
+        if (userId != null) {
+            try {
+                int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
+                long completedVideos = progressRepository
+                        .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
+
+                if (totalVideos > 0) {
+                    progressPercent = (int) ((completedVideos * 100) / totalVideos);
+                } else {
+                    progressPercent = 0;
+                }
+            } catch (Exception e) {
+                log.debug("사용자 진행도 확인 실패: {}", e.getMessage());
+                progressPercent = null;
+            }
         } else {
-            // Redis에 캐시가 없으면 DB 값을 Redis에 저장
-            Long dbLikeCount = (long) (lecture.getLikeCount() != null ? lecture.getLikeCount() : 0);
-            redisInteractionService.setLectureLikesCount(lectureId, dbLikeCount);
-            log.debug("강의 좋아요 수 Redis 캐싱 - lectureId: {}, count: {}", lectureId, dbLikeCount);
+            // 관리자이거나 비회원인 경우 진행도를 null로 설정
+            progressPercent = null;
         }
-    } catch (Exception e) {
-        log.warn("강의 좋아요 수 Redis 동기화 실패 - lectureId: {}", lectureId, e);
-        // Redis 연동 실패해도 서비스는 정상 동작하도록 함
+
+        LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
+                ,videos,ingredientsList,lectureStepList, progressPercent, Boolean.TRUE.equals(isLiked), Boolean.TRUE.equals(isPurchased));
+
+        return lectureDetailDto;
     }
 
-    Boolean isLiked = null;
-    try {
-        UUID currentUserId = AuthUtils.getCurrentUserId();
-        if (currentUserId != null) {
-            isLiked = interactionService.isLectureLikedByCurrentUser(lectureId);
-        }
-    } catch (Exception e) {
-        log.debug("사용자 좋아요 상태 확인 실패 (비회원 접근): {}", e.getMessage());
-    }
-
-    User submittedBy = lecture.getSubmittedBy();
-    List<LectureReview> reviews = lectureReviewRepository.findAllByLectureId(lectureId);
-
-    List<LectureQna> qnas = lecture.getQnas();
-
-    List<LectureVideo> videos = lecture.getVideos();
-
-    List<LectureIngredientsList> ingredientsList = lecture.getIngredientsList();
-
-    List<LectureStep> lectureStepList = lecture.getLectureStepList();
-
-    Integer progressPercent = null;
-    try {
-        UUID userId = AuthUtils.getCurrentUserId();
-        int totalVideos = lectureVideoRepository.countByLectureId(lectureId);
-        long completedVideos = progressRepository
-                .countByUserIdAndLectureVideo_LectureIdAndCompletedTrue(userId, lectureId);
-
-        if (totalVideos > 0) {
-            progressPercent = (int) ((completedVideos * 100) / totalVideos);
-        } else {
-            progressPercent = 0;
-        }
-    } catch (Exception e) {
-        // 로그인 안 된 경우 anonymousUser → progressPercent = null
-        progressPercent = null;
-    }
-
-    LectureDetailDto lectureDetailDto = LectureDetailDto.fromEntity(lecture,submittedBy,reviews,qnas
-            ,videos,ingredientsList,lectureStepList, progressPercent,isLiked);
-
-    return lectureDetailDto;
-}
 
 
 
 
-
-// ====== 강의삭제 ======
+    // ====== 강의삭제 ======
     public void deleteLecture(UUID lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(()-> new EntityNotFoundException("해당 ID 강의 없습니다."));
@@ -436,7 +461,7 @@ public LectureDetailDto findDetailLecture(UUID lectureId) {
     // 영상 진행도 업데이트
     public UUID updateProgress(UUID videoId, int second) {
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
 
         LectureVideo video = lectureVideoRepository.findById(videoId)
@@ -462,8 +487,4 @@ public LectureDetailDto findDetailLecture(UUID lectureId) {
         if (totalVideos == 0) return 0;
         return (int) ((completedVideos * 100) / totalVideos);
     }
-
-
-
-
 }

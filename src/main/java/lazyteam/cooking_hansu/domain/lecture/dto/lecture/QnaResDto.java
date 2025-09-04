@@ -20,10 +20,11 @@ public class QnaResDto {
     private String parentContent;
     private LocalDateTime parentCreatedAt;
     private LocalDateTime questionUpdatedAt;
-    private UUID parentId;
-    private String parentProfileUrl;
-    private LocalDateTime parentJoinedAt; // 부모 가입 일자
-    private String parentEmail; // 부모 이메일
+    private UUID userId;
+    private String email;
+    private String userNickname;
+    private String profileImageUrl;
+    private LocalDateTime userCreatedAt; 
 
 //    답변
     private String answerName;
@@ -50,11 +51,12 @@ public class QnaResDto {
                 .parentContent(parent.getContent())
                 .parentCreatedAt(parent.getCreatedAt())
                 .questionUpdatedAt(parent.getUpdatedAt())
-                .parentId(parent.getUser().getId())
+                .userId(parent.getUser() != null ? parent.getUser().getId() : null)
                 .qnaId(parent.getId())
-                .parentProfileUrl(parent.getUser().getPicture())
-                .parentJoinedAt(parent.getUser().getCreatedAt())
-                .parentEmail(parent.getUser().getEmail())
+                .email(parent.getUser() != null ? parent.getUser().getEmail() : null)
+                .userNickname(parent.getUser() != null ? parent.getUser().getNickname() : null)
+                .profileImageUrl(parent.getUser() != null ? parent.getUser().getPicture() : null)
+                .userCreatedAt(parent.getUser() != null ? parent.getUser().getCreatedAt() : null)
 
                 // 답변
                 .answerName(answer != null && answer.getUser() != null ? answer.getUser().getName() : null)

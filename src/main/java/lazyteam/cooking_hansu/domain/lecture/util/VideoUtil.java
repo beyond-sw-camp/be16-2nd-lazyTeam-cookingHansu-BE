@@ -77,15 +77,26 @@ public class VideoUtil {
         if (originalName != null && originalName.lastIndexOf('.') >= 0) {
             suffix = originalName.substring(originalName.lastIndexOf('.'));
         }
+        
         File convFile = File.createTempFile("upload_", suffix);
+        log.debug("[CONVERT] 임시파일 생성: {} -> {}", originalName, convFile.getAbsolutePath());
 
         //  move(transferTo) 대신 copy: 원본 임시파일을 건드리지 않음
         try (InputStream in = multipartFile.getInputStream()) {
-            Files.copy(
+            long bytesCopied = Files.copy(
                     in, convFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING
             );
+            log.debug("[CONVERT] 파일 복사 완료: {} bytes", bytesCopied);
+        } catch (IOException e) {
+            log.error("[CONVERT] 파일 복사 실패: {}", e.getMessage(), e);
+            // 임시 파일 정리
+            if (!convFile.delete()) {
+                convFile.deleteOnExit();
+            }
+            throw e;
         }
+        
         return convFile;
     }
 
@@ -94,40 +105,95 @@ public class VideoUtil {
     // VideoUtil.java
     public String detectAndValidateContainerExt(MultipartFile multipartFile) {
         final Set<String> mp4Family = Set.of("mp4","mov","m4a","3gp","3g2","mj2");
+        File file = null;
         try {
-            File file = convertToFileVideoValidated(multipartFile); //fix
+            // 중복 검증 제거: convertToFileVideoValidated 대신 convertToFile 사용
+            file = convertToFile(multipartFile);
+            log.info("[FFPROBE] 임시파일 생성 완료: {}", file.getAbsolutePath());
 
-            String[] cmd = {"ffprobe","-v","error","-show_entries","format=format_name",
-                    "-of","default=noprint_wrappers=1:nokey=1", file.getAbsolutePath()};
-            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+            // 1차 시도: 기본 ffprobe 명령어
+            String output = tryFfprobe(file, multipartFile.getOriginalFilename());
+            
+            if (output != null && !output.isBlank()) {
+                // 핵심 로그: 여기 찍히면 ffprobe 감지는 됨
+                log.info("[FFPROBE] 성공 - filename={}, format_name={}", multipartFile.getOriginalFilename(), output);
 
-            String output;
-            try (var br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                output = br.readLine();
+                var names = Arrays.stream(output.toLowerCase().split(","))
+                        .map(String::trim).filter(s -> !s.isBlank())
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+
+                // 포맷 검증
+                if (names.contains("avi")) return "avi";
+                boolean isMp4 = names.stream().anyMatch(mp4Family::contains);
+                if (isMp4) {
+                    String ori = Optional.ofNullable(multipartFile.getOriginalFilename()).orElse("").toLowerCase();
+                    return ori.endsWith(".mov") ? "mov" : "mp4";
+                }
+                throw new IllegalArgumentException("허용되지 않은 영상 포맷: " + output);
             }
-            int exit = p.waitFor();
-            boolean deleted = file.delete(); if (!deleted) file.deleteOnExit();
 
-            if (exit != 0 || output == null || output.isBlank()) {
-                throw new IllegalArgumentException("영상 포맷 추출 실패(ffprobe)");
-            }
+            // 2차 시도: 파일 확장자 기반으로 추정
+            log.warn("[FFPROBE] ffprobe 실패, 파일 확장자로 추정 - filename: {}", multipartFile.getOriginalFilename());
+            return fallbackToExtension(multipartFile.getOriginalFilename());
 
-            // 핵심 로그: 여기 찍히면 ffprobe 감지는 됨
-            log.info("[FFPROBE] filename={}, format_name={}", multipartFile.getOriginalFilename(), output);
-
-            var names = Arrays.stream(output.toLowerCase().split(","))
-                    .map(String::trim).filter(s -> !s.isBlank())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            if (names.contains("avi")) return "avi";
-            boolean isMp4 = names.stream().anyMatch(mp4Family::contains);
-            if (isMp4) {
-                String ori = Optional.ofNullable(multipartFile.getOriginalFilename()).orElse("").toLowerCase();
-                return ori.endsWith(".mov") ? "mov" : "mp4";
-            }
-            throw new IllegalArgumentException("허용되지 않은 영상 포맷: " + output); // 이 메시지 보이면 ffprobe 검증이 원인
         } catch (IOException | InterruptedException e) {
-            throw new IllegalArgumentException("영상 포맷 감지 실패: " + e.getMessage(), e); // 이 메시지 보이면 ffprobe 실행 자체 문제
+            log.error("[FFPROBE] 예외 발생 - filename: {}, error: {}", 
+                     multipartFile.getOriginalFilename(), e.getMessage(), e);
+            throw new IllegalArgumentException("영상 포맷 감지 실패: " + e.getMessage(), e);
+        } finally {
+            // 파일 정리
+            if (file != null && !file.delete()) {
+                file.deleteOnExit();
+                log.debug("[FFPROBE] 임시파일 정리 완료: {}", file.getAbsolutePath());
+            }
+        }
+    }
+
+    /**
+     * ffprobe 실행 시도
+     */
+    private String tryFfprobe(File file, String originalFilename) throws IOException, InterruptedException {
+        String[] cmd = {"ffprobe","-v","error","-show_entries","format=format_name",
+                "-of","default=noprint_wrappers=1:nokey=1", file.getAbsolutePath()};
+        
+        log.info("[FFPROBE] 명령어 실행: {}", String.join(" ", cmd));
+        Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+
+        String output;
+        try (var br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            output = br.readLine();
+        }
+        int exit = p.waitFor();
+
+        if (exit != 0 || output == null || output.isBlank()) {
+            log.error("[FFPROBE] 실패 - exit: {}, output: '{}', filename: {}", 
+                     exit, output, originalFilename);
+            return null;
+        }
+
+        return output;
+    }
+
+    /**
+     * ffprobe 실패 시 파일 확장자로 포맷 추정
+     */
+    private String fallbackToExtension(String originalFilename) {
+        if (originalFilename == null) {
+            throw new IllegalArgumentException("파일명이 null입니다.");
+        }
+
+        String lowerName = originalFilename.toLowerCase();
+        
+        if (lowerName.endsWith(".avi")) {
+            return "avi";
+        } else if (lowerName.endsWith(".mov")) {
+            return "mov";
+        } else if (lowerName.endsWith(".mp4") || lowerName.endsWith(".m4a") || 
+                   lowerName.endsWith(".3gp") || lowerName.endsWith(".3g2") || 
+                   lowerName.endsWith(".mj2")) {
+            return lowerName.endsWith(".mov") ? "mov" : "mp4";
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 파일 확장자: " + originalFilename);
         }
     }
 

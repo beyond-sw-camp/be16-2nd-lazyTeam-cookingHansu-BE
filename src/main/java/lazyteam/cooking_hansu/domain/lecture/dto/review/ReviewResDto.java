@@ -10,6 +10,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.*;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -18,17 +19,24 @@ import java.util.UUID;
 @ToString
 @Builder
 public class ReviewResDto {
+    private UUID writerId;
+    private String writerEmail;
     private String writerNickname;
     private Integer rating;
     private String content;
-    private UUID writerId;
+    private String profileImageUrl;
+    private LocalDateTime userCreatedAt;
+
 
     public static ReviewResDto fromEntity(User writer, Integer rating, String content) {
         return ReviewResDto.builder()
                 .writerId(writer.getId())
+                .writerEmail(writer.getEmail())
                 .writerNickname(writer.getNickname())
                 .rating(rating)
                 .content(content)
+                .profileImageUrl(writer.getPicture())
+                .userCreatedAt(writer.getCreatedAt())
                 .build();
     }
 }

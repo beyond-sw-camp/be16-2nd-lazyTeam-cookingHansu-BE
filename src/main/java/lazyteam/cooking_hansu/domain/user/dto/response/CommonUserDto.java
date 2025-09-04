@@ -12,10 +12,12 @@ import lombok.*;
 import java.util.UUID;
 
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-@ToString @EqualsAndHashCode
+// chef, business 필드는 toString에서 제외 (순환 참조 방지)
+@ToString(exclude = {"chef", "business"})
 public class CommonUserDto {
 
     private UUID id;

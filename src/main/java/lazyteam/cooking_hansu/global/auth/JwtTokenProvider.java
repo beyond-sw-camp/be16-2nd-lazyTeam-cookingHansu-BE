@@ -83,10 +83,9 @@ public class JwtTokenProvider {
     // 관리자 AT 토큰 생성
     public String createAdminAtToken(Admin admin) {
         UUID id = admin.getId();
-        String email = admin.getEmail();
 
         Claims claims = Jwts.claims().setSubject(id.toString());
-        claims.put("email", email);
+        claims.put("id", id.toString());
         claims.put("role", "ADMIN"); // 관리자 role 추가
 
         Date now = new Date();
@@ -103,10 +102,9 @@ public class JwtTokenProvider {
     // 관리자 RT 토큰 생성
     public String createAdminRtToken(Admin admin) {
         UUID id = admin.getId();
-        String email = admin.getEmail();
 
         Claims claims = Jwts.claims().setSubject(id.toString());
-        claims.put("email", email);
+        claims.put("id", id.toString());
         claims.put("role", "ADMIN"); // 관리자 role 추가
 
         Date now = new Date();

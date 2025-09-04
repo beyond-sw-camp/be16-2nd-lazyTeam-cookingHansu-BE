@@ -11,6 +11,7 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -24,10 +25,11 @@ import java.util.UUID;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class ReportService {
 
-    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
+
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
 
@@ -72,7 +74,6 @@ public class ReportService {
 
     public boolean checkReport(UUID targetId) {
         UUID id = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("신고를 생성할 사용자를 찾을 수 없습니다."));
         return reportRepository.existsByUserIdAndTargetIdAndStatus(id, targetId, Status.PENDING);
     }
 }

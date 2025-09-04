@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.global.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3Uploader {
 
     private final S3Client s3Client;
@@ -28,34 +30,26 @@ public class S3Uploader {
     private String bucket;
 
     /**
-     * 파일을 S3에 업로드 (기존 메서드 - 수정하지 않음)
+     * 파일을 S3에 업로드 (수정됨 - 파일명 중복 문제 해결)
      */
     public String upload(MultipartFile file, String dirName) {
-        // 파일 유효성 검증 및 난수화 파일명 생성
+        // 파일 유효성 검증
         validateFile(file);
-        String randomFileName = generateRandomFileName(file.getOriginalFilename());
-        String key = dirName + randomFileName;
 
-        try {
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .contentType(getContentTypeFromFile(file))
-                    .build();
-
-            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-
-            return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
-
-        } catch (IOException e) {
-            throw new IllegalArgumentException("S3 업로드 실패", e);
+        // ✅ 파일명 중복 문제 해결: dirName이 이미 완전한 파일명인 경우 난수화하지 않음
+        String key;
+        if (dirName.contains(".")) {
+            // 이미 확장자가 포함된 완전한 파일명인 경우
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String randomId = UUID.randomUUID().toString().substring(0, 8);
+            String extension = getFileExtension(dirName);
+            String baseName = dirName.substring(0, dirName.lastIndexOf("."));
+            key = baseName + "_" + timestamp + "_" + randomId + extension;
+        } else {
+            // 기존 방식 (디렉토리명 + 난수화된 파일명)
+            String randomFileName = generateRandomFileName(file.getOriginalFilename());
+            key = dirName + randomFileName;
         }
-    }
-
-    public String uploadForChat(MultipartFile file, String dirName) {
-        // 파일 유효성 검증 및 난수화 파일명 생성
-        String randomFileName = generateRandomFileName(file.getOriginalFilename());
-        String key = dirName + randomFileName;
 
         try {
             PutObjectRequest request = PutObjectRequest.builder()
@@ -66,7 +60,10 @@ public class S3Uploader {
 
             s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
-            return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+            String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+            log.info("S3 업로드 성공 - Key: {}, URL: {}", key, s3Url);
+
+            return s3Url;
 
         } catch (IOException e) {
             throw new IllegalArgumentException("S3 업로드 실패", e);
@@ -74,7 +71,48 @@ public class S3Uploader {
     }
 
     /**
-     * S3에서 파일 삭제 (기존 메서드 - 수정하지 않음)
+     * 채팅용 파일 업로드 (수정됨 - 파일명 중복 문제 해결)
+     */
+    public String uploadForChat(MultipartFile file, String dirName) {
+        // 파일 유효성 검증
+        validateFile(file);
+
+        // ✅ 파일명 중복 문제 해결: dirName이 이미 완전한 파일명인 경우 난수화하지 않음
+        String key;
+        if (dirName.contains(".")) {
+            // 이미 확장자가 포함된 완전한 파일명인 경우
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String randomId = UUID.randomUUID().toString().substring(0, 8);
+            String extension = getFileExtension(dirName);
+            String baseName = dirName.substring(0, dirName.lastIndexOf("."));
+            key = baseName + "_" + timestamp + "_" + randomId + extension;
+        } else {
+            // 기존 방식 (디렉토리명 + 난수화된 파일명)
+            String randomFileName = generateRandomFileName(file.getOriginalFilename());
+            key = dirName + randomFileName;
+        }
+
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(getContentTypeFromFile(file))
+                    .build();
+
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+
+            String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+            log.info("S3 채팅 업로드 성공 - Key: {}, URL: {}", key, s3Url);
+
+            return s3Url;
+
+        } catch (IOException e) {
+            throw new IllegalArgumentException("S3 채팅 업로드 실패", e);
+        }
+    }
+
+    /**
+     * S3에서 파일 삭제
      */
     public void delete(String fileUrl) {
         try {
@@ -86,6 +124,7 @@ public class S3Uploader {
                     .build();
 
             s3Client.deleteObject(deleteRequest);
+            log.info("S3 파일 삭제 성공 - Key: {}", key);
 
         } catch (Exception e) {
             throw new IllegalArgumentException("S3 삭제 실패", e);
@@ -93,7 +132,7 @@ public class S3Uploader {
     }
 
     /**
-     * URL에서 key 추출 (기존 메서드 - 수정하지 않음)
+     * URL에서 key 추출
      */
     private String extractKeyFromUrl(String fileUrl) {
         try {
@@ -103,7 +142,6 @@ public class S3Uploader {
             }
 
             String encodedKey = fileUrl.substring(index + ".amazonaws.com/".length());
-
             return URLDecoder.decode(encodedKey, java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
@@ -113,11 +151,6 @@ public class S3Uploader {
 
     /**
      * URL에서 이미지를 다운로드하여 S3에 업로드
-     *
-     * @param imageUrl 소셜 로그인에서 제공하는 프로필 이미지 URL
-     * @param dirName  S3 버킷 내 디렉토리명
-     * @param fileName 저장할 파일명 (확장자 없이)
-     * @return S3에 업로드된 이미지 URL
      */
     public String uploadFromUrl(String imageUrl, String dirName, String fileName) {
         if (imageUrl == null || imageUrl.isEmpty()) {
@@ -125,61 +158,65 @@ public class S3Uploader {
         }
 
         try {
-            // URL에서 이미지 다운로드
-            URL url = new URL(imageUrl);
+            String decodedUrl = URLDecoder.decode(imageUrl, "UTF-8");
+            URL url = new URL(decodedUrl);
+
             URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+            connection.setRequestProperty("Accept", "image/*");
+            connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(60000);
 
             try (InputStream inputStream = connection.getInputStream()) {
-                // 파일 확장자 추출 또는 기본값 설정
-                String fileExtension = extractFileExtensionFromUrl(imageUrl);
-                if (fileExtension.isEmpty()) {
-                    fileExtension = ".jpg"; // 기본 확장자
+                byte[] imageBytes = inputStream.readAllBytes();
+
+                long maxProfileImageSize = 100 * 1024 * 1024;
+                if (imageBytes.length > maxProfileImageSize) {
+                    throw new IllegalArgumentException("프로필 이미지 크기는 100MB를 초과할 수 없습니다. 현재 크기: " + (imageBytes.length / 1024 / 1024) + "MB");
                 }
 
-                // 난수화된 파일명 생성 (프로필 이미지용)
+                String fileExtension = extractFileExtensionFromUrl(imageUrl);
+                if (fileExtension.isEmpty()) {
+                    fileExtension = ".jpg";
+                }
+
                 String randomFileName = generateProfileFileName(fileName, fileExtension);
                 String key = dirName + randomFileName;
                 String contentType = getContentTypeFromExtension(fileExtension);
 
-                // 파일 크기 검증 (프로필 이미지는 100MB 제한)
-                long maxProfileImageSize = 100 * 1024 * 1024; // 100MB
-                int contentLength = connection.getContentLength();
-                if (contentLength > maxProfileImageSize) {
-                    throw new IllegalArgumentException("프로필 이미지 크기는 10MB를 초과할 수 없습니다.");
-                }
-
-                // S3에 업로드
                 PutObjectRequest request = PutObjectRequest.builder()
                         .bucket(bucket)
                         .key(key)
                         .contentType(contentType)
                         .build();
 
-                s3Client.putObject(request, RequestBody.fromInputStream(inputStream, inputStream.available()));
+                s3Client.putObject(request, RequestBody.fromBytes(imageBytes));
 
-                return s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+                String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+                log.info("S3 URL 업로드 성공 - Key: {}, URL: {}", key, s3Url);
+
+                return s3Url;
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("URL에서 S3 업로드 실패: " + imageUrl, e);
+            log.error("URL에서 S3 업로드 실패: {}", imageUrl, e);
+            throw new IllegalArgumentException("프로필 이미지 업로드 실패: " + e.getMessage(), e);
         }
     }
 
     /**
-     * 파일 유효성 검증 (개선됨)
+     * 파일 유효성 검증
      */
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
         }
 
-        // 파일 크기 검증 (100MB 제한)
-        long maxFileSize = 100 * 1024 * 1024; // 100MB
+        long maxFileSize = 100 * 1024 * 1024;
         if (file.getSize() > maxFileSize) {
             throw new IllegalArgumentException("파일 크기는 100MB를 초과할 수 없습니다.");
         }
 
-        // 파일 확장자 검증
         String fileName = file.getOriginalFilename();
         if (fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException("파일명이 유효하지 않습니다.");
@@ -187,22 +224,19 @@ public class S3Uploader {
 
         String extension = getFileExtension(fileName);
         if (!isAllowedExtension(extension)) {
-            throw new IllegalArgumentException("지원하지 않는 파일 형식입니다. (jpg, jpeg, png, gif, pdf만 허용)");
+            throw new IllegalArgumentException("지원하지 않는 파일 형식입니다. (jpg, jpeg, png, gif, pdf, mp4, mov, avi만 허용)");
         }
     }
 
     /**
-     * 난수화된 파일명 생성 (개선됨)
+     * 난수화된 파일명 생성
      */
     private String generateRandomFileName(String originalFileName) {
         if (originalFileName == null || originalFileName.isEmpty()) {
             throw new IllegalArgumentException("파일명이 유효하지 않습니다.");
         }
 
-        // 파일 확장자 추출
         String extension = getFileExtension(originalFileName);
-
-        // 현재 시간 + UUID + 확장자로 난수화된 파일명 생성
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String randomId = UUID.randomUUID().toString().substring(0, 8);
 
@@ -233,17 +267,44 @@ public class S3Uploader {
      * URL에서 파일 확장자 추출
      */
     private String extractFileExtensionFromUrl(String url) {
-        try {
-            // URL에서 쿼리 파라미터 제거
-            String cleanUrl = url.split("\\?")[0];
-            int lastDot = cleanUrl.lastIndexOf('.');
-            if (lastDot > 0) {
-                return cleanUrl.substring(lastDot).toLowerCase();
-            }
-        } catch (Exception e) {
-            // 확장자 추출 실패 시 빈 문자열 반환
+        if (url == null || url.isEmpty()) {
+            return "";
         }
-        return "";
+
+        try {
+            String cleanUrl = url.split("\\?")[0];
+            cleanUrl = cleanUrl.split("#")[0];
+
+            int lastSlash = cleanUrl.lastIndexOf('/');
+            if (lastSlash >= 0) {
+                cleanUrl = cleanUrl.substring(lastSlash + 1);
+            }
+
+            int lastDot = cleanUrl.lastIndexOf('.');
+            if (lastDot > 0 && lastDot < cleanUrl.length() - 1) {
+                String extension = cleanUrl.substring(lastDot).toLowerCase();
+
+                if (isAllowedImageExtension(extension)) {
+                    return extension;
+                }
+            }
+
+            log.debug("URL에서 확장자를 추출할 수 없음: {}", url);
+            return "";
+
+        } catch (Exception e) {
+            log.warn("URL에서 확장자 추출 실패: {}, error: {}", url, e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     * 허용된 이미지 확장자인지 확인
+     */
+    private boolean isAllowedImageExtension(String extension) {
+        return extension.equals(".jpg") || extension.equals(".jpeg") ||
+                extension.equals(".png") || extension.equals(".gif") ||
+                extension.equals(".webp");
     }
 
     /**
@@ -253,7 +314,7 @@ public class S3Uploader {
         return extension.equals(".jpg") || extension.equals(".jpeg") ||
                 extension.equals(".png") || extension.equals(".gif") ||
                 extension.equals(".webp") || extension.equals(".pdf") ||
-                extension.equals(".mp4") || extension.equals(".mov") || //영상 확장자 허용(강의 업로드 시 필요)
+                extension.equals(".mp4") || extension.equals(".mov") ||
                 extension.equals(".avi");
     }
 
@@ -266,7 +327,6 @@ public class S3Uploader {
             return contentType;
         }
 
-        // Content-Type이 없는 경우 확장자로 추정
         String fileName = file.getOriginalFilename();
         if (fileName != null) {
             String extension = getFileExtension(fileName);
@@ -276,13 +336,15 @@ public class S3Uploader {
                 case ".gif" -> "image/gif";
                 case ".webp" -> "image/webp";
                 case ".pdf" -> "application/pdf";
+                case ".mp4" -> "video/mp4";
+                case ".mov" -> "video/quicktime";
+                case ".avi" -> "video/x-msvideo";
                 default -> "application/octet-stream";
             };
         }
 
         return "application/octet-stream";
     }
-
 
     /**
      * 파일 확장자에 따른 Content-Type 반환

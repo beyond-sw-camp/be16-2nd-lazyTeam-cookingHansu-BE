@@ -2,7 +2,6 @@ package lazyteam.cooking_hansu.domain.purchase.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.common.enums.ApprovalStatus;
 import lazyteam.cooking_hansu.domain.common.enums.PayMethod;
 import lazyteam.cooking_hansu.domain.common.enums.PaymentStatus;
@@ -37,6 +36,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;

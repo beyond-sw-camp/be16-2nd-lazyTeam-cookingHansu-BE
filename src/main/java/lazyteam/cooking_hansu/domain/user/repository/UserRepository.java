@@ -17,15 +17,8 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    Optional<User> findByEmail(String email);
-
-    Optional<User> findBySocialId(String socialId);
-
-
     // 닉네임 중복 검사
     boolean existsByNickname(String nickname);
-
-    Optional<User> findBySocialIdAndOauthType(String socialId, OauthType oauthType);
 
     // 탈퇴한 회원 포함하여 조회
     @Query("SELECT u FROM User u WHERE u.socialId = :socialId AND u.oauthType = :oauthType")
@@ -33,4 +26,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     // 탈퇴한 회원만 조회
     Optional<User> findBySocialIdAndOauthTypeAndIsDeleted(String socialId, OauthType oauthType, String isDeleted);
+
+    // ====== Fetch Join을 활용한 성능 최적화 쿼리 ======
+    
+    /**
+     * User와 연관된 Chef, Owner를 한 번에 조회 (N+1 문제 해결)
+     */
+    @Query("SELECT u FROM User u " +
+           "LEFT JOIN FETCH u.chef " +
+           "LEFT JOIN FETCH u.owner " +
+           "WHERE u.id = :userId")
+    Optional<User> findByIdWithDetails(@Param("userId") UUID userId);
 }

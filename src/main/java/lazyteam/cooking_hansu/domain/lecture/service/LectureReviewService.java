@@ -2,7 +2,6 @@ package lazyteam.cooking_hansu.domain.lecture.service;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewCreateDto;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewModifyDto;
 import lazyteam.cooking_hansu.domain.lecture.dto.review.ReviewResDto;
@@ -20,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 import java.util.UUID;
 

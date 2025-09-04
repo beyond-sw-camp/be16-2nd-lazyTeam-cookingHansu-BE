@@ -16,27 +16,30 @@ import java.util.UUID;
 @Builder
 public class LectureReviewResDto {
 
-    private String writer;
+    private UUID writerId;
+    private String writerEmail;
+    private String writerNickname;
+    private String profileImageUrl;
+    private LocalDateTime userCreatedAt;
+    private String writerName;
     private Integer rating;
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
-    private UUID reviewerId;
-    private String profileUrl;
-    private LocalDateTime reviewerJoinedAt; //가입일자
-    private String reviewerEmail; // 이메일
+
 
     public static LectureReviewResDto fromEntity(LectureReview lectureReview) {
         return LectureReviewResDto.builder()
-                .writer(lectureReview.getWriter().getName())
+                .writerName(lectureReview.getWriter().getName())
                 .rating(lectureReview.getRating())
                 .content(lectureReview.getContent())
                 .createAt(lectureReview.getCreatedAt())
                 .updateAt(lectureReview.getUpdatedAt())
-                .reviewerId(lectureReview.getWriter().getId())
-                .profileUrl(lectureReview.getWriter().getPicture())
-                .reviewerJoinedAt(lectureReview.getWriter().getCreatedAt())
-                .reviewerEmail(lectureReview.getWriter().getEmail())
+                .writerId(lectureReview.getWriter().getId())
+                .writerEmail(lectureReview.getWriter().getEmail())
+                .writerNickname(lectureReview.getWriter().getNickname())
+                .profileImageUrl(lectureReview.getWriter().getPicture())
+                .userCreatedAt(lectureReview.getWriter().getCreatedAt())
                 .build();
     }
 }

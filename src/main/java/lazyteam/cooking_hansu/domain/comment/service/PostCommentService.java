@@ -36,7 +36,7 @@ public class PostCommentService {
 
         // 유저가 존재하는지 확인
         UUID userId = AuthUtils.getCurrentUserId();
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         Post post = postRepository.findById(postCommentCreateDto.getPostId()).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
         PostComment postComment;
@@ -102,8 +102,10 @@ public class PostCommentService {
                         .commentId(c.getId())
                         .postId(c.getPost().getId())
                         .authorId(c.getUser().getId())
+                        .authorEmail(c.getUser().getEmail())
                         .authorNickName(c.getUser().getNickname())
                         .authorProfileImage(c.getUser().getPicture())
+                        .authorCreatedAt(c.getUser().getCreatedAt())
                         .content(c.getContent())
                         .createdAt(c.getCreatedAt())
                         .updatedAt(c.getUpdatedAt())
@@ -112,8 +114,10 @@ public class PostCommentService {
                                 .commentId(child.getId())
                                 .postId(child.getPost().getId())
                                 .authorId(child.getUser().getId())
+                                .authorEmail(child.getUser().getEmail())
                                 .authorNickName(child.getUser().getNickname())
                                 .authorProfileImage(child.getUser().getPicture())
+                                .authorCreatedAt(child.getUser().getCreatedAt())
                                 .content(child.getContent())
                                 .createdAt(child.getCreatedAt())
                                 .updatedAt(child.getUpdatedAt())

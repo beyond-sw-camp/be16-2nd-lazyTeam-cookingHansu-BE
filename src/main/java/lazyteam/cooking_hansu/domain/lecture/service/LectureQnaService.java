@@ -1,7 +1,6 @@
 package lazyteam.cooking_hansu.domain.lecture.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lazyteam.cooking_hansu.domain.lecture.dto.qna.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.Lecture;
 import lazyteam.cooking_hansu.domain.lecture.entity.LectureQna;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -123,10 +123,15 @@ public class LectureQnaService {
                 .map(qna -> LectureQnaListDto.builder()
                         .id(qna.getId())
                         .content(qna.getContent())
+                        .userId(qna.getUser().getId())
                         .status(qna.getStatus())
+                        .email(qna.getUser().getEmail())
+                        .userCreatedAt(qna.getUser().getCreatedAt())
                         .createdAt(qna.getCreatedAt())
                         .updatedAt(qna.getUpdatedAt())
                         .userName(qna.getUser().getName())
+                        .userNickname(qna.getUser().getNickname())
+                        .profileImageUrl(qna.getUser().getPicture())
                         .answers(qna.getChild() != null
                                 ? List.of(LectureQnaChildDto.builder()
                                 .id(qna.getChild().getId())
@@ -135,6 +140,11 @@ public class LectureQnaService {
                                 .createdAt(qna.getChild().getCreatedAt())
                                 .updatedAt(qna.getChild().getUpdatedAt())
                                 .userName(qna.getChild().getUser().getName())
+                                .userNickname(qna.getChild().getUser().getNickname())
+                                .email(qna.getChild().getUser().getEmail())
+                                .userCreatedAt(qna.getChild().getUser().getCreatedAt())
+                                .userId(qna.getChild().getUser().getId())
+                                .profileImageUrl(qna.getChild().getUser().getPicture())
                                 .build())
                                 : List.of())
                         .build()

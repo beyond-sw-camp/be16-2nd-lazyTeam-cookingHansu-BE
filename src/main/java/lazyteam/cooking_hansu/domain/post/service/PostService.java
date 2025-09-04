@@ -11,6 +11,7 @@ import lazyteam.cooking_hansu.domain.post.entity.RecipeStep;
 import lazyteam.cooking_hansu.domain.post.repository.IngredientsRepository;
 import lazyteam.cooking_hansu.domain.post.repository.PostRepository;
 import lazyteam.cooking_hansu.domain.post.repository.RecipeStepRepository;
+
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -46,14 +47,30 @@ public class PostService {
 
     private User getCurrentUser() {
         UUID userId = AuthUtils.getCurrentUserId();
-        return userRepository.findById(userId)
+        return userRepository.findByIdWithDetails(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+    }
+    
+    private User getCurrentUserOrNull() {
+        UUID userId = AuthUtils.getCurrentUserIdOrNull();
+        if (userId == null) {
+            return null;
+        }
+        return userRepository.findByIdWithDetails(userId)
+                .orElse(null);
     }
 
     private Post getPostByIdAndUser(UUID postId, User user) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-        if (!post.isOwnedBy(user)) {
+        
+        // 관리자는 모든 게시글에 접근 가능 (삭제된 것 포함)
+        if (AuthUtils.isAdmin()) {
+            return post;
+        }
+        
+        // 일반 사용자의 경우 권한 체크
+        if (user == null || !post.isOwnedBy(user)) {
             throw new IllegalArgumentException("게시글에 대한 권한이 없습니다.");
         }
         if (post.isDeleted()) {
@@ -132,12 +149,12 @@ public class PostService {
         // 비공개 게시글의 경우 작성자만 접근 가능
         if (!post.getIsOpen()) {
             try {
-                UUID currentUserId = AuthUtils.getCurrentUserId();
+                UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
                 if (currentUserId == null || !post.getUser().getId().equals(currentUserId)) {
                     throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
                 }
             } catch (Exception e) {
-                // 비로그인 사용자가 비공개 게시글에 접근
+                // 비로그인 사용자나 관리자가 비공개 게시글에 접근
                 throw new EntityNotFoundException("접근할 수 없는 게시글입니다.");
             }
         }
@@ -150,12 +167,19 @@ public class PostService {
         Boolean isBookmarked = null;
 
         try {
-            UUID currentUserId = AuthUtils.getCurrentUserId();
+            UUID currentUserId = AuthUtils.getCurrentUserIdOrNull();
             if (currentUserId != null) {
                 isLiked = interactionService.isPostLikedByCurrentUser(postId);
                 isBookmarked = interactionService.isPostBookmarkedByCurrentUser(postId);
+            } else {
+                // 관리자이거나 비회원인 경우 기본값 설정
+                isLiked = false;
+                isBookmarked = false;
             }
         } catch (Exception e) {
+            log.debug("사용자 상태 확인 실패 (비회원/관리자 접근): {}", e.getMessage());
+            isLiked = false;
+            isBookmarked = false;
         }
 
         return PostResponseDto.fromEntity(post, ingredients, steps, isLiked, isBookmarked);
@@ -163,7 +187,7 @@ public class PostService {
 
 
     public void updatePost(UUID postId, PostUpdateRequestDto requestDto, MultipartFile thumbnail) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUserOrNull();
         Post post = getPostByIdAndUser(postId, currentUser);
 
         // 기존 썸네일 URL 저장
@@ -220,7 +244,8 @@ public class PostService {
             saveRecipeSteps(post, requestDto.getSteps());
         }
 
-        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
+        log.info("Post 수정 완료. 사용자: {}, Post ID: {}", 
+                currentUser != null ? currentUser.getEmail() : "관리자", postId);
     }
 
     /**
@@ -228,7 +253,7 @@ public class PostService {
      */
     @Transactional
     public void deletePost(UUID postId) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUserOrNull();
         Post post = getPostByIdAndUser(postId, currentUser);
 
         // 연관 데이터 삭제 (Cascade 설정으로 자동 삭제되지만 명시적으로)
@@ -239,7 +264,8 @@ public class PostService {
         post.softDelete();
         postRepository.save(post);
 
-        log.info("Post 삭제 완료. 사용자: {}, Post ID: {}", currentUser.getEmail(), postId);
+        log.info("Post 삭제 완료. 사용자: {}, Post ID: {}", 
+                currentUser != null ? currentUser.getEmail() : "관리자", postId);
     }
 
     /**
@@ -253,9 +279,9 @@ public class PostService {
 
         UUID currentUserId = null;
         try {
-            currentUserId = AuthUtils.getCurrentUserId();
+            currentUserId = AuthUtils.getCurrentUserIdOrNull();
         } catch (Exception e) {
-            log.debug("비회원 접근: {}", e.getMessage());
+            log.debug("비회원/관리자 접근: {}", e.getMessage());
         }
 
         final UUID finalCurrentUserId = currentUserId;

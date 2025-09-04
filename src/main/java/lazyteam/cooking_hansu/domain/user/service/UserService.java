@@ -50,12 +50,6 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
     private final NotificationService notificationService;
 
-    @Value("${my.test.user-id}")
-    private String testUserIdStr;
-
-    // TODO: 회원 서비스 메서드 구현 예정
-
-
 //    요리업종 승인 대기 목록 조회
     @Transactional(readOnly = true)
     public Page<WaitingChefListDto> getWaitingChefList(Pageable pageable) {
@@ -101,6 +95,7 @@ public class UserService {
                 throw new IllegalArgumentException("이미 승인된 사업자입니다. userId: " + userId);
             }
             owner.approve();
+            // 역할은 이미 OWNER로 설정되어 있으므로 별도 변경 불필요
             user.updateRoleStatus(Role.OWNER);
 
             // 승인 알림 생성 및 발송
@@ -199,9 +194,12 @@ public class UserService {
                 );
                 log.info("프로필 이미지 S3 업로드 성공: {} -> {}", picture, uploadedPictureUrl);
             } catch (Exception e) {
-                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용: {}", picture, e);
-                uploadedPictureUrl = picture; // 업로드 실패 시 원본 URL 사용
+                log.warn("프로필 이미지 S3 업로드 실패, 원본 URL 사용 - URL: {}, error: {}", picture, e.getMessage());
+                // ✅ S3 업로드 실패 시 원본 URL 사용 (안전한 fallback)
+                uploadedPictureUrl = picture;
             }
+        } else {
+            log.info("프로필 이미지가 제공되지 않음 - email: {}", email);
         }
 
         // 사용자 엔티티 저장
@@ -209,10 +207,6 @@ public class UserService {
         userRepository.save(user);
 
         return user;
-    }
-
-    public User getUserBySocialIdAndOauthType(String email, OauthType oauthType) {
-        return userRepository.findBySocialIdAndOauthType(email, oauthType).orElse(null);
     }
 
     // 탈퇴한 회원 포함하여 조회
@@ -240,7 +234,7 @@ public class UserService {
     }
 
     public User getUserById(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
+        return userRepository.findByIdWithDetails(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
     }
 
         // 회원 탈퇴

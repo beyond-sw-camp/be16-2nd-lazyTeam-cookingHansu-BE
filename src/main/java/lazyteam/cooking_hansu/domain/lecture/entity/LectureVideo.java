@@ -39,6 +39,4 @@ public class LectureVideo extends BaseIdAndTimeEntity {
         this.title = title;
         this.preview = preview;
     }
-
-
 }
