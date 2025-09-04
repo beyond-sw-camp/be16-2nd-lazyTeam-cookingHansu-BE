@@ -7,6 +7,9 @@ import lazyteam.cooking_hansu.domain.lecture.dto.lecture.*;
 import lazyteam.cooking_hansu.domain.lecture.entity.*;
 import lazyteam.cooking_hansu.domain.lecture.repository.*;
 import lazyteam.cooking_hansu.domain.lecture.util.VideoUtil;
+import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
+import lazyteam.cooking_hansu.domain.notification.entity.TargetType;
+import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.domain.purchase.repository.PurchasedLectureRepository;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
@@ -52,6 +55,7 @@ public class LectureService {
     private final InteractionService interactionService;
     private final LectureProgressRepository progressRepository;
     private final PurchasedLectureRepository purchasedLectureRepository;
+    private final NotificationService notificationService;
 
     // ====== 강의 등록 ======
     public UUID create(LectureCreateDto lectureCreateDto,
@@ -321,6 +325,17 @@ public class LectureService {
             throw new IllegalArgumentException("이미 승인된 강의입니다. lectureId: " + lectureId);
         }
         lecture.approve();
+
+        // 강의 승인 알림
+
+        SseMessageDto approvalNotification = SseMessageDto.builder()
+                .recipientId(lecture.getSubmittedBy().getId())
+                .content("강의 '" + lecture.getTitle() + "'이(가) 승인되었습니다.")
+                .targetType(TargetType.APPROVAL)
+                .targetId(lecture.getId())
+                .build();
+
+        notificationService.createAndDispatch(approvalNotification);
     }
 
     //    강의 거절
@@ -331,6 +346,15 @@ public class LectureService {
         }
         lecture.reject(rejectRequestDto.getReason());
 
+        // 강의 거절 알림
+        SseMessageDto rejectionNotification = SseMessageDto.builder()
+                .recipientId(lecture.getSubmittedBy().getId())
+                .content("강의 '" + lecture.getTitle() + "'이(가) 거절되었습니다. 사유: " + rejectRequestDto.getReason())
+                .targetType(TargetType.APPROVAL)
+                .targetId(lecture.getId())
+                .build();
+
+        notificationService.createAndDispatch(rejectionNotification);
     }
 
 
