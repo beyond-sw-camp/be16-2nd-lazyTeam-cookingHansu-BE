@@ -244,7 +244,7 @@
   <summary><b>ERD</b></summary>
   <a href='https://www.erdcloud.com/d/25tEnmWT48D4MufsZ' style="text-decoration: none; color: inherit;">📄 ERD 바로가기</a>
   <br>
-  <img width="1254" height="792" alt="스크린샷 2025-08-25 오후 2 33 14" src="https://github.com/user-attachments/assets/a8ae440d-08c1-4038-879a-0b063fde7c24" />
+  <img width="5040" height="2242" alt="요리한수 (1)" src="https://github.com/user-attachments/assets/895e27f9-4b0b-49ed-8201-1fc9e191770a" />
 
   <a href="https://www.erdcloud.com/...">
 </details>
