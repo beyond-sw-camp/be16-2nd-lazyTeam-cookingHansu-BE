@@ -1,5 +1,5 @@
 # 🍳 요리한수 - 레시피 공유 및 강의 커뮤니티 서비스
-<img width="800" height="1000" alt="요리한수" src="https://github.com/user-attachments/assets/851df87c-1416-45a7-9e4e-a0de7169b982" />
+![header_image](https://github.com/user-attachments/assets/2667d145-c713-4a46-b75f-9b1a7892caa5)
 <br>
 
 ## 🙋🏻 팀원 소개
