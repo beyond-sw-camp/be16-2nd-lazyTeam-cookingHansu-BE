@@ -722,6 +722,79 @@
   
   <details>
     <summary><b>최재혁</b></summary>
+      <details>
+        <summary><b>OAuth 플로우 선택과 최초 구현 난항</b></summary>
+
+  ### 🔎 발생 이슈
+  - 소셜 로그인 방식을 어디서부터 어떻게 붙여야 할지 모호.
+  - oauth2-client 전면 사용 vs 프론트 인가코드 수신 후 백엔드가 토큰 교환 방식 중 선택 필요.
+  
+  ### 🧩 원인 분석
+  - 팀 프론트가 이미 인가코드를 받도록 설계. 백엔드가 code로 토큰 교환 및 프로필 조회를 책임지는 형태가 팀 구조와 배포 동선상 가장 단순.
+  - 각 공급자마다 토큰/프로필 엔드포인트, 파라미터 명세가 상이.
+  
+  ### 🛠️ 해결 방법
+  - 전략: AuthorizationCode → Token → Profile → 내부 JWT 파이프라인을 공통 인터페이스로 추상화.
+  - OAuthClient 인터페이스 + GoogleClient, KakaoClient, NaverClient 구현체.
+  - 공급자별 tokenUri, profileUri, clientId/secret, redirectUri를 application-*.yml에 분리.
+  - 공통 DTO: OAuthUserProfile { provider, providerUserId, email?, name? }
+  - 식별 키는 provider + providerUserId를 1차로, email은 보조로 사용.
+  
+  ### ✅ 최종 결과
+  - 프론트/백 분리 구조 유지하면서도 백엔드의 공통 파이프라인으로 공급자 추가가 쉬워짐.
+  - 신규 공급자 테스트 시 구현 범위가 명확해지고 회귀 리스크 감소.
+
+      </details>
+
+      <details>
+        <summary><b>프로필 조회 스펙 차이로 매핑 오류</b></summary>
+
+  ### 🔎 발생 이슈
+  - 토큰은 받았는데 사용자 정보가 null로 매핑되거나, 키 경로가 달라 NPE 발생.
+  
+  ### 🧩 원인 분석
+  - 각 공급자 응답 스키마 차이:
+    - Google: GET `https://www.googleapis.com/oauth2/v3/userinfo` 헤더 Authorization: Bearer {access_token}
+      - 응답 예: { "id": "...", "email": "...", "name": "..." }
+    - Kakao: GET `https://kapi.kakao.com/v2/user/me`
+      - 응답 예: { "id": 12345, "kakao_account": { "email": "...", "profile": {"nickname": "..."} } }
+    - Naver: GET `"https://openapi.naver.com/v1/nid/me`
+      - 응답 예: { "resultcode":"00", "message":"success", "response": {"id":"...", "email":"...", "name":"..."} }
+  
+  ### 🛠️ 해결 방법
+  - 전략: AuthorizationCode → Token → Profile → 내부 JWT 파이프라인을 공통 인터페이스로 추상화.
+  - OAuthService 인터페이스 + GoogleService, KakaoService, NaverService 구현체.
+  - 공급자별 tokenUri, clientId/secret, redirectUri를 application-*.yml에 분리.
+  - 소셜 별 DTO 분리: GoogleProfileDto, KakaoProfileDto, NaverProfileDto
+  
+  ### ✅ 최종 결과
+  - 프론트/백 분리 구조 유지하면서도 백엔드의 공통 파이프라인으로 공급자 추가가 쉬워짐.
+  - 신규 공급자 테스트 시 구현 범위가 명확해지고 회귀 리스크 감소.
+
+      </details>
+
+      <details>
+        <summary><b>회원 탈퇴 API 403 발생</b></summary>
+
+  ### 🔎 발생 이슈
+  - 공식 문서대로 “공급자 탈퇴 API”를 호출했으나 403 권한 오류.
+  - 우리 서버에서 발급한 JWT를 Authorization에 넣었더니 공급자 API가 인식 못함.
+  
+  ### 🧩 원인 분석
+  - 공급자 API는 공급자 액세스 토큰을 요구. 내부 JWT는 외부 API에서 무용.
+  - 또한 실제 서비스 요구사항 상 “정말 공급자 연결 해제까지 해야 하는가”가 모호.
+  
+  ### 🛠️ 해결 방법
+  - 서비스 정책 합의: 외부 연결 해제 대신 소프트 삭제(soft delete) 채택.
+    - User.isDeleted (Y/N) 컬럼 추가, 공통 탈퇴 로직으로 처리.
+    - 로그인/토큰 재발급 시 isDeleted = Y 계정은 거부.
+  - 필요 시 별도 “연결 해제”는 옵션으로 분리하여 공급자 토큰을 재발급한 뒤 호출.
+  
+  ### ✅ 최종 결과
+  - 더 이상 공급자 토큰/정책 변화에 종속되지 않음.
+  - 데이터 보존 및 복구 시나리오도 단순화.
+
+      </details>
   </details>
 
   
