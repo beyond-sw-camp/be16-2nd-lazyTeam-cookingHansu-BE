@@ -133,6 +133,12 @@ public class NotificationService {
         return sseEmitterRegistry.connect(userId);
     }
 
+    // 현재 사용자의 SSE 연결 해제
+    public void disconnectCurrentUser() {
+        UUID userId = AuthUtils.getCurrentUserId();
+        sseEmitterRegistry.disconnect(userId);
+    }
+
      // 채팅방 온라인 참여 시 해당 채팅방의 알림들을 읽음 처리
     public void markChatNotificationsAsRead(UUID userId, Long chatRoomId) {
         // 채팅 관련 알림 중 해당 채팅방의 알림들을 읽음 처리
