@@ -33,6 +33,11 @@ public class UserController {
     private final RefreshTokenService refreshTokenService;
     private final S3Uploader s3Uploader;
 
+    @GetMapping("/health")
+    public String healthCheck() {
+        return "헬스 체크 OK";
+    }
+
     // 리프레시 토큰 갱신
     @PostMapping("/refresh")
     public ResponseDto<?> updateRefreshToken(@RequestBody Map<String, String> request) {

@@ -1,5 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.dto;
 
+import lazyteam.cooking_hansu.domain.user.entity.common.LoginStatus;
 import lazyteam.cooking_hansu.domain.user.entity.common.Role;
 import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,8 @@ public class UserSummaryDto {
     private LocalDateTime createdAt; // 생성일시
     private Role role; // 사용자 역할
     private String name; // 사용자 이름
+    private LoginStatus loginStatus; // 로그인 상태
+
 
     public static UserSummaryDto fromEntity(User user) {
         return UserSummaryDto.builder()
@@ -33,6 +36,7 @@ public class UserSummaryDto {
                 .createdAt(user.getCreatedAt())
                 .role(user.getRole())
                 .name(user.getName())
+                .loginStatus(user.getLoginStatus())
                 .build();
     }
 }

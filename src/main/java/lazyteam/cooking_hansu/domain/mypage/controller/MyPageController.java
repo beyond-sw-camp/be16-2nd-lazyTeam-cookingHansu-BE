@@ -51,7 +51,7 @@ public class MyPageController {
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<?> myPostList(@PageableDefault(size = 6, sort = "createdAt",
+    public ResponseEntity<?> myPostList(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.getMyPosts(pageable), HttpStatus.OK),
@@ -61,7 +61,7 @@ public class MyPageController {
 
     //   내가 구매한 강의 목록조회
     @GetMapping("/lectures")
-    public ResponseEntity<?> myLectures(@PageableDefault(size = 6, sort = "createdAt",
+    public ResponseEntity<?> myLectures(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         Page<MyLectureListDto> lectureResDto = myPageService.getMyLectures(pageable);
         return new ResponseEntity<>(ResponseDto.ok(lectureResDto,HttpStatus.OK),HttpStatus.OK);
@@ -69,7 +69,7 @@ public class MyPageController {
 
 
     @GetMapping("/bookmarked-posts")
-    public ResponseEntity<?> myBookmarkedPosts(@PageableDefault(size = 6, sort = "createdAt",
+    public ResponseEntity<?> myBookmarkedPosts(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.getMyBookmarks(pageable), HttpStatus.OK),
@@ -78,7 +78,7 @@ public class MyPageController {
     }
 
     @GetMapping("/liked-posts")
-    public ResponseEntity<?> myLikedPosts(@PageableDefault(size = 6, sort = "createdAt",
+    public ResponseEntity<?> myLikedPosts(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.getMyLikes(pageable), HttpStatus.OK),
@@ -87,7 +87,7 @@ public class MyPageController {
     }
 
     @GetMapping("/liked-lectures")
-    public ResponseEntity<?> myLikedLectures(@PageableDefault(size = 6, sort = "createdAt",
+    public ResponseEntity<?> myLikedLectures(@PageableDefault(size = 8, sort = "createdAt",
             direction = Sort.Direction.DESC) Pageable pageable) {
         return new ResponseEntity<>(
                 ResponseDto.ok(myPageService.getMyLikedLectures(pageable), HttpStatus.OK),

@@ -30,9 +30,10 @@ public class CommonUserDto {
     private String picture;
     @Size(message = "닉네임은 2자 이상 20자 이하여야 합니다", min = 2, max = 20)
     private String nickname;
-    @Size(max = 200, message = "자기소개는 200자 이하여야 합니다")
+    @Size(max = 20, message = "자기소개는 20자 이하여야 합니다")
     private String info;
     private Role role;
+
     private GeneralType generalType;
     private ChefDto chef;
     private BusinessDto business;
