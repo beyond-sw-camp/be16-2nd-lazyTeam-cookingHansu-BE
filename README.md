@@ -596,10 +596,10 @@
 ---
 
 ## 🛠️ 트러블 슈팅
-<details>
-  <summary><b>트러블 슈팅</b></summary>
 
   <details>
+    <summary><b>조민형</b></summary>
+     <details>
     <summary><b>강의 등록 시 순환참조 이슈</b></summary>
 
   ### 🔎 발생 이슈
@@ -645,8 +645,12 @@
   - 프론트/백엔드 역할이 분리되어 유지보수성과 가독성이 개선됨  
 
   </details>
+  </details>
+
 
   <details>
+    <summary><b>김건동</b></summary>
+      <details>
     <summary><b>채팅 모듈 – 실시간 읽음 처리 문제</b></summary>
 
   ### 🔎 발생 이슈
@@ -710,8 +714,25 @@
   - REST API를 통한 업로드로 UX와 효율성 개선  
 
   </details>
+  </details>
+ 
 
-</details>
+
+
+  
+  <details>
+    <summary><b>최재혁</b></summary>
+  </details>
+
+  
+  <details>
+    <summary><b>이승지</b></summary>
+  </details>
+
+  
+  <details>
+    <summary><b>김상환</b></summary>
+  </details>
 
 
 ---
