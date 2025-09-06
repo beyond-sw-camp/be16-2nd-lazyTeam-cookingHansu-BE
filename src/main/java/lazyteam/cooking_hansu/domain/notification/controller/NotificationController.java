@@ -25,6 +25,13 @@ public class NotificationController {
         return notificationService.subscribeToNotifications();
     }
 
+    // SSE 연결 해제
+    @PostMapping("/disconnect")
+    public ResponseEntity<?> disconnect() {
+        notificationService.disconnectCurrentUser();
+        return ResponseEntity.ok(ResponseDto.ok("SSE 연결이 해제되었습니다.", HttpStatus.OK));
+    }
+
     // 목록 조회 (Cursor pagination)
     @GetMapping
     public ResponseEntity<?> list(
