@@ -13,10 +13,11 @@ import lazyteam.cooking_hansu.domain.user.entity.common.User;
 import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.global.auth.dto.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.domain.notification.dto.SseMessageDto;
@@ -90,40 +91,38 @@ public class PostCommentService {
         return postComment.getId();
     }
 
-//    댓글 목록 조회
+//    댓글 목록 조회 (페이지네이션)
     @Transactional(readOnly = true)
-    public List<PostCommentListResDto> findCommentList(UUID postId) {
+    public Page<PostCommentListResDto> findCommentList(UUID postId, Pageable pageable) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
 
-        List<PostComment> comments = postCommentRepository.findAllByPostAndParentCommentIsNull(post);
-        return comments.stream()
-                .filter(c -> !c.getCommentIsDeleted() || !c.getChildComments().isEmpty()) //  삭제된 댓글이지만 자식 있으면 남김
-                .map(c -> PostCommentListResDto.builder()
-                        .commentId(c.getId())
-                        .postId(c.getPost().getId())
-                        .authorId(c.getUser().getId())
-                        .authorEmail(c.getUser().getEmail())
-                        .authorNickName(c.getUser().getNickname())
-                        .authorProfileImage(c.getUser().getPicture())
-                        .authorCreatedAt(c.getUser().getCreatedAt())
-                        .content(c.getContent())
-                        .createdAt(c.getCreatedAt())
-                        .updatedAt(c.getUpdatedAt())
-                        .isDeleted(c.getCommentIsDeleted())
-                        .childComments(c.getChildComments().stream().map(child -> PostCommentChildListResDto.builder()
-                                .commentId(child.getId())
-                                .postId(child.getPost().getId())
-                                .authorId(child.getUser().getId())
-                                .authorEmail(child.getUser().getEmail())
-                                .authorNickName(child.getUser().getNickname())
-                                .authorProfileImage(child.getUser().getPicture())
-                                .authorCreatedAt(child.getUser().getCreatedAt())
-                                .content(child.getContent())
-                                .createdAt(child.getCreatedAt())
-                                .updatedAt(child.getUpdatedAt())
-                                .build()).toList())
-                        .build())
-                .toList();
+        Page<PostComment> commentsPage = postCommentRepository.findAllByPostAndParentCommentIsNull(post, pageable);
+        
+        return commentsPage.map(c -> PostCommentListResDto.builder()
+                .commentId(c.getId())
+                .postId(c.getPost().getId())
+                .authorId(c.getUser().getId())
+                .authorEmail(c.getUser().getEmail())
+                .authorNickName(c.getUser().getNickname())
+                .authorProfileImage(c.getUser().getPicture())
+                .authorCreatedAt(c.getUser().getCreatedAt())
+                .content(c.getContent())
+                .createdAt(c.getCreatedAt())
+                .updatedAt(c.getUpdatedAt())
+                .isDeleted(c.getCommentIsDeleted())
+                .childComments(c.getChildComments().stream().map(child -> PostCommentChildListResDto.builder()
+                        .commentId(child.getId())
+                        .postId(child.getPost().getId())
+                        .authorId(child.getUser().getId())
+                        .authorEmail(child.getUser().getEmail())
+                        .authorNickName(child.getUser().getNickname())
+                        .authorProfileImage(child.getUser().getPicture())
+                        .authorCreatedAt(child.getUser().getCreatedAt())
+                        .content(child.getContent())
+                        .createdAt(child.getCreatedAt())
+                        .updatedAt(child.getUpdatedAt())
+                        .build()).toList())
+                .build());
     }
 
     // 댓글 수정
