@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface BookmarkRepository extends JpaRepository<Bookmark, UUID> {
-    Page<Bookmark> findAllByUser(User user, Pageable pageable);
+    Page<Bookmark> findAllByUserAndPostIsOpenTrueAndPostDeletedAtIsNull(User user, Pageable pageable);
     // UUID로 직접 조회하는 메서드 추가
     Bookmark findByUserIdAndPostId(@Param("userId") UUID userId, @Param("postId") UUID postId);
 

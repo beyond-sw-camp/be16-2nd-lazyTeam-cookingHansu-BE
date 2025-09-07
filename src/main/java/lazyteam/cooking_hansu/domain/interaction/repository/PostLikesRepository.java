@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PostLikesRepository extends JpaRepository<PostLikes, UUID> {
-    Page<PostLikes> findAllByUser(User user, Pageable pageable);
+    Page<PostLikes> findAllByUserAndPostIsOpenTrueAndPostDeletedAtIsNull(User user, Pageable pageable);
 
     
     // UUID로 직접 조회하는 메서드 추가

@@ -181,8 +181,10 @@ public class PostService {
             isLiked = false;
             isBookmarked = false;
         }
+        // 코멘트 카운트
+        Long commentCount = postCommentRepository.countByPostAndCommentIsDeletedFalse(post);
 
-        return PostResponseDto.fromEntity(post, ingredients, steps, isLiked, isBookmarked);
+        return PostResponseDto.fromEntity(post, ingredients, steps, isLiked, isBookmarked, commentCount);
     }
 
 

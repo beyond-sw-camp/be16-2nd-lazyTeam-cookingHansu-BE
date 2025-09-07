@@ -72,10 +72,16 @@ public class LectureService {
         Lecture lecture = lectureRepository.save(lectureCreateDto.toEntity(user));
 
         // 재료목록 저장
+        if(lectureIngredientsListDto != null && lectureIngredientsListDto.isEmpty()) {
+            throw new IllegalArgumentException("재료목록은 필수입니다.");
+        }
         List<LectureIngredientsList> ingredientsList = lectureIngredientsListDto.stream().map(a -> a.toEntity(lecture)).toList();
         lectureIngredientsListRepository.saveAll(ingredientsList);
 
         // 재료순서 저장
+        if(lectureStepDto != null && lectureStepDto.isEmpty()) {
+            throw new IllegalArgumentException("재료순서는 필수입니다.");
+        }
         List<LectureStep> lectureStepList = lectureStepDto.stream().map(a -> a.toEntity(lecture)).toList();
         lectureStepRepository.saveAll(lectureStepList);
 
