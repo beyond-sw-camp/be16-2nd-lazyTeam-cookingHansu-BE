@@ -158,7 +158,7 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public Page<MyBookmarkLikedListDto> getMyBookmarks(Pageable pageable) {
         User user = getCurrentUser();
-        Page<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user, pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findAllByUserAndPostIsOpenTrueAndPostDeletedAtIsNull(user, pageable);
 
         return bookmarks.map(bookmark -> {
             Post post = bookmark.getPost();
@@ -185,7 +185,7 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public Page<MyBookmarkLikedListDto> getMyLikes(Pageable pageable) {
         User user = getCurrentUser();
-        Page<PostLikes> postLikesList = postLikesRepository.findAllByUser(user, pageable);
+        Page<PostLikes> postLikesList = postLikesRepository.findAllByUserAndPostIsOpenTrueAndPostDeletedAtIsNull(user, pageable);
 
         return postLikesList.map(like -> {
             Post post = like.getPost();
