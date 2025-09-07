@@ -39,6 +39,7 @@ public class PostResponseDto {
     private UserInfoDto user;
     private List<IngredientDto> ingredients;
     private List<RecipeStepDto> steps;
+    private Long commentCount;
 
     @Getter
     @NoArgsConstructor
@@ -107,7 +108,7 @@ public class PostResponseDto {
 
     // 통합 Post 엔티티로부터 DTO 생성 (재료, 조리순서 포함)
     public static PostResponseDto fromEntity(Post post, List<Ingredients> ingredients, List<RecipeStep> steps,
-                                             Boolean isLiked, Boolean isBookmarked) {
+                                             Boolean isLiked, Boolean isBookmarked, Long commentCount) {
         return PostResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -127,6 +128,7 @@ public class PostResponseDto {
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .user(UserInfoDto.fromEntity(post.getUser()))
+                .commentCount(commentCount)
                 .ingredients(ingredients != null ? ingredients.stream().map(IngredientDto::fromEntity).toList() : List.of())
                 .steps(steps != null ? steps.stream().map(RecipeStepDto::fromEntity).toList() : List.of())
                 .build();
