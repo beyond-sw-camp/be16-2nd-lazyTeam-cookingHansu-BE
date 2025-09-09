@@ -383,13 +383,13 @@ public class GlobalExceptionHandler {
      * ======================== IO 관련 예외 ========================
      */
 
-    // IO 에러 (파일 읽기/쓰기 실패)
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<?> handleIOException(IOException e) {
-        log.error("[IOException] {}", e.getMessage(), e);
-         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
-//        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-    }
+//    // IO 에러 (파일 읽기/쓰기 실패)
+//    @ExceptionHandler(IOException.class)
+//    public ResponseEntity<?> handleIOException(IOException e) {
+//        log.error("[IOException] {}", e.getMessage(), e);
+//         return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
+////        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//    }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<?> handleIOException(HttpServletRequest req, IOException e) {
