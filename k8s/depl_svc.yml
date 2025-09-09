@@ -76,6 +76,27 @@ spec:
             secretKeyRef:
               name: cookinghansu-secrets
               key: KAKAO_CLIENT_ID
+        - name: GOOGLE_CLIENT_ID
+          valueFrom:
+              secretKeyRef:
+                name: cookinghansu-secrets
+                key: GOOGLE_CLIENT_ID
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+              secretKeyRef:
+                name: cookinghansu-secrets
+                key: GOOGLE_CLIENT_SECRET
+        - name: NAVER_CLIENT_ID
+          valueFrom:
+              secretKeyRef:
+                  name: cookinghansu-secrets
+                  key: NAVER_CLIENT_ID
+        - name: NAVER_CLIENT_SECRET
+          valueFrom:
+              secretKeyRef:
+                  name: cookinghansu-secrets
+                  key: NAVER_CLIENT_SECRET
+
         # 컨테이너 상태 확인을 통해 롤링업데이트 최적화
         readinessProbe:
           httpGet:
