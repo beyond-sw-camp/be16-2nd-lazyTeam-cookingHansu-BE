@@ -12,6 +12,7 @@ RUN ./gradlew bootJar
 # 두번째 스테이지
 # 이미지 경량화를 위해 스테이지 분리
 FROM openjdk:17-jdk-slim
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # stage1의 jar파일을 stage2로 copy
 COPY --from=stage1 /app/build/libs/*.jar app.jar
