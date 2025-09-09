@@ -12,7 +12,7 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://${DB_HOST}:3306/cookingHanSu
+    url: jdbc:mariadb://${DB_HOST}:3306/cookingHanSu?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: admin
     password: ${DB_PW}
   jpa:
