@@ -1,6 +1,7 @@
 package lazyteam.cooking_hansu.global.exception.handler;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -353,6 +356,29 @@ public class GlobalExceptionHandler {
         return buildError(status, message);
     }
 
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public ResponseEntity<?> handleAsyncNotUsable(HttpServletRequest req, AsyncRequestNotUsableException e) {
+        log.error("[AsyncRequestNotUsableException] {}", e.getMessage(), e);
+
+        if (isSseRequest(req)) {
+            return ResponseEntity.noContent().build();
+        }
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "요청 처리가 중단되었습니다.");
+    }
+
+    private boolean isSseRequest(HttpServletRequest req) {
+        if (req == null) return false;
+        String accept = req.getHeader("Accept");
+        String ct = req.getHeader("Content-Type");
+        // 필요 시 경로 매칭도 추가
+        String uri = req.getRequestURI();
+
+        return (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE))
+                || (ct != null && ct.contains(MediaType.TEXT_EVENT_STREAM_VALUE))
+                || (uri != null && uri.startsWith("/api/notifications/subscribe"));
+    }
+
+
     /**
      * ======================== IO 관련 예외 ========================
      */
@@ -364,6 +390,20 @@ public class GlobalExceptionHandler {
          return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
 //        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<?> handleIOException(HttpServletRequest req, IOException e) {
+        log.error("[IOException] {}", e.getMessage(), e);
+
+        if (isSseRequest(req)) {
+            // SSE 스트림은 바디 쓰지 말고 조용히 닫는다.
+            return ResponseEntity.noContent().build(); // 204
+            // 원하면 200 OK로도 가능: ResponseEntity.ok().build();
+        }
+
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "파일 처리 중 오류가 발생했습니다.");
+    }
+
 
     /**
      * ======================== Fallback (그 외 모든 예외) ========================
