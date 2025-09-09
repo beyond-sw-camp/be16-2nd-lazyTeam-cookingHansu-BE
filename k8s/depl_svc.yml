@@ -4,7 +4,7 @@ metadata:
   name: cookinghansu-deployment
   namespace: cookinghansu
 spec:
-  replicas: 1
+  replicas: 2
   # 아래의 label은 replicaset이 관리해야 할 파드를 결정하는데 사용
   selector:
     matchLabels:
