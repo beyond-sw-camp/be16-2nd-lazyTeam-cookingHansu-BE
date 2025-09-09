@@ -51,23 +51,22 @@ public class S3Uploader {
             key = dirName + randomFileName;
         }
 
-        try {
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .contentType(getContentTypeFromFile(file))
-                    .build();
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(getContentTypeFromFile(file))
+                .build();
 
-            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-
-            String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
-            log.info("S3 업로드 성공 - Key: {}, URL: {}", key, s3Url);
-
-            return s3Url;
-
+        try (InputStream in = file.getInputStream()) {
+            s3Client.putObject(request, RequestBody.fromInputStream(in, file.getSize()));
         } catch (IOException e) {
-            throw new IllegalArgumentException("S3 업로드 실패", e);
+            throw new IllegalArgumentException("S3 채팅 업로드 실패", e);
         }
+
+        String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+        log.info("S3 업로드 성공 - Key: {}, URL: {}", key, s3Url);
+
+        return s3Url;
     }
 
     /**
@@ -91,24 +90,22 @@ public class S3Uploader {
             String randomFileName = generateRandomFileName(file.getOriginalFilename());
             key = dirName + randomFileName;
         }
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(getContentTypeFromFile(file))
+                .build();
 
-        try {
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .contentType(getContentTypeFromFile(file))
-                    .build();
-
-            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-
-            String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
-            log.info("S3 채팅 업로드 성공 - Key: {}, URL: {}", key, s3Url);
-
-            return s3Url;
-
+        try (InputStream in = file.getInputStream()) {
+            s3Client.putObject(request, RequestBody.fromInputStream(in, file.getSize()));
         } catch (IOException e) {
             throw new IllegalArgumentException("S3 채팅 업로드 실패", e);
         }
+
+        String s3Url = s3Client.utilities().getUrl(builder -> builder.bucket(bucket).key(key)).toExternalForm();
+        log.info("S3 채팅 업로드 성공 - Key: {}, URL: {}", key, s3Url);
+
+        return s3Url;
     }
 
     /**
