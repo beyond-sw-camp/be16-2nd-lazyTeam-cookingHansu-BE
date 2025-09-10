@@ -1,10 +1,6 @@
 package lazyteam.cooking_hansu.domain.user.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import lazyteam.cooking_hansu.domain.user.dto.response.BusinessDto;
-import lazyteam.cooking_hansu.domain.user.dto.response.ChefDto;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
 import lazyteam.cooking_hansu.domain.user.entity.business.Owner;
@@ -22,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * 회원 추가 정보 입력 서비스
@@ -39,7 +33,16 @@ public class UserAdditionalInfoService {
     private final ChefRepository chefRepository;
     private final OwnerRepository ownerRepository;
     private final S3Uploader s3Uploader;
-    private final Validator validator;
+
+    /**
+     * 닉네임 중복 검증
+     */
+    public boolean isNicknameAvailable(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임은 필수입니다.");
+        }
+        return !userRepository.existsByNickname(nickname.trim());
+    }
 
     /**
      * 회원 추가 정보 입력 (통합)
@@ -223,18 +226,6 @@ public class UserAdditionalInfoService {
         }
     }
 
-    /**
-     * DTO 유효성 검증
-     */
-    private void validateDto(Object dto) {
-        Set<ConstraintViolation<Object>> violations = validator.validate(dto);
-        if (!violations.isEmpty()) {
-            String errorMessages = violations.stream()
-                    .map(ConstraintViolation::getMessage)
-                    .collect(Collectors.joining(", "));
-            throw new RuntimeException(errorMessages);
-        }
-    }
 
     /**
      * 응답 생성
