@@ -29,6 +29,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     // 채팅 알림 읽음 처리를 위한 메서드
     List<Notification> findByRecipient_IdAndTargetTypeAndIsReadFalse(UUID userId, TargetType targetType);
 
-    // 모든 안읽은 알림 조회 (모두 읽음 처리용)
-    List<Notification> findByRecipient_IdAndIsReadFalseAndIsDeletedFalse(UUID userId);
+    // 모든 알림 조회 (모두 삭제용)
+    List<Notification> findByRecipient_IdAndIsDeletedFalse(UUID userId);
 }

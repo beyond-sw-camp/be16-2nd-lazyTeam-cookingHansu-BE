@@ -64,10 +64,10 @@ public class NotificationController {
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
 
-    // 모든 알림 읽음 처리
-    @PatchMapping("/read-all")
-    public ResponseEntity<?> readAll() {
-        notificationService.markAllAsRead();
+    // 모든 알림 삭제
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> deleteAll() {
+        notificationService.deleteAllNotifications();
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
 
