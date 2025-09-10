@@ -115,6 +115,16 @@ public class NotificationService {
         n.markRead();
     }
 
+    public void markAllAsRead() {
+        UUID userId = AuthUtils.getCurrentUserId();
+        List<Notification> unreadNotifications = notificationRepository
+                .findByRecipient_IdAndIsReadFalseAndIsDeletedFalse(userId);
+        
+        for (Notification notification : unreadNotifications) {
+            notification.markRead();
+        }
+    }
+
     public void markDeleted(UUID notificationId) {
         UUID userId = AuthUtils.getCurrentUserId();
         Notification n = notificationRepository.findById(notificationId)
