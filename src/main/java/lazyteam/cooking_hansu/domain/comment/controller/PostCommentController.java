@@ -35,7 +35,7 @@ public class PostCommentController {
     //    댓글 목록 조회 (페이지네이션)
     @GetMapping("/list/{postId}")
     public ResponseEntity<?> getCommentList(@PathVariable UUID postId, @PageableDefault(size = 10, sort = "createdAt",
-            direction = Sort.Direction.DESC) Pageable pageable) {
+            direction = Sort.Direction.ASC) Pageable pageable) {
         Page<PostCommentListResDto> commentPage = postCommentService.findCommentList(postId, pageable);
         return new ResponseEntity<>(ResponseDto.ok(commentPage, HttpStatus.OK), HttpStatus.OK);
     }
