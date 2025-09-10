@@ -31,8 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -224,10 +226,12 @@ public class LectureService {
             int fileIndex = 0;
             List<LectureVideo> videosToSave = new ArrayList<>();
             List<LectureVideo> videosToDelete = new ArrayList<>();
+            Set<Integer> processedSequences = new HashSet<>(); // 처리된 시퀀스 번호 추적
 
             for (int i = 0; i < lectureVideoDto.size(); i++) {
                 LectureVideoDto dto = lectureVideoDto.get(i);
                 int sequence = dto.getSequence();
+                processedSequences.add(sequence); // 처리된 시퀀스 번호 추가
                 MultipartFile file = null;
 
                 // 새 파일이 필요한 경우에만 fileList에서 꺼냄
@@ -287,6 +291,21 @@ public class LectureService {
                 }
             }
 
+            // 수정 요청에 포함되지 않은 기존 영상들을 모두 삭제
+            for (LectureVideo existingVideo : existingVideos) {
+                if (!processedSequences.contains(existingVideo.getSequence())) {
+                    try {
+                        s3Uploader.delete(existingVideo.getVideoUrl());
+                        videosToDelete.add(existingVideo);
+                        log.info("수정 요청에 포함되지 않은 영상 {}번 삭제: {}", 
+                                existingVideo.getSequence(), existingVideo.getVideoUrl());
+                    } catch (Exception e) {
+                        log.warn("영상 {}번 S3 삭제 실패(무시): {}", existingVideo.getSequence(), e.getMessage());
+                        videosToDelete.add(existingVideo); // S3 삭제 실패해도 DB에서는 삭제
+                    }
+                }
+            }
+
             // 삭제할 영상들을 DB에서 제거
             if (!videosToDelete.isEmpty()) {
                 lectureVideoRepository.deleteAll(videosToDelete);
@@ -297,7 +316,8 @@ public class LectureService {
             lectureVideoRepository.saveAll(videosToSave);
             log.info("모든 영상 저장 완료 (총 {}개)", videosToSave.size());
 
-            log.info("강의영상 수정 완료 - 총 {}개 영상 처리", videosToSave.size());
+            log.info("강의영상 수정 완료 - 총 {}개 영상 처리, {}개 영상 삭제", 
+                    videosToSave.size(), videosToDelete.size());
 
         } else {
             log.info("영상 DTO 미전달 → 교체 스킵");
