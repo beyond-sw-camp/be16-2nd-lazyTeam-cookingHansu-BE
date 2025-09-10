@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
+import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.user.service.UserAdditionalInfoService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserAdditionalInfoController {
 
+    private final UserRepository userRepository;
     private final UserAdditionalInfoService userAdditionalInfoService;
 
     /**
@@ -68,7 +70,9 @@ public class UserAdditionalInfoController {
                     .businessAddress(businessAddress)
                     .shopCategory(shopCategory)
                     .build();
-
+            if(userRepository.existsByNickname(requestDto.getNickname())) {
+                throw new IllegalArgumentException("존재하는 닉네임입니다.");
+            }
             UserAdditionalInfoResDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
 
             log.info("회원 추가 정보 입력 성공 - userId: {}", userId);
