@@ -337,7 +337,7 @@ public class ChatService {
         ChatParticipant chatParticipant = ChatParticipant.builder()
                 .chatRoom(chatRoom)
                 .user(user)
-                .customRoomName(otherUser.getName())
+                .customRoomName(otherUser.getNickname())
                 .isActive("Y")
                 .build();
         chatParticipantRepository.save(chatParticipant);

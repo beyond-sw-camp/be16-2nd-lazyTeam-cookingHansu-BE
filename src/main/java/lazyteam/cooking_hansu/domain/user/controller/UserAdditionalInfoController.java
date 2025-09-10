@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lazyteam.cooking_hansu.domain.user.dto.request.UserAdditionalInfoRequestDto;
 import lazyteam.cooking_hansu.domain.user.dto.response.UserAdditionalInfoResDto;
-import lazyteam.cooking_hansu.domain.user.repository.UserRepository;
 import lazyteam.cooking_hansu.domain.user.service.UserAdditionalInfoService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +27,33 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserAdditionalInfoController {
 
-    private final UserRepository userRepository;
     private final UserAdditionalInfoService userAdditionalInfoService;
+
+    /**
+     * 닉네임 중복 확인
+     * GET /user/add-info/check-nickname
+     */
+    @GetMapping("/check-nickname")
+    public ResponseDto<Boolean> checkNicknameAvailability(
+            @RequestParam @NotBlank(message = "닉네임은 필수입니다")
+            @Size(min = 2, max = 10, message = "닉네임은 2자 이상 10자 이하여야 합니다") String nickname) {
+
+        try {
+            log.info("닉네임 중복 확인 요청 - nickname: {}", nickname);
+            
+            boolean isAvailable = userAdditionalInfoService.isNicknameAvailable(nickname);
+            
+            log.info("닉네임 중복 확인 완료 - nickname: {}, available: {}", nickname, isAvailable);
+            return ResponseDto.ok(isAvailable, HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+            log.error("닉네임 중복 확인 실패 - 잘못된 요청: nickname: {}, error: {}", nickname, e.getMessage());
+            return ResponseDto.fail(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            log.error("닉네임 중복 확인 실패 - 시스템 오류: nickname: {}, error: {}", nickname, e.getMessage(), e);
+            return ResponseDto.fail(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 중복 확인 중 오류가 발생했습니다.");
+        }
+    }
 
     /**
      * 회원 추가 정보 입력 (통합 엔드포인트)
@@ -55,6 +79,11 @@ public class UserAdditionalInfoController {
         try {
             log.info("회원 추가 정보 입력 요청 - userId: {}, role: {}, nickname: {}, info: {}", userId, role, nickname, info);
 
+            // 닉네임 중복 검증
+            if (!userAdditionalInfoService.isNicknameAvailable(nickname)) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+
             // RequestDto 생성
             UserAdditionalInfoRequestDto requestDto = UserAdditionalInfoRequestDto.builder()
                     .nickname(nickname)
@@ -70,9 +99,6 @@ public class UserAdditionalInfoController {
                     .businessAddress(businessAddress)
                     .shopCategory(shopCategory)
                     .build();
-            if(userRepository.existsByNickname(requestDto.getNickname())) {
-                throw new IllegalArgumentException("존재하는 닉네임입니다.");
-            }
             UserAdditionalInfoResDto response = userAdditionalInfoService.updateAdditionalInfo(userId, requestDto);
 
             log.info("회원 추가 정보 입력 성공 - userId: {}", userId);
