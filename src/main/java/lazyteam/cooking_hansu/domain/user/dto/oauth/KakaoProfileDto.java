@@ -22,7 +22,7 @@ public class KakaoProfileDto {
     @AllArgsConstructor
     public static class KakaoAccount {
         private String email;
-        private String nickname;
+        private String name;
         private Profile profile;
     }
 
@@ -31,5 +31,6 @@ public class KakaoProfileDto {
     @AllArgsConstructor
     public static class Profile {
         private String profile_image_url;
+
     }
 }
