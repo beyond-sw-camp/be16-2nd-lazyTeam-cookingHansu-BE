@@ -105,7 +105,7 @@ public class LoginController {
                 deletedUserInfo.put("socialId", kakaoProfileDto.getId());
                 deletedUserInfo.put("oauthType", "KAKAO");
                 deletedUserInfo.put("email", kakaoProfileDto.getKakao_account().getEmail());
-                deletedUserInfo.put("name", kakaoProfileDto.getKakao_account().getName());
+                deletedUserInfo.put("name", kakaoProfileDto.getKakao_account().getProfile().getNickname());
                 deletedUserInfo.put("picture", kakaoProfileDto.getKakao_account().getProfile().getProfile_image_url());
                 deletedUserInfo.put("message", "탈퇴한 회원입니다. 복구를 원하시면 복구 버튼을 눌러주세요.");
                 return ResponseDto.ok(deletedUserInfo, HttpStatus.OK);
@@ -115,7 +115,7 @@ public class LoginController {
             if (originalUser == null) {
                 originalUser = userService.createKakaoOauth(
                         kakaoProfileDto.getId(),
-                        kakaoProfileDto.getKakao_account().getName(),
+                        kakaoProfileDto.getKakao_account().getProfile().getNickname(),
                         kakaoProfileDto.getKakao_account().getEmail(),
                         kakaoProfileDto.getKakao_account().getProfile().getProfile_image_url(),
                         OauthType.KAKAO
