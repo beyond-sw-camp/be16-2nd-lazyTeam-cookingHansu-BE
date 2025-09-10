@@ -1,11 +1,14 @@
 package lazyteam.cooking_hansu.domain.notification.controller;
 
-import lazyteam.cooking_hansu.domain.notification.dto.NotificationDto;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lazyteam.cooking_hansu.domain.notification.dto.NotificationListResponseDto;
 import lazyteam.cooking_hansu.domain.notification.service.NotificationService;
 import lazyteam.cooking_hansu.global.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -20,8 +23,14 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping("/subscribe")
-    public SseEmitter subscribe() {
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(HttpServletResponse response) {
+        // 반드시 바디 쓰기 전에 설정
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("X-Accel-Buffering", "no");              // nginx 버퍼링 off
+        response.setHeader("Cache-Control", "no-cache, no-transform"); // 캐시/변환 금지
+        response.setHeader("Connection", "keep-alive");              // (HTTP/1.1일 때 유효)
+
         return notificationService.subscribeToNotifications();
     }
 
@@ -52,6 +61,13 @@ public class NotificationController {
     @PatchMapping("/{id}/read")
     public ResponseEntity<?> read(@PathVariable UUID id) {
         notificationService.markRead(id);
+        return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
+    }
+
+    // 모든 알림 삭제
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> deleteAll() {
+        notificationService.deleteAllNotifications();
         return ResponseEntity.ok(ResponseDto.ok(null, HttpStatus.OK));
     }
 
