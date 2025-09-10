@@ -1,0 +1,5 @@
+#spring.application.name=cooking_hansu
+
+spring:
+  profiles:
+    active: prod

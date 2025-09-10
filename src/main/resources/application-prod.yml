@@ -1,0 +1,93 @@
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 500MB
+    # 파일 업로드 시 multipart 요청에서
+    # 파일 10개 + 기타 form 필드들을 고려하여 여유있게 설정
+    max-part-count: 200
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${DB_HOST}:3306/cookingHanSu?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: admin
+    password: ${DB_PW}
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+
+    show-sql: true
+
+  data:
+    redis:
+      host: redis-service
+      port: 6379
+
+  servlet:
+    multipart:
+      # 파일 업로드 최대 크기 설정
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+# AWS S3 설정
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: cookinghansu
+
+jwt:
+  expirationAt: 1000
+  secretKeyAt: ${JWT_SECRET_KEY_AT}
+  expirationRt: 10000
+  secretKeyRt: ${JWT_SECRET_KEY_RT}
+
+toss:
+  client-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+  secret-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+
+app:
+  admin:
+    name: 관리자
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PW}
+
+# Oauth 설정
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: https://www.cookinghansu.shop/oauth/google/redirect
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    redirect-uri: https://www.cookinghansu.shop/oauth/kakao/redirect
+  naver:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_CLIENT_SECRET}
+    redirect-uri: https://www.cookinghansu.shop/oauth/naver/redirect
+
+logging:
+  level:
+    # TRACE < DEBUG < INFO < ERROR
+    # debug, info, error 로그 출력
+    root: info
+
+#  mapper파일(mybatis의 쿼리파일)의 위치를 명시하고 scan. 기본적으로 resource폴더는 default
+mybatis:
+  mapper-locations: classpath:/mapper/*/.xml

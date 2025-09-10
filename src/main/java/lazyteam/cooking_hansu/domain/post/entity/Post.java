@@ -1,0 +1,132 @@
+package lazyteam.cooking_hansu.domain.post.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lazyteam.cooking_hansu.domain.common.enums.CategoryEnum;
+import lazyteam.cooking_hansu.domain.common.enums.LevelEnum;
+import lazyteam.cooking_hansu.domain.common.entity.BaseIdAndTimeEntity;
+import lazyteam.cooking_hansu.domain.post.dto.PostUpdateData;
+import lazyteam.cooking_hansu.domain.user.entity.common.User;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "post")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@ToString
+public class Post extends BaseIdAndTimeEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @NotBlank(message = "게시글 제목은 필수입니다")
+    @Size(max = 20, message = "게시글 제목은 20자 이하여야 합니다")
+    @Column(nullable = false)
+    private String title;
+
+    @Size(max = 2000, message = "게시글 설명은 2000자 이하여야 합니다")
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @NotNull(message = "게시글 카테고리는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CategoryEnum category;
+
+    @Size(max = 512, message = "썸네일 URL은 512자 이하여야 합니다")
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    private String thumbnailUrl;
+
+    @Builder.Default
+    @Min(value = 0, message = "좋아요 수는 0 이상이어야 합니다")
+    @Column(name = "like_count", nullable = false)
+    private Long likeCount = 0L;
+
+    @Builder.Default
+    @Min(value = 0, message = "조회수는 0 이상이어야 합니다")
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
+
+    @Builder.Default
+    @Min(value = 0, message = "북마크 수는 0 이상이어야 합니다")
+    @Column(name = "bookmark_count", nullable = false)
+    private Long bookmarkCount = 0L;
+
+    @NotNull(message = "조리 시간은 필수입니다")
+    @Column(name = "cook_time", nullable = false, columnDefinition = "INT UNSIGNED")
+    private Integer cookTime;
+
+    @NotNull(message = "난이도는 필수입니다")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "level", nullable = false)
+    private LevelEnum level;
+
+    @NotNull(message = "인분 수는 필수입니다")
+    @Min(value = 1, message = "인분 수는 1 이상이어야 합니다")
+    @Max(value = 20, message = "인분 수는 20 이하여야 합니다")
+    @Column(name = "serving", nullable = false, columnDefinition = "INT UNSIGNED")
+    private Integer serving;
+
+    @Size(max = 1000, message = "메시지 내용은 1000자 이하여야 합니다")
+    @Column(name = "message_text", nullable = false, columnDefinition = "TEXT")
+    private String cookTip;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredients> ingredients;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeStep> steps;
+
+    @Builder.Default
+    @NotNull(message = "공개 여부는 필수입니다")
+    @Column(name = "is_open", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean isOpen = true;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+
+//    레시피 공유 삭제
+    public void softDelete() { this.deletedAt = LocalDateTime.now();}
+
+//   삭제 여부 확인
+    public boolean isDeleted() { return this.deletedAt != null;}
+
+//    업데이트
+    public void updatePost(PostUpdateData data) {
+        this.title = data.getTitle();
+        this.description = data.getDescription();
+        this.thumbnailUrl = data.getThumbnailUrl();
+        this.category = data.getCategory();
+        this.level = data.getLevel();
+        this.cookTime = data.getCookTime();
+        this.serving = data.getServing();
+        this.cookTip = data.getCookTip();
+        this.isOpen = data.getIsOpen();
+    }
+
+//    엔티티 포스트 어노테이션 걸고 업데이트 간단하게 만들기
+    public boolean isOwnedBy(User user) {
+        return this.user != null && this.user.getId().equals(user.getId());
+    }
+
+    // Redis 동기화를 위한 카운트 업데이트 메서드들
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount != null ? viewCount : 0L;
+    }
+
+    public void setLikeCount(Long likeCount) {
+        this.likeCount = likeCount != null ? likeCount : 0L;
+    }
+
+    public void setBookmarkCount(Long bookmarkCount) {
+        this.bookmarkCount = bookmarkCount != null ? bookmarkCount : 0L;
+    }
+
+}
