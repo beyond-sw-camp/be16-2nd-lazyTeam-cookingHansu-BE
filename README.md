@@ -260,8 +260,8 @@
 
 <details>
   <summary><b>시스템 아키텍처</b></summary>
-  
-<img width="900" alt="시스템 아키텍처" src="https://github.com/user-attachments/assets/b7b34342-8b56-4e0d-b9f6-0552b12bd664" />
+
+<img width="900" alt="시스템 아키텍처" src="https://github.com/user-attachments/assets/6a0b09ef-e692-4e70-aecf-91aa6212cca4" />
 
 </details>
 
